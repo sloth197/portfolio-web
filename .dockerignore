@@ -1,0 +1,7 @@
+.git
+.github
+.vscode
+frontend
+target
+node_modules
+*.log
