@@ -1,0 +1,32 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: portfolio
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/portfolio}
+    username: ${DB_USERNAME:portfolio}
+    password: ${DB_PASSWORD:portfolio}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+app:
+  admin:
+    username: ${APP_ADMIN_USERNAME:admin}
+    password: ${APP_ADMIN_PASSWORD:change-me-before-prod}
+  auth:
+    enabled: ${APP_AUTH_ENABLED:false}
+    cookie-name: PORTFOLIO_SESSION
+    cookie-secure: false
+    cookie-same-site: Lax
+    session-hours: 12
+    code-ttl-minutes: 5
+    code-max-attempts: 5
+    max-requests-per-hour: 10
+    kakao-webhook-url: ${APP_AUTH_KAKAO_WEBHOOK_URL:}
+    pass-webhook-url: ${APP_AUTH_PASS_WEBHOOK_URL:}
