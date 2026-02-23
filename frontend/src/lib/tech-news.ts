@@ -1,61 +1,72 @@
-type HackerNewsItem = {
-  id: number;
-  title?: string;
-  url?: string;
-  by?: string;
-  time?: number;
-  score?: number;
-  type?: string;
-};
-
 export type HomeNewsItem = {
-  id: number;
+  id: string;
   title: string;
   url: string;
-  author: string;
-  publishedAtUnix: number;
-  score: number;
+  publishedAt: string;
 };
 
-const TOP_STORIES_URL = "https://hacker-news.firebaseio.com/v0/topstories.json";
-const ITEM_URL = (id: number) => `https://hacker-news.firebaseio.com/v0/item/${id}.json`;
+const YOZM_FEED_URL = "https://yozm.wishket.com/magazine/feed/";
+const ITEM_REGEX = /<item>([\s\S]*?)<\/item>/g;
 
-async function fetchJson<T>(url: string): Promise<T | null> {
+function decodeXml(value: string): string {
+  return value
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#39;", "'")
+    .replaceAll("&amp;", "&");
+}
+
+function readTag(xml: string, tag: string): string | null {
+  const pattern = new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`, "i");
+  const matched = xml.match(pattern);
+  if (!matched?.[1]) {
+    return null;
+  }
+
+  const raw = matched[1].trim();
+  const withoutCdata = raw.startsWith("<![CDATA[") && raw.endsWith("]]>") ? raw.slice(9, -3) : raw;
+  return decodeXml(withoutCdata.trim());
+}
+
+export async function fetchHomeTechNews(limit = 10): Promise<HomeNewsItem[]> {
   try {
-    const response = await fetch(url, {
+    const response = await fetch(YOZM_FEED_URL, {
       next: { revalidate: 900 },
       cache: "force-cache",
     });
     if (!response.ok) {
-      return null;
+      return [];
     }
-    return (await response.json()) as T;
-  } catch {
-    return null;
-  }
-}
 
-export async function fetchHomeTechNews(limit = 6): Promise<HomeNewsItem[]> {
-  const ids = await fetchJson<number[]>(TOP_STORIES_URL);
-  if (!ids?.length) {
+    const xml = await response.text();
+    const items: HomeNewsItem[] = [];
+
+    for (const matched of xml.matchAll(ITEM_REGEX)) {
+      const block = matched[1];
+      const title = readTag(block, "title");
+      const url = readTag(block, "link");
+      const guid = readTag(block, "guid");
+      const pubDate = readTag(block, "pubDate");
+
+      if (!title || !url) {
+        continue;
+      }
+
+      items.push({
+        id: guid ?? url,
+        title,
+        url,
+        publishedAt: pubDate ?? "",
+      });
+
+      if (items.length >= limit) {
+        break;
+      }
+    }
+
+    return items;
+  } catch {
     return [];
   }
-
-  const topIds = ids.slice(0, 24);
-  const itemRequests = topIds.map((id) => fetchJson<HackerNewsItem>(ITEM_URL(id)));
-  const rawItems = await Promise.all(itemRequests);
-
-  return rawItems
-    .filter((item): item is HackerNewsItem => Boolean(item))
-    .filter((item) => item.type === "story")
-    .filter((item) => Boolean(item.title && item.url && item.time))
-    .slice(0, limit)
-    .map((item) => ({
-      id: item.id,
-      title: item.title as string,
-      url: item.url as string,
-      author: item.by ?? "unknown",
-      publishedAtUnix: item.time as number,
-      score: item.score ?? 0,
-    }));
 }

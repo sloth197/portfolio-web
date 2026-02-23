@@ -1,17 +1,9 @@
 import Link from "next/link";
+import HomeItNewsStrip from "@/components/home-it-news-strip";
 import { fetchHomeTechNews } from "@/lib/tech-news";
 
-function formatPublishedAt(unixSeconds: number): string {
-  return new Intl.DateTimeFormat("ko-KR", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(unixSeconds * 1000));
-}
-
 export default async function Home() {
-  const newsItems = await fetchHomeTechNews(6);
+  const newsItems = await fetchHomeTechNews(10);
 
   return (
     <div style={{ display: "grid", gap: 26 }}>
@@ -56,47 +48,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section style={{ display: "grid", gap: 14 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
-          <h2 className="section-title">IT News</h2>
-          <span className="section-copy" style={{ fontSize: 13 }}>
-            Hacker News 기준, 15분 캐시
-          </span>
-        </div>
-
-        {newsItems.length > 0 ? (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-              gap: 12,
-            }}
-          >
-            {newsItems.map((item) => (
-              <a
-                key={item.id}
-                className="panel project-card"
-                href={item.url}
-                target="_blank"
-                rel="noreferrer"
-                style={{ padding: 16, display: "grid", gap: 10 }}
-              >
-                <div style={{ fontSize: 12, color: "var(--muted)", fontFamily: "var(--font-geist-mono)" }}>
-                  {formatPublishedAt(item.publishedAtUnix)}
-                </div>
-                <div style={{ margin: 0, fontSize: 17, fontWeight: 800, lineHeight: 1.38 }}>{item.title}</div>
-                <div className="section-copy" style={{ fontSize: 13 }}>
-                  by {item.author} · score {item.score}
-                </div>
-              </a>
-            ))}
-          </div>
-        ) : (
-          <div className="panel" style={{ padding: 16 }}>
-            <p className="section-copy">뉴스를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.</p>
-          </div>
-        )}
-      </section>
+      <HomeItNewsStrip items={newsItems} />
     </div>
   );
 }
