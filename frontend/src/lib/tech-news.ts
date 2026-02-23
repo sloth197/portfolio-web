@@ -3,6 +3,7 @@ export type HomeNewsItem = {
   title: string;
   url: string;
   publishedAt: string;
+  summary: string;
 };
 
 const YOZM_FEED_URL = "https://yozm.wishket.com/magazine/feed/";
@@ -15,6 +16,10 @@ function decodeXml(value: string): string {
     .replaceAll("&quot;", '"')
     .replaceAll("&#39;", "'")
     .replaceAll("&amp;", "&");
+}
+
+function stripHtml(value: string): string {
+  return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function readTag(xml: string, tag: string): string | null {
@@ -48,6 +53,7 @@ export async function fetchHomeTechNews(limit = 10): Promise<HomeNewsItem[]> {
       const url = readTag(block, "link");
       const guid = readTag(block, "guid");
       const pubDate = readTag(block, "pubDate");
+      const description = readTag(block, "description");
 
       if (!title || !url) {
         continue;
@@ -58,6 +64,7 @@ export async function fetchHomeTechNews(limit = 10): Promise<HomeNewsItem[]> {
         title,
         url,
         publishedAt: pubDate ?? "",
+        summary: description ? stripHtml(description) : "",
       });
 
       if (items.length >= limit) {
