@@ -1,5 +1,6 @@
 ﻿import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import ProjectAdminCreateForm from "@/components/project-admin-create-form";
 import { ApiError, fetchProjects } from "@/lib/api";
 import type { ProjectCategory } from "@/lib/types";
 
@@ -56,6 +57,8 @@ export default async function ProjectsPage({
           </Link>
         </div>
       </section>
+
+      <ProjectAdminCreateForm category={selectedCategory} />
 
       <section
         style={{
