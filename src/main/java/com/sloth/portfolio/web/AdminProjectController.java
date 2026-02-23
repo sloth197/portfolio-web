@@ -7,6 +7,7 @@ import com.sloth.portfolio.web.dto.ProjectDto;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,11 @@ public class AdminProjectController {
 
     public AdminProjectController(ProjectCommandService projectCommandService) {
         this.projectCommandService = projectCommandService;
+    }
+
+    @GetMapping("/ping")
+    public PingResponse ping() {
+        return new PingResponse(true);
     }
 
     @PostMapping
@@ -50,5 +56,8 @@ public class AdminProjectController {
     }
 
     public record ErrorResponse(String code, String message) {
+    }
+
+    public record PingResponse(boolean ok) {
     }
 }
