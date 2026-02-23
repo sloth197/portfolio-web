@@ -16,6 +16,8 @@ spring:
     open-in-view: false
 
 app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,https://xhbt.dev,https://www.xhbt.dev}
   admin:
     username: ${APP_ADMIN_USERNAME:admin}
     password: ${APP_ADMIN_PASSWORD:change-me-before-prod}

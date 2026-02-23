@@ -42,6 +42,7 @@ Override with env vars when needed:
 - `APP_ADMIN_USERNAME`
 - `APP_ADMIN_PASSWORD`
 - `APP_AUTH_ENABLED`
+- `APP_CORS_ALLOWED_ORIGINS`
 - `APP_AUTH_KAKAO_WEBHOOK_URL`
 - `APP_AUTH_PASS_WEBHOOK_URL`
 
@@ -122,6 +123,11 @@ npm run dev
 Frontend URL:
 
 - `http://localhost:3000`
+
+Frontend env (deployment example):
+
+- `NEXT_PUBLIC_API_BASE_URL=https://api.xhbt.dev`
+- `NEXT_PUBLIC_AUTH_ENABLED=false`
 
 ## 4) Major Endpoints / Test URLs
 
