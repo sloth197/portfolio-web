@@ -18,7 +18,7 @@ export default async function Home() {
             maxWidth: 760,
           }}
         >
-          안녕하세요 테스트 중입니다
+          테스트 중입니다
         </h1>
         <p className="section-copy" style={{ maxWidth: 700 }}></p>
       </section>
@@ -35,14 +35,14 @@ export default async function Home() {
           <Link className="panel project-card" href="/projects?category=FIRMWARE" style={{ padding: 18, display: "grid" }}>
             <span className="badge">Firmware</span>
             <p className="section-copy" style={{ marginTop: 12 }}>
-              Firmware 프로젝트 목록 보기
+              Firmware List
             </p>
           </Link>
 
           <Link className="panel project-card" href="/projects?category=SOFTWARE" style={{ padding: 18, display: "grid" }}>
             <span className="badge">Software</span>
             <p className="section-copy" style={{ marginTop: 12 }}>
-              Software 프로젝트 목록 보기
+              Software List
             </p>
           </Link>
         </div>

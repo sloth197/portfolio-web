@@ -42,7 +42,7 @@ export default function AdminLoginPage() {
       });
 
       if (!response.ok) {
-        setError("관리자 인증에 실패했습니다.");
+        setError("로그인에 실패했습니다.");
         return;
       }
 
@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
     <div style={{ display: "grid", gap: 16 }}>
       <section className="surface-card" style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 8 }}>
         <span className="badge">Admin</span>
-        <h1 className="section-title">관리자 로그인</h1>
+        <h1 className="section-title">Admin 로그인</h1>
         <p className="section-copy" style={{ fontSize: 14 }}>
           로그인 후 프로젝트 작성 페이지로 이동합니다.
         </p>
@@ -68,7 +68,7 @@ export default function AdminLoginPage() {
       <section className="panel" style={{ padding: 16, maxWidth: 560 }}>
         <form onSubmit={onSubmit} style={{ display: "grid", gap: 10 }}>
           <label className="field-label" htmlFor="admin-username">
-            관리자 ID
+            ID
           </label>
           <input
             id="admin-username"
@@ -79,7 +79,7 @@ export default function AdminLoginPage() {
           />
 
           <label className="field-label" htmlFor="admin-password">
-            관리자 Password
+            PW
           </label>
           <input
             id="admin-password"

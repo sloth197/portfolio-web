@@ -17,7 +17,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sloth Portfolio",
+  title: "JWS Portfolio",
   description: "Firmware and software portfolio",
 };
 
@@ -47,7 +47,7 @@ export default function RootLayout({
           <header className="site-header">
             <div className="site-header-inner">
               <Link className="brand-mark" href="/">
-                Sloth Portfolio
+                JWS Portfolio
               </Link>
               <nav className="site-nav">
                 <Link className="nav-link" href="/">
