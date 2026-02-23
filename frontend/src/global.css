@@ -1,0 +1,9 @@
+html, body {
+  height: 100%;
+}
+
+body {
+  background: #000;
+  color: #eaeaea;
+}
+a { color: inherit; text-decoration: none; }
