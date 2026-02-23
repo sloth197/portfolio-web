@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: ${PORT:8081}
 
 spring:
   application:
@@ -24,11 +24,11 @@ app:
   auth:
     enabled: ${APP_AUTH_ENABLED:false}
     cookie-name: PORTFOLIO_SESSION
-    cookie-secure: false
-    cookie-same-site: Lax
-    session-hours: 12
-    code-ttl-minutes: 5
-    code-max-attempts: 5
-    max-requests-per-hour: 10
+    cookie-secure: ${APP_AUTH_COOKIE_SECURE:false}
+    cookie-same-site: ${APP_AUTH_COOKIE_SAME_SITE:Lax}
+    session-hours: ${APP_AUTH_SESSION_HOURS:12}
+    code-ttl-minutes: ${APP_AUTH_CODE_TTL_MINUTES:5}
+    code-max-attempts: ${APP_AUTH_CODE_MAX_ATTEMPTS:5}
+    max-requests-per-hour: ${APP_AUTH_MAX_REQUESTS_PER_HOUR:10}
     kakao-webhook-url: ${APP_AUTH_KAKAO_WEBHOOK_URL:}
     pass-webhook-url: ${APP_AUTH_PASS_WEBHOOK_URL:}
