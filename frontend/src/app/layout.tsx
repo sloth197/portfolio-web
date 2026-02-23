@@ -70,7 +70,7 @@ export default function RootLayout({
           <main className="site-main">{children}</main>
 
           <footer className="site-footer">
-            <div className="site-footer-inner">Phone OTP portfolio {new Date().getFullYear()}</div>
+            <div className="site-footer-inner">© 2026 JWS. All rights reserved. </div>
           </footer>
         </div>
       </body>
