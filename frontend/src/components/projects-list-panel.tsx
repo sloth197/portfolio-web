@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { projectDetailPath } from "@/lib/project-route";
 import type { ProjectCategory, ProjectDto } from "@/lib/types";
 
 const PAGE_SIZE = 4;
@@ -51,7 +50,7 @@ export default function ProjectsListPanel({ projects, selectedCategory }: Props)
         {visibleProjects.map((project) => (
           <Link
             key={project.id}
-            href={projectDetailPath(project.category, project.slug)}
+            href={`/projects/${project.slug}`}
             className="panel project-card"
             style={{
               padding: "10px 12px",
