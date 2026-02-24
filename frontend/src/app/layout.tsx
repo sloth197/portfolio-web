@@ -56,11 +56,11 @@ export default function RootLayout({
                 <Link className="nav-link" href="/projects">
                   Project
                 </Link>
+                <Link className="nav-link" href="/about">
+                  About
+                </Link>
                 <Link className="nav-link" href="/contact">
                   Contact
-                </Link>
-                <Link className="nav-link" href="/auth">
-                  Auth
                 </Link>
               </nav>
               <ThemeToggle />

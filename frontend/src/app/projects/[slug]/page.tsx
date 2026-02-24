@@ -1,5 +1,5 @@
 ﻿import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { ApiError, fetchProjectBySlug, fetchProjects } from "@/lib/api";
 import type { ProjectCategory } from "@/lib/types";
 
@@ -13,9 +13,6 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     allProjects = await fetchProjects();
   } catch (error) {
     if (error instanceof ApiError) {
-      if (error.status === 401) {
-        redirect("/auth");
-      }
       if (error.status === 404) {
         notFound();
       }

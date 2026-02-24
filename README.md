@@ -129,6 +129,21 @@ Frontend env (deployment example):
 - `NEXT_PUBLIC_API_BASE_URL=https://api.xhbt.dev`
 - `NEXT_PUBLIC_AUTH_ENABLED=false`
 
+## 3-1) Frontend Auto Deploy (GitHub Actions + Vercel)
+
+`main` 브랜치에 `frontend/**` 변경이 푸시되면 아래 워크플로가 실행됩니다:
+
+- `.github/workflows/frontend-auto-deploy.yml`
+- 순서: `lint/build` -> `Vercel production deploy`
+
+GitHub 저장소 `Settings -> Secrets and variables -> Actions`에 다음 시크릿을 등록하세요:
+
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
+
+필요 시 Vercel CLI로 연결 후 `.vercel/project.json`에서 `orgId`, `projectId`를 확인할 수 있습니다.
+
 ## 4) Major Endpoints / Test URLs
 
 Backend:
