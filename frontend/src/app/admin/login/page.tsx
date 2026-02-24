@@ -26,7 +26,7 @@ export default function AdminLoginPage() {
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!API_BASE) {
-      setError("NEXT_PUBLIC_API_BASE_URL 설정이 필요합니다.");
+      setError("NEXT_PUBLIC_API_BASE_URL is not set.");
       return;
     }
 
@@ -42,14 +42,14 @@ export default function AdminLoginPage() {
       });
 
       if (!response.ok) {
-        setError("로그인에 실패했습니다.");
+        setError("Login failed.");
         return;
       }
 
       window.sessionStorage.setItem(ADMIN_AUTH_KEY, authHeader);
       router.replace(nextPath);
     } catch {
-      setError("로그인 요청 중 오류가 발생했습니다.");
+      setError("Login request failed.");
     } finally {
       setSubmitting(false);
     }
@@ -58,17 +58,17 @@ export default function AdminLoginPage() {
   return (
     <div style={{ display: "grid", gap: 16 }}>
       <section className="surface-card" style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 8 }}>
-        <span className="badge">Admin</span>
-        <h1 className="section-title">Admin 로그인</h1>
+        <span className="badge">Login</span>
+        <h1 className="section-title">Login</h1>
         <p className="section-copy" style={{ fontSize: 14 }}>
-          로그인 후 프로젝트 작성 페이지로 이동합니다.
+          Login is required to edit or delete projects.
         </p>
       </section>
 
       <section className="panel" style={{ padding: 16, maxWidth: 560 }}>
         <form onSubmit={onSubmit} style={{ display: "grid", gap: 10 }}>
           <label className="field-label" htmlFor="admin-username">
-            ID
+            Username
           </label>
           <input
             id="admin-username"
@@ -79,7 +79,7 @@ export default function AdminLoginPage() {
           />
 
           <label className="field-label" htmlFor="admin-password">
-            PW
+            Password
           </label>
           <input
             id="admin-password"
@@ -92,7 +92,7 @@ export default function AdminLoginPage() {
 
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <button className="btn" type="submit" disabled={submitting}>
-              {submitting ? "확인 중..." : "로그인"}
+              {submitting ? "Checking..." : "Login"}
             </button>
             {error ? <span className="error-text">{error}</span> : null}
           </div>

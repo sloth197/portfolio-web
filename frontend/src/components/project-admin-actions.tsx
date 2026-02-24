@@ -216,15 +216,9 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
   return (
     <section className="panel" style={{ padding: 14, display: "grid", gap: 10 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-        {adminLoggedIn ? (
-          <button type="button" className="btn-ghost" onClick={() => (editing ? setEditing(false) : onStartEdit())}>
-            {editing ? "Cancel Edit" : "Edit"}
-          </button>
-        ) : (
-          <button type="button" className="btn-ghost" onClick={() => router.replace(`/admin/login?next=${encodeURIComponent(resolveCurrentPath())}`)}>
-            Admin Login Required
-          </button>
-        )}
+        <button type="button" className="btn-ghost" onClick={() => (editing ? setEditing(false) : onStartEdit())}>
+          {editing ? "Cancel Edit" : "Edit"}
+        </button>
         {editing && adminLoggedIn ? (
           <button type="button" className="btn-ghost" onClick={onDelete} disabled={deleting || saving}>
             {deleting ? "Deleting..." : "Delete"}
