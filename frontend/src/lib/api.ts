@@ -17,13 +17,36 @@ export class ApiError extends Error {
   }
 }
 
-export async function fetchProjects(category?: ProjectCategory): Promise<ProjectDto[]> {
+export type ProjectFetchPolicy = "live" | "cached";
+
+type ProjectFetchOptions = {
+  policy?: ProjectFetchPolicy;
+  revalidateSeconds?: number;
+};
+
+function resolveProjectFetchInit(
+  options?: ProjectFetchOptions,
+): RequestInit & { next?: { revalidate: number } } {
+  const policy = options?.policy ?? "live";
+
+  if (policy === "cached") {
+    return {
+      cache: "force-cache",
+      next: { revalidate: options?.revalidateSeconds ?? 120 },
+    };
+  }
+
+  return { cache: "no-store" };
+}
+
+export async function fetchProjects(
+  category?: ProjectCategory,
+  options?: ProjectFetchOptions,
+): Promise<ProjectDto[]> {
   const url = new URL(`${BASE}/api/public/projects`);
   if (category) url.searchParams.set("category", category);
 
-  const res = await fetch(url.toString(), {
-    cache: "no-store",
-  });
+  const res = await fetch(url.toString(), resolveProjectFetchInit(options));
   if (!res.ok) throw new ApiError(res.status, `Failed to fetch projects: ${res.status}`);
   return res.json();
 }

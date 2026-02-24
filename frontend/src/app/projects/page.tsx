@@ -3,19 +3,46 @@ import { notFound } from "next/navigation";
 import ProjectsListPanel from "@/components/projects-list-panel";
 import { ApiError, fetchProjects } from "@/lib/api";
 import { PREVIEW_PROJECTS, filterProjectsByCategory, normalizeProjectCategory } from "@/lib/project-preview";
+import type { ProjectCategory } from "@/lib/types";
+
+type ProjectsMode = "cached" | "live";
+
+const PROJECTS_REVALIDATE_SECONDS = 120;
+
+function normalizeProjectsMode(value?: string): ProjectsMode {
+  return value === "live" ? "live" : "cached";
+}
+
+function buildProjectsPath(mode: ProjectsMode, category?: ProjectCategory): string {
+  const params = new URLSearchParams();
+  if (category) {
+    params.set("category", category);
+  }
+  if (mode === "live") {
+    params.set("mode", "live");
+  }
+  const query = params.toString();
+  return query ? `/projects?${query}` : "/projects";
+}
 
 export default async function ProjectsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; mode?: string }>;
 }) {
   const params = await searchParams;
   const selectedCategory = normalizeProjectCategory(params.category);
+  const selectedMode = normalizeProjectsMode(params.mode);
 
   let allProjects: Awaited<ReturnType<typeof fetchProjects>> = [];
+  let serverFetchDurationMs = 0;
+  const requestStartedAt = Date.now();
 
   try {
-    allProjects = await fetchProjects();
+    allProjects = await fetchProjects(undefined, {
+      policy: selectedMode,
+      revalidateSeconds: PROJECTS_REVALIDATE_SECONDS,
+    });
   } catch (error) {
     if (error instanceof ApiError) {
       if (error.status === 404) {
@@ -28,6 +55,8 @@ export default async function ProjectsPage({
     } else {
       throw error;
     }
+  } finally {
+    serverFetchDurationMs = Date.now() - requestStartedAt;
   }
 
   const filteredProjects = filterProjectsByCategory(allProjects, selectedCategory);
@@ -47,15 +76,40 @@ export default async function ProjectsPage({
       </section>
 
       <section className="projects-filter-bar">
-        <Link className={`projects-filter-pill ${!selectedCategory ? "is-active" : ""}`} href="/projects">
+        <Link className={`projects-filter-pill ${!selectedCategory ? "is-active" : ""}`} href={buildProjectsPath(selectedMode)}>
           All ({totalCount})
         </Link>
-        <Link className={`projects-filter-pill ${selectedCategory === "SOFTWARE" ? "is-active" : ""}`} href="/projects?category=SOFTWARE">
+        <Link
+          className={`projects-filter-pill ${selectedCategory === "SOFTWARE" ? "is-active" : ""}`}
+          href={buildProjectsPath(selectedMode, "SOFTWARE")}
+        >
           Software ({softwareCount})
         </Link>
-        <Link className={`projects-filter-pill ${selectedCategory === "FIRMWARE" ? "is-active" : ""}`} href="/projects?category=FIRMWARE">
+        <Link
+          className={`projects-filter-pill ${selectedCategory === "FIRMWARE" ? "is-active" : ""}`}
+          href={buildProjectsPath(selectedMode, "FIRMWARE")}
+        >
           Firmware ({firmwareCount})
         </Link>
+      </section>
+
+      <section className="projects-filter-bar" style={{ alignItems: "center" }}>
+        <span className="projects-filter-pill is-static">Data Mode</span>
+        <Link
+          className={`projects-filter-pill ${selectedMode === "cached" ? "is-active" : ""}`}
+          href={buildProjectsPath("cached", selectedCategory)}
+        >
+          Cached (Fast)
+        </Link>
+        <Link
+          className={`projects-filter-pill ${selectedMode === "live" ? "is-active" : ""}`}
+          href={buildProjectsPath("live", selectedCategory)}
+        >
+          Live (Realtime)
+        </Link>
+        <span className="helper-text" style={{ marginLeft: "auto" }}>
+          Server fetch: {serverFetchDurationMs}ms
+        </span>
       </section>
 
       <ProjectsListPanel projects={sortedProjects} selectedCategory={selectedCategory} />
