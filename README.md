@@ -131,18 +131,18 @@ Frontend env (deployment example):
 
 ## 3-1) Frontend Auto Deploy (GitHub Actions + Vercel)
 
-`main` 브랜치에 `frontend/**` 변경이 푸시되면 아래 워크플로가 실행됩니다:
+When changes under `frontend/**` are pushed to `main`, this workflow runs automatically:
 
 - `.github/workflows/frontend-auto-deploy.yml`
-- 순서: `lint/build` -> `Vercel production deploy`
+- order: `lint/build` -> `Vercel production deploy`
 
-GitHub 저장소 `Settings -> Secrets and variables -> Actions`에 다음 시크릿을 등록하세요:
+Add these repository secrets in GitHub:
 
 - `VERCEL_TOKEN`
 - `VERCEL_ORG_ID`
 - `VERCEL_PROJECT_ID`
 
-필요 시 Vercel CLI로 연결 후 `.vercel/project.json`에서 `orgId`, `projectId`를 확인할 수 있습니다.
+You can find `orgId` and `projectId` from `.vercel/project.json` after linking with Vercel CLI.
 
 ## 4) Major Endpoints / Test URLs
 
@@ -161,3 +161,4 @@ Frontend:
 - `http://localhost:3000/auth`
 - `http://localhost:3000/projects`
 - `http://localhost:3000/projects/portfolio-web`
+
