@@ -54,7 +54,7 @@ export default function RootLayout({
                   Home
                 </Link>
                 <Link className="nav-link" href="/projects">
-                  Project
+                  Projects
                 </Link>
                 <Link className="nav-link" href="/about">
                   About

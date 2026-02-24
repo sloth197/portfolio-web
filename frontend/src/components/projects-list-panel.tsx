@@ -1,10 +1,5 @@
-"use client";
-
 import Link from "next/link";
-import { useMemo, useState } from "react";
 import type { ProjectCategory, ProjectDto } from "@/lib/types";
-
-const PAGE_SIZE = 4;
 
 type Props = {
   projects: ProjectDto[];
@@ -24,73 +19,77 @@ function buildAdminLoginPath(selectedCategory?: ProjectCategory): string {
   return `/admin/login?next=${encodeURIComponent(next)}`;
 }
 
+function buildProjectDetailPath(slug: string, selectedCategory?: ProjectCategory): string {
+  const params = new URLSearchParams();
+  if (selectedCategory) {
+    params.set("category", selectedCategory);
+  }
+  return params.size > 0 ? `/projects/${slug}?${params.toString()}` : `/projects/${slug}`;
+}
+
+function formatCreatedLabel(value: string): string {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return "Recent";
+  }
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  return `${year}.${month}`;
+}
+
+function buildSectionTitle(selectedCategory?: ProjectCategory): string {
+  if (selectedCategory === "SOFTWARE") {
+    return "Software Projects";
+  }
+  if (selectedCategory === "FIRMWARE") {
+    return "Firmware Projects";
+  }
+  return "All Projects";
+}
+
 export default function ProjectsListPanel({ projects, selectedCategory }: Props) {
-  const [page, setPage] = useState(1);
-
-  const totalPages = Math.max(1, Math.ceil(projects.length / PAGE_SIZE));
-  const safePage = Math.min(Math.max(page, 1), totalPages);
-
-  const visibleProjects = useMemo(() => {
-    const start = (safePage - 1) * PAGE_SIZE;
-    return projects.slice(start, start + PAGE_SIZE);
-  }, [projects, safePage]);
-
   return (
-    <section className="panel" style={{ padding: 14, display: "grid", gap: 12 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
-        <p className="section-copy" style={{ fontSize: 13 }}>
-          {selectedCategory ? `${selectedCategory} 선택 중` : "카테고리를 선택해 주세요"}
-        </p>
-        <Link className="btn-ghost" href={buildAdminLoginPath(selectedCategory)} style={{ padding: "8px 16px", borderRadius: 999 }}>
-          추가
+    <section className="projects-gallery">
+      <div className="projects-gallery-head">
+        <div style={{ display: "grid", gap: 6 }}>
+          <h2 className="projects-gallery-title">{buildSectionTitle(selectedCategory)}</h2>
+          <p className="projects-gallery-copy">{projects.length} projects available</p>
+        </div>
+        <Link className="btn-ghost projects-admin-button" href={buildAdminLoginPath(selectedCategory)}>
+          Add Project
         </Link>
       </div>
 
-      <div style={{ display: "grid", gap: 8 }}>
-        {visibleProjects.map((project) => (
-          <Link
-            key={project.id}
-            href={`/projects/${project.slug}`}
-            className="panel project-card"
-            style={{
-              padding: "10px 12px",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <span style={{ fontSize: 18 }}>{project.title}</span>
-          </Link>
-        ))}
-      </div>
-
       {projects.length === 0 ? (
-        <p className="section-copy" style={{ fontSize: 13 }}>
-          표시할 프로젝트가 없습니다.
-        </p>
-      ) : null}
+        <div className="projects-empty-state">
+          No projects yet for this category.
+        </div>
+      ) : (
+        <div className="projects-showcase-grid">
+          {projects.map((project, index) => (
+            <article key={project.id} className="project-showcase-card">
+              <div className={`project-showcase-shot shot-variant-${index % 6}`}>
+                <span className="project-showcase-category">{project.category}</span>
+                <span className="project-showcase-slug">{project.slug}</span>
+              </div>
 
-      {totalPages > 1 ? (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, paddingTop: 4 }}>
-          {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((num) => (
-            <button
-              key={num}
-              type="button"
-              className={num === safePage ? "btn" : "btn-ghost"}
-              onClick={() => setPage(num)}
-              style={{
-                minWidth: 34,
-                height: 34,
-                padding: 0,
-                borderRadius: 10,
-                boxShadow: "none",
-              }}
-            >
-              {num}
-            </button>
+              <div className="project-showcase-body">
+                <h3 className="project-showcase-title">{project.title}</h3>
+                <p className="project-showcase-summary">{project.summary}</p>
+
+                <div className="project-tag-row">
+                  <span className="project-tag-pill">{project.category.toLowerCase()}</span>
+                  <span className="project-tag-pill">{formatCreatedLabel(project.createdAt)}</span>
+                </div>
+
+                <Link href={buildProjectDetailPath(project.slug, selectedCategory)} className="btn project-showcase-link">
+                  View
+                </Link>
+              </div>
+            </article>
           ))}
         </div>
-      ) : null}
+      )}
     </section>
   );
 }

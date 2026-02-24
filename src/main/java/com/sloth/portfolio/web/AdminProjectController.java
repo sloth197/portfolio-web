@@ -4,11 +4,15 @@ import com.sloth.portfolio.domain.Project;
 import com.sloth.portfolio.service.ProjectCommandService;
 import com.sloth.portfolio.web.dto.ProjectCreateRequest;
 import com.sloth.portfolio.web.dto.ProjectDto;
+import com.sloth.portfolio.web.dto.ProjectUpdateRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -41,6 +45,31 @@ public class AdminProjectController {
                 request.githubUrl()
         ));
         return ProjectDto.from(created);
+    }
+
+    @PutMapping("/{id}")
+    public ProjectDto update(@PathVariable Long id, @Valid @RequestBody ProjectUpdateRequest request) {
+        Project updated = projectCommandService.update(id, new Project(
+                request.category(),
+                request.title(),
+                request.slug(),
+                request.summary(),
+                request.contentMarkdown(),
+                request.githubUrl()
+        ));
+        return ProjectDto.from(updated);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        projectCommandService.delete(id);
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(ProjectCommandService.NotFoundException.class)
+    public ErrorResponse handleNotFound(ProjectCommandService.NotFoundException e) {
+        return new ErrorResponse("NOT_FOUND", e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)

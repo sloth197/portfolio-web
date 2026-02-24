@@ -1,19 +1,8 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProjectsListPanel from "@/components/projects-list-panel";
 import { ApiError, fetchProjects } from "@/lib/api";
-import type { ProjectCategory } from "@/lib/types";
-
-function normalizeCategory(value?: string): ProjectCategory | undefined {
-  if (!value) {
-    return undefined;
-  }
-  const upper = value.toUpperCase();
-  if (upper === "FIRMWARE" || upper === "SOFTWARE") {
-    return upper;
-  }
-  return undefined;
-}
+import { PREVIEW_PROJECTS, filterProjectsByCategory, normalizeProjectCategory } from "@/lib/project-preview";
 
 export default async function ProjectsPage({
   searchParams,
@@ -21,37 +10,49 @@ export default async function ProjectsPage({
   searchParams: Promise<{ category?: string }>;
 }) {
   const params = await searchParams;
-  const selectedCategory = normalizeCategory(params.category);
+  const selectedCategory = normalizeProjectCategory(params.category);
 
-  let projects: Awaited<ReturnType<typeof fetchProjects>> = [];
+  let allProjects: Awaited<ReturnType<typeof fetchProjects>> = [];
+
   try {
-    projects = await fetchProjects(selectedCategory);
+    allProjects = await fetchProjects();
   } catch (error) {
     if (error instanceof ApiError) {
       if (error.status === 404) {
         notFound();
       }
     }
-    throw error;
+
+    if (process.env.NODE_ENV !== "production") {
+      allProjects = PREVIEW_PROJECTS;
+    } else {
+      throw error;
+    }
   }
 
-  const sortedProjects = [...projects].sort((a, b) => a.title.localeCompare(b.title));
+  const filteredProjects = filterProjectsByCategory(allProjects, selectedCategory);
+  const totalCount = allProjects.length;
+  const softwareCount = allProjects.filter((project) => project.category === "SOFTWARE").length;
+  const firmwareCount = allProjects.filter((project) => project.category === "FIRMWARE").length;
+  const sortedProjects = [...filteredProjects].sort((a, b) => a.title.localeCompare(b.title));
 
   return (
-    <div style={{ display: "grid", gap: 14 }}>
-      <section className="surface-card" style={{ padding: "16px clamp(14px, 4vw, 20px)", display: "grid", gap: 12 }}>
-        <span className="badge">Projects</span>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <Link className="badge" href="/projects?category=SOFTWARE">
-            Software
-          </Link>
-          <Link className="badge" href="/projects?category=FIRMWARE">
-            Firmware
-          </Link>
-          <Link className="badge" href="/projects">
-            All
-          </Link>
-        </div>
+    <div className="projects-layout-preview">
+      <section className="projects-hero-preview">
+        <span className="projects-eyebrow">My Projects</span>
+        <h1 className="projects-hero-title">Featured Projects</h1>
+      </section>
+
+      <section className="projects-filter-bar">
+        <Link className={`projects-filter-pill ${!selectedCategory ? "is-active" : ""}`} href="/projects">
+          All ({totalCount})
+        </Link>
+        <Link className={`projects-filter-pill ${selectedCategory === "SOFTWARE" ? "is-active" : ""}`} href="/projects?category=SOFTWARE">
+          Software ({softwareCount})
+        </Link>
+        <Link className={`projects-filter-pill ${selectedCategory === "FIRMWARE" ? "is-active" : ""}`} href="/projects?category=FIRMWARE">
+          Firmware ({firmwareCount})
+        </Link>
       </section>
 
       <ProjectsListPanel projects={sortedProjects} selectedCategory={selectedCategory} />

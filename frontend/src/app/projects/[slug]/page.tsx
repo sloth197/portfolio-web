@@ -1,26 +1,29 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import ProjectAdminActions from "@/components/project-admin-actions";
 import { ApiError, fetchProjectBySlug, fetchProjects } from "@/lib/api";
-import type { ProjectCategory } from "@/lib/types";
+import { PREVIEW_PROJECTS, normalizeProjectCategory } from "@/lib/project-preview";
+import type { ProjectCategory, ProjectDto } from "@/lib/types";
 
-export default async function ProjectDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  let project: Awaited<ReturnType<typeof fetchProjectBySlug>>;
-  let allProjects: Awaited<ReturnType<typeof fetchProjects>> = [];
-
-  try {
-    const { slug } = await params;
-    project = await fetchProjectBySlug(slug);
-    allProjects = await fetchProjects();
-  } catch (error) {
-    if (error instanceof ApiError) {
-      if (error.status === 404) {
-        notFound();
-      }
-    }
-    throw error;
+function buildProjectsPath(selectedCategory?: ProjectCategory): string {
+  if (!selectedCategory) {
+    return "/projects";
   }
+  return `/projects?category=${selectedCategory}`;
+}
 
-  const sortedProjects = [...allProjects].sort((a, b) => {
+function buildProjectDetailPath(slug: string, selectedCategory?: ProjectCategory): string {
+  const params = new URLSearchParams();
+  if (selectedCategory) {
+    params.set("category", selectedCategory);
+  }
+  return params.size > 0 ? `/projects/${slug}?${params.toString()}` : `/projects/${slug}`;
+}
+
+function sortProjectsForSidebar(items: ProjectDto[]): ProjectDto[] {
+  return [...items].sort((a, b) => {
     const order = (category: ProjectCategory) => (category === "SOFTWARE" ? 0 : 1);
     const byCategory = order(a.category) - order(b.category);
     if (byCategory !== 0) {
@@ -28,79 +31,124 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     }
     return a.title.localeCompare(b.title);
   });
+}
+
+export default async function ProjectDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const [{ slug }, query] = await Promise.all([params, searchParams]);
+  const selectedCategory = normalizeProjectCategory(query.category);
+
+  let project: ProjectDto | null = null;
+  let allProjects: ProjectDto[] = [];
+  let usesPreviewData = false;
+
+  try {
+    [project, allProjects] = await Promise.all([fetchProjectBySlug(slug), fetchProjects()]);
+  } catch (error) {
+    if (error instanceof ApiError) {
+      if (error.status === 404) {
+        notFound();
+      }
+    }
+
+    if (process.env.NODE_ENV !== "production") {
+      allProjects = PREVIEW_PROJECTS;
+      project = PREVIEW_PROJECTS.find((item) => item.slug === slug) ?? null;
+      usesPreviewData = true;
+      if (!project) {
+        notFound();
+      }
+    } else {
+      throw error;
+    }
+  }
+
+  if (!project) {
+    notFound();
+  }
+
+  const sortedProjects = sortProjectsForSidebar(allProjects);
 
   return (
-    <div style={{ display: "grid", gap: 16 }}>
-      <Link className="btn-ghost" href="/projects" style={{ width: "fit-content" }}>
-        프로젝트 목록으로
-      </Link>
+    <div id="project-detail-layout" className="project-detail-layout">
+      <section className="surface-card project-detail-head">
+        <div className="project-detail-top-row">
+          <Link className="btn-ghost" href={buildProjectsPath(selectedCategory)} style={{ width: "fit-content" }}>
+            Back to projects
+          </Link>
+          {usesPreviewData ? <span className="badge">Preview Data</span> : null}
+        </div>
 
-      <section className="surface-card" style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 12 }}>
         <span className="badge">{project.category}</span>
-        <h1 style={{ margin: 0, fontSize: "clamp(1.8rem, 4vw, 2.4rem)", letterSpacing: "-0.02em", lineHeight: 1.1 }}>
-          {project.title}
-        </h1>
-        <p className="section-copy" style={{ margin: 0 }}>
-          {project.summary}
-        </p>
+        <h1 className="project-detail-title">{project.title}</h1>
+        <p className="section-copy" style={{ margin: 0 }}>{project.summary}</p>
+
         {project.githubUrl ? (
           <a href={project.githubUrl} target="_blank" rel="noreferrer" className="btn" style={{ width: "fit-content" }}>
-            GitHub 보기
+            Open GitHub
           </a>
         ) : null}
       </section>
 
-      <section className="panel" style={{ padding: "18px clamp(14px, 4vw, 22px)", display: "grid", gap: 14 }}>
-        <h2 style={{ margin: 0, fontSize: 20 }}>프로젝트 선택</h2>
+      <ProjectAdminActions
+        project={project}
+        returnPath={buildProjectsPath(selectedCategory)}
+        disabled={usesPreviewData}
+      />
 
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <Link className="badge" href="/projects?category=SOFTWARE">
-            Software
-          </Link>
-          <Link className="badge" href="/projects?category=FIRMWARE">
-            Firmware
-          </Link>
-          <Link className="badge" href="/projects">
-            Projects
-          </Link>
-        </div>
+      <section className="project-detail-main">
+        <article className="panel project-detail-content">
+          <h2 className="project-detail-subtitle">Project Details</h2>
+          {project.contentMarkdown ? (
+            <div className="project-markdown">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.contentMarkdown}</ReactMarkdown>
+            </div>
+          ) : (
+            <p className="section-copy" style={{ margin: 0 }}>
+              No detailed notes available yet.
+            </p>
+          )}
+        </article>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: 12,
-          }}
-        >
-          {sortedProjects.map((item) => {
-            const isCurrent = item.slug === project.slug;
-            return (
-              <Link
-                key={item.id}
-                href={`/projects/${item.slug}`}
-                className="panel project-card"
-                style={{
-                  padding: 14,
-                  display: "grid",
-                  gap: 6,
-                  borderColor: isCurrent ? "var(--accent)" : undefined,
-                }}
-              >
-                <span className="badge">{item.category}</span>
-                <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-0.01em" }}>{item.title}</div>
-                <div className="section-copy" style={{ fontSize: 14 }}>
-                  {item.summary}
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+        <aside className="panel project-detail-sidebar">
+          <h2 className="project-detail-subtitle">Other Projects</h2>
 
-        {sortedProjects.length === 0 ? (
-          <div className="section-copy" style={{ fontSize: 14 }}>
-            표시할 프로젝트가 없습니다.
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <Link className="badge" href="/projects?category=SOFTWARE">
+              Software
+            </Link>
+            <Link className="badge" href="/projects?category=FIRMWARE">
+              Firmware
+            </Link>
+            <Link className="badge" href="/projects">
+              Projects
+            </Link>
           </div>
-        ) : null}
+
+          <div className="project-detail-related-list">
+            {sortedProjects.map((item) => {
+              const isCurrent = item.slug === project.slug;
+              return (
+                <Link
+                  key={item.id}
+                  href={buildProjectDetailPath(item.slug, selectedCategory)}
+                  className={`project-detail-related-item ${isCurrent ? "is-current" : ""}`}
+                >
+                  <span className="badge">{item.category}</span>
+                  <div className="project-detail-related-title">{item.title}</div>
+                  <p className="section-copy" style={{ margin: 0, fontSize: 13 }}>
+                    {item.summary}
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+        </aside>
       </section>
     </div>
   );
