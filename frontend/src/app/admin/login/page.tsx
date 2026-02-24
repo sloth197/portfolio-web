@@ -59,16 +59,16 @@ export default function AdminLoginPage() {
     <div style={{ display: "grid", gap: 16 }}>
       <section className="surface-card" style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 8 }}>
         <span className="badge">Login</span>
-        <h1 className="section-title">Login</h1>
+        <h1 className="section-title">Login </h1>
         <p className="section-copy" style={{ fontSize: 14 }}>
-          Login is required to edit or delete projects.
+          로그인을 해야 수정 및 삭제가 가능합니다.
         </p>
       </section>
 
       <section className="panel" style={{ padding: 16, maxWidth: 560 }}>
         <form onSubmit={onSubmit} style={{ display: "grid", gap: 10 }}>
           <label className="field-label" htmlFor="admin-username">
-            Username
+            ID
           </label>
           <input
             id="admin-username"
@@ -79,7 +79,7 @@ export default function AdminLoginPage() {
           />
 
           <label className="field-label" htmlFor="admin-password">
-            Password
+            PW
           </label>
           <input
             id="admin-password"
