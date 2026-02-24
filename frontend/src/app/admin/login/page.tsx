@@ -57,7 +57,7 @@ export default function AdminLoginPage() {
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
-      <section className="surface-card" style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 8 }}>
+      <section className="surface-card top-banner top-banner-login" style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 8 }}>
         <span className="badge">Login</span>
         <h1 className="section-title">Login </h1>
         <p className="section-copy" style={{ fontSize: 14 }}>

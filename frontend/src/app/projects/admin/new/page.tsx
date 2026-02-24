@@ -103,7 +103,7 @@ export default function AdminProjectCreatePage() {
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
-      <section className="surface-card" style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 8 }}>
+      <section className="surface-card top-banner top-banner-admin" style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 8 }}>
         <span className="badge">Admin</span>
         <h1 className="section-title">프로젝트 작성</h1>
         <p className="section-copy" style={{ fontSize: 14 }}>

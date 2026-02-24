@@ -76,7 +76,7 @@ export default async function ProjectDetailPage({
 
   return (
     <div id="project-detail-layout" className="project-detail-layout">
-      <section className="surface-card project-detail-head">
+      <section className="surface-card project-detail-head top-banner top-banner-project-detail">
         <div className="project-detail-top-row">
           <Link className="btn-ghost" href={buildProjectsPath(selectedCategory)} style={{ width: "fit-content" }}>
             Back to projects

@@ -7,7 +7,7 @@ export default async function Home() {
 
   return (
     <div style={{ display: "grid", gap: 26 }}>
-      <section className="surface-card" style={{ padding: "28px clamp(20px, 4vw, 42px)", display: "grid", gap: 18 }}>
+      <section className="surface-card top-banner top-banner-home" style={{ padding: "28px clamp(20px, 4vw, 42px)", display: "grid", gap: 18 }}>
         <span className="badge">Introduction</span>
         <h1
           style={{

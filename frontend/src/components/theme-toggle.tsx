@@ -5,15 +5,21 @@ import { useSyncExternalStore } from "react";
 type Theme = "light" | "dark";
 
 const STORAGE_KEY = "portfolio-theme";
+const THEME_CHANGE_EVENT = "portfolio-theme-change";
 
 function applyTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;
   window.localStorage.setItem(STORAGE_KEY, theme);
+  window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
 }
 
 function readTheme(): Theme {
-  if (typeof document === "undefined") {
+  if (typeof window === "undefined" || typeof document === "undefined") {
     return "light";
+  }
+  const saved = window.localStorage.getItem(STORAGE_KEY);
+  if (saved === "dark" || saved === "light") {
+    return saved;
   }
   return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
 }
@@ -25,12 +31,22 @@ function subscribe(onStoreChange: () => void): () => void {
 
   const onStorage = (event: StorageEvent) => {
     if (!event.key || event.key === STORAGE_KEY) {
+      const next = window.localStorage.getItem(STORAGE_KEY);
+      if (next === "dark" || next === "light") {
+        document.documentElement.dataset.theme = next;
+      }
       onStoreChange();
     }
   };
 
+  const onThemeChange = () => onStoreChange();
+
   window.addEventListener("storage", onStorage);
-  return () => window.removeEventListener("storage", onStorage);
+  window.addEventListener(THEME_CHANGE_EVENT, onThemeChange);
+  return () => {
+    window.removeEventListener("storage", onStorage);
+    window.removeEventListener(THEME_CHANGE_EVENT, onThemeChange);
+  };
 }
 
 function getServerSnapshot(): Theme {

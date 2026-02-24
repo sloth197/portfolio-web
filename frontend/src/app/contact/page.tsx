@@ -1,7 +1,7 @@
 export default function ContactPage() {
   return (
     <div style={{ display: "grid", gap: 16 }}>
-      <section className="surface-card" style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 10 }}>
+      <section className="surface-card top-banner top-banner-contact" style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 10 }}>
         <span className="badge">Contact</span>
         <h1 className="section-title">테슷뜨</h1>
         <p className="section-copy">테슷뜨</p>

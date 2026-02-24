@@ -38,9 +38,12 @@ export default async function ProjectsPage({
 
   return (
     <div className="projects-layout-preview">
-      <section className="projects-hero-preview">
-        <span className="projects-eyebrow">My Projects</span>
-        <h1 className="projects-hero-title">Featured Projects</h1>
+      <section
+        className="surface-card top-banner top-banner-projects"
+        style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 10 }}
+      >
+        <span className="badge">My Projects</span>
+        <h1 className="section-title">Featured Projects</h1>
       </section>
 
       <section className="projects-filter-bar">
