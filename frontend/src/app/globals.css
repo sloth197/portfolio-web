@@ -727,7 +727,7 @@ a {
 .project-detail-main {
   display: grid;
   gap: 12px;
-  grid-template-columns: minmax(0, 1.9fr) minmax(280px, 1fr);
+  grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
 }
 
 .project-detail-layout[data-editing="true"] .project-detail-main {
@@ -735,12 +735,14 @@ a {
 }
 
 .project-detail-content {
+  min-width: 0;
   padding: 16px;
   display: grid;
   gap: 12px;
 }
 
 .project-detail-sidebar {
+  min-width: 0;
   padding: 16px;
   display: grid;
   gap: 12px;
@@ -793,6 +795,7 @@ a {
   border-radius: 16px;
   color: #e2edf7;
   line-height: 1.82;
+  overflow-x: auto;
   padding: 20px 22px;
 }
 
@@ -807,6 +810,7 @@ a {
 
 .project-markdown p {
   margin: 0.65em 0;
+  overflow-wrap: anywhere;
 }
 
 .project-markdown ul,
@@ -817,6 +821,11 @@ a {
 
 .project-markdown li + li {
   margin-top: 0.3em;
+}
+
+.project-markdown li,
+.project-markdown a {
+  overflow-wrap: anywhere;
 }
 
 .project-markdown code {
@@ -874,6 +883,12 @@ a {
 .theme-pill.is-active {
   color: #f4fffc;
   background: var(--accent);
+}
+
+@media (max-width: 980px) {
+  .project-detail-main {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 760px) {
