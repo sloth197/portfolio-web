@@ -63,7 +63,11 @@ export default function RootLayout({
                   Contact
                 </Link>
               </nav>
-              <ThemeToggle />
+              <div className="site-header-actions">
+                <Link className="btn-ghost header-login-link" href="/admin/login">
+                  Login
+                </Link>
+              </div>
             </div>
           </header>
 
@@ -72,6 +76,10 @@ export default function RootLayout({
           <footer className="site-footer">
             <div className="site-footer-inner">© 2026 JWS. All rights reserved. </div>
           </footer>
+
+          <div className="floating-theme-toggle">
+            <ThemeToggle />
+          </div>
         </div>
       </body>
     </html>
