@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { useSyncExternalStore } from "react";
+import { isAdminLoggedIn, subscribeAdminAuth } from "@/lib/admin-auth";
 import type { ProjectCategory, ProjectDto } from "@/lib/types";
 
 type Props = {
@@ -14,9 +18,8 @@ function buildAdminCreatePath(selectedCategory?: ProjectCategory): string {
   return params.size > 0 ? `/projects/admin/new?${params.toString()}` : "/projects/admin/new";
 }
 
-function buildAdminLoginPath(selectedCategory?: ProjectCategory): string {
-  const next = buildAdminCreatePath(selectedCategory);
-  return `/admin/login?next=${encodeURIComponent(next)}`;
+function getServerSnapshot(): boolean {
+  return false;
 }
 
 function buildProjectDetailPath(slug: string, selectedCategory?: ProjectCategory): string {
@@ -48,6 +51,8 @@ function buildSectionTitle(selectedCategory?: ProjectCategory): string {
 }
 
 export default function ProjectsListPanel({ projects, selectedCategory }: Props) {
+  const adminLoggedIn = useSyncExternalStore(subscribeAdminAuth, isAdminLoggedIn, getServerSnapshot);
+
   return (
     <section className="projects-gallery">
       <div className="projects-gallery-head">
@@ -55,9 +60,11 @@ export default function ProjectsListPanel({ projects, selectedCategory }: Props)
           <h2 className="projects-gallery-title">{buildSectionTitle(selectedCategory)}</h2>
           <p className="projects-gallery-copy">{projects.length} projects available</p>
         </div>
-        <Link className="btn-ghost projects-admin-button" href={buildAdminLoginPath(selectedCategory)}>
-          Add Project
-        </Link>
+        {adminLoggedIn ? (
+          <Link className="btn-ghost projects-admin-button" href={buildAdminCreatePath(selectedCategory)}>
+            Add Project
+          </Link>
+        ) : null}
       </div>
 
       {projects.length === 0 ? (

@@ -2,10 +2,10 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { clearAdminAuthHeader, getAdminAuthHeader } from "@/lib/admin-auth";
 import type { ProjectCategory } from "@/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
-const ADMIN_AUTH_KEY = "portfolio_admin_basic_auth";
 
 function normalizeCategory(value: string | null): ProjectCategory {
   return value?.toUpperCase() === "FIRMWARE" ? "FIRMWARE" : "SOFTWARE";
@@ -37,7 +37,7 @@ export default function AdminProjectCreatePage() {
     const parsedCategory = normalizeCategory(new URLSearchParams(window.location.search).get("category"));
     setCategory(parsedCategory);
 
-    const auth = window.sessionStorage.getItem(ADMIN_AUTH_KEY);
+    const auth = getAdminAuthHeader();
     if (!auth) {
       const next = `/projects/admin/new?category=${parsedCategory}`;
       router.replace(`/admin/login?next=${encodeURIComponent(next)}`);
@@ -51,7 +51,7 @@ export default function AdminProjectCreatePage() {
       return;
     }
 
-    const auth = window.sessionStorage.getItem(ADMIN_AUTH_KEY);
+    const auth = getAdminAuthHeader();
     if (!auth) {
       setError("관리자 로그인 정보가 없습니다. 다시 로그인해 주세요.");
       return;
@@ -81,7 +81,7 @@ export default function AdminProjectCreatePage() {
       if (!response.ok) {
         const payload = (await response.json().catch(() => null)) as { message?: string } | null;
         if (response.status === 401 || response.status === 403) {
-          window.sessionStorage.removeItem(ADMIN_AUTH_KEY);
+          clearAdminAuthHeader();
           const next = `/projects/admin/new?category=${category}`;
           router.replace(`/admin/login?next=${encodeURIComponent(next)}`);
           return;

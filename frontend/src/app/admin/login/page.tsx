@@ -2,9 +2,9 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { setAdminAuthHeader } from "@/lib/admin-auth";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
-const ADMIN_AUTH_KEY = "portfolio_admin_basic_auth";
 
 function toBasicAuth(username: string, password: string): string {
   return `Basic ${btoa(`${username}:${password}`)}`;
@@ -46,7 +46,7 @@ export default function AdminLoginPage() {
         return;
       }
 
-      window.sessionStorage.setItem(ADMIN_AUTH_KEY, authHeader);
+      setAdminAuthHeader(authHeader);
       router.replace(nextPath);
     } catch {
       setError("Login request failed.");
