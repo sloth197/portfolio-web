@@ -228,17 +228,22 @@ export default function AdminProjectCreatePage() {
           <label className="field-label" htmlFor="project-files">
             Files (Image/GIF/Docs)
           </label>
-          <input
-            id="project-files"
-            className="field-input"
-            type="file"
-            multiple
-            accept={FILE_INPUT_ACCEPT}
-            onChange={(event) => setSelectedFiles(Array.from(event.target.files ?? []))}
-          />
-          <p className="helper-text" style={{ margin: 0 }}>
-            {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : "No files selected."}
-          </p>
+          <div className="file-picker-row">
+            <input
+              id="project-files"
+              className="hidden-file-input"
+              type="file"
+              multiple
+              accept={FILE_INPUT_ACCEPT}
+              onChange={(event) => setSelectedFiles(Array.from(event.target.files ?? []))}
+            />
+            <label htmlFor="project-files" className="btn-ghost file-picker-button">
+              Add files
+            </label>
+            <p className="helper-text file-picker-names">
+              {selectedFiles.length > 0 ? selectedFiles.map((file) => file.name).join(", ") : "No files selected."}
+            </p>
+          </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <button className="btn" type="submit" disabled={submitting}>

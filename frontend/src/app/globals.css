@@ -466,6 +466,30 @@ a {
   line-height: 1.5;
 }
 
+.file-picker-row {
+  display: grid;
+  gap: 8px;
+}
+
+.hidden-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  overflow: hidden;
+}
+
+.file-picker-button {
+  width: fit-content;
+}
+
+.file-picker-names {
+  word-break: break-word;
+}
+
 .error-text {
   color: var(--error);
   font-size: 0.86rem;

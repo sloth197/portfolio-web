@@ -384,17 +384,22 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
           <label className="field-label" htmlFor="edit-files">
             Add Files (Image/GIF/Docs)
           </label>
-          <input
-            id="edit-files"
-            className="field-input"
-            type="file"
-            multiple
-            accept={FILE_INPUT_ACCEPT}
-            onChange={(event) => setSelectedFiles(Array.from(event.target.files ?? []))}
-          />
-          <p className="helper-text" style={{ margin: 0 }}>
-            {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) ready to upload on Save` : "No new files selected."}
-          </p>
+          <div className="file-picker-row">
+            <input
+              id="edit-files"
+              className="hidden-file-input"
+              type="file"
+              multiple
+              accept={FILE_INPUT_ACCEPT}
+              onChange={(event) => setSelectedFiles(Array.from(event.target.files ?? []))}
+            />
+            <label htmlFor="edit-files" className="btn-ghost file-picker-button">
+              Add files
+            </label>
+            <p className="helper-text file-picker-names">
+              {selectedFiles.length > 0 ? selectedFiles.map((file) => file.name).join(", ") : "No new files selected."}
+            </p>
+          </div>
 
           {sortedAssets.length > 0 ? (
             <div style={{ display: "grid", gap: 8 }}>
