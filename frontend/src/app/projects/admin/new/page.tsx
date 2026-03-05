@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { clearAdminAuthHeader, getAdminAuthHeader } from "@/lib/admin-auth";
+import NotionMarkdownEditor from "@/components/notion-markdown-editor";
 import type { ProjectCategory, ProjectDto } from "@/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -214,14 +215,13 @@ export default function AdminProjectCreatePage() {
           />
 
           <label className="field-label" htmlFor="project-markdown">
-            Content Markdown
+            Project Details (Notion-style Markdown)
           </label>
-          <textarea
+          <NotionMarkdownEditor
             id="project-markdown"
-            className="field-input"
             value={contentMarkdown}
-            onChange={(event) => setContentMarkdown(event.target.value)}
-            rows={8}
+            onValueChange={setContentMarkdown}
+            rows={12}
             required
           />
 

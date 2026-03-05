@@ -61,11 +61,11 @@ export default function AdminLoginPage() {
         <span className="badge">Login</span>
         <h1 className="section-title">Login </h1>
         <p className="section-copy" style={{ fontSize: 14 }}>
-          로그인을 해야 수정 및 삭제가 가능합니다.
+          관리자 계정으로 로그인할 수 있습니다.
         </p>
       </section>
 
-      <section className="panel" style={{ padding: 16, maxWidth: 560 }}>
+      <section className="panel" style={{ padding: 16, width: "min(560px, 100%)", margin: "0 auto" }}>
         <form onSubmit={onSubmit} style={{ display: "grid", gap: 10 }}>
           <label className="field-label" htmlFor="admin-username">
             ID
