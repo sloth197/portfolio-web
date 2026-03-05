@@ -1,11 +1,12 @@
-"use client";
+﻿"use client";
 
-import { FormEvent, useEffect, useState, useSyncExternalStore } from "react";
+import { FormEvent, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { clearAdminAuthHeader, getAdminAuthHeader, isAdminLoggedIn, subscribeAdminAuth } from "@/lib/admin-auth";
-import type { ProjectCategory, ProjectDto } from "@/lib/types";
+import type { ProjectAssetDto, ProjectCategory, ProjectDto } from "@/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+const FILE_INPUT_ACCEPT = "image/*,.pdf,.zip,.md,.txt,.doc,.docx,.ppt,.pptx,.xls,.xlsx";
 
 type Props = {
   project: ProjectDto;
@@ -27,6 +28,16 @@ function slugify(value: string): string {
     .replace(/^-|-$/g, "");
 }
 
+function resolveAssetUrl(url: string): string {
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  if (API_BASE) {
+    return `${API_BASE}${url}`;
+  }
+  return url;
+}
+
 export default function ProjectAdminActions({ project, returnPath, disabled = false }: Props) {
   const router = useRouter();
   const adminLoggedIn = useSyncExternalStore(subscribeAdminAuth, isAdminLoggedIn, getServerSnapshot);
@@ -37,10 +48,15 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
   const [summary, setSummary] = useState(project.summary);
   const [contentMarkdown, setContentMarkdown] = useState(project.contentMarkdown);
   const [githubUrl, setGithubUrl] = useState(project.githubUrl ?? "");
+  const [assets, setAssets] = useState<ProjectAssetDto[]>(project.assets ?? []);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deletingAssetId, setDeletingAssetId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+
+  const canEdit = adminLoggedIn && !disabled;
 
   useEffect(() => {
     if (!adminLoggedIn && editing) {
@@ -77,6 +93,36 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
       return null;
     }
     return auth;
+  }
+
+  async function uploadSelectedFiles(auth: string): Promise<{ uploaded: ProjectAssetDto[]; failed: string[] }> {
+    const uploaded: ProjectAssetDto[] = [];
+    const failed: string[] = [];
+
+    for (const file of selectedFiles) {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const response = await fetch(`${API_BASE}/api/admin/projects/${project.id}/assets`, {
+          method: "POST",
+          headers: { Authorization: auth },
+          body: formData,
+        });
+
+        if (!response.ok) {
+          failed.push(file.name);
+          continue;
+        }
+
+        const createdAsset = (await response.json()) as ProjectAssetDto;
+        uploaded.push(createdAsset);
+      } catch {
+        failed.push(file.name);
+      }
+    }
+
+    return { uploaded, failed };
   }
 
   function onStartEdit() {
@@ -141,7 +187,21 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
         return;
       }
 
-      setNotice("Project updated.");
+      let noticeMessage = "Project updated.";
+
+      if (selectedFiles.length > 0) {
+        const uploadResult = await uploadSelectedFiles(auth);
+        if (uploadResult.uploaded.length > 0) {
+          setAssets((prev) => [...prev, ...uploadResult.uploaded]);
+          noticeMessage = `Project updated. Uploaded ${uploadResult.uploaded.length} file(s).`;
+          setSelectedFiles([]);
+        }
+        if (uploadResult.failed.length > 0) {
+          setError(`Some files failed to upload: ${uploadResult.failed.join(", ")}`);
+        }
+      }
+
+      setNotice(noticeMessage);
       setEditing(false);
       router.refresh();
     } catch {
@@ -201,6 +261,49 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
     }
   }
 
+  async function onDeleteAsset(assetId: number) {
+    if (!API_BASE) {
+      setError("NEXT_PUBLIC_API_BASE_URL is not set.");
+      return;
+    }
+
+    const auth = requireAuthHeader();
+    if (!auth) {
+      return;
+    }
+
+    setDeletingAssetId(assetId);
+    setError(null);
+    setNotice(null);
+
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/projects/${project.id}/assets/${assetId}`, {
+        method: "DELETE",
+        headers: { Authorization: auth },
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { message?: string } | null;
+        if (response.status === 401 || response.status === 403) {
+          clearAdminAuthHeader();
+          router.replace(`/admin/login?next=${encodeURIComponent(resolveCurrentPath())}`);
+          return;
+        }
+        setError(payload?.message ?? `Asset delete failed (${response.status})`);
+        return;
+      }
+
+      setAssets((prev) => prev.filter((item) => item.id !== assetId));
+      setNotice("Asset removed.");
+    } catch {
+      setError("Asset delete request failed.");
+    } finally {
+      setDeletingAssetId(null);
+    }
+  }
+
+  const sortedAssets = useMemo(() => [...assets].sort((a, b) => a.id - b.id), [assets]);
+
   if (!adminLoggedIn) {
     return null;
   }
@@ -211,14 +314,14 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
         <button type="button" className="btn-ghost" onClick={() => (editing ? setEditing(false) : onStartEdit())}>
           {editing ? "Cancel Edit" : "Edit"}
         </button>
-        {editing && adminLoggedIn ? (
+        {editing && canEdit ? (
           <button type="button" className="btn-ghost" onClick={onDelete} disabled={deleting || saving}>
             {deleting ? "Deleting..." : "Delete"}
           </button>
         ) : null}
       </div>
 
-      {editing && adminLoggedIn ? (
+      {editing && canEdit ? (
         <form onSubmit={onSave} style={{ display: "grid", gap: 10 }}>
           <label className="field-label" htmlFor="edit-category">
             Category
@@ -278,8 +381,49 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
             required
           />
 
+          <label className="field-label" htmlFor="edit-files">
+            Add Files (Image/GIF/Docs)
+          </label>
+          <input
+            id="edit-files"
+            className="field-input"
+            type="file"
+            multiple
+            accept={FILE_INPUT_ACCEPT}
+            onChange={(event) => setSelectedFiles(Array.from(event.target.files ?? []))}
+          />
+          <p className="helper-text" style={{ margin: 0 }}>
+            {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) ready to upload on Save` : "No new files selected."}
+          </p>
+
+          {sortedAssets.length > 0 ? (
+            <div style={{ display: "grid", gap: 8 }}>
+              <div className="field-label">Current Files</div>
+              <div className="admin-asset-list">
+                {sortedAssets.map((asset) => {
+                  const assetUrl = resolveAssetUrl(asset.url);
+                  return (
+                    <div key={asset.id} className="admin-asset-item">
+                      <a href={assetUrl} target="_blank" rel="noreferrer" className="admin-asset-link">
+                        {asset.originalName}
+                      </a>
+                      <button
+                        type="button"
+                        className="btn-ghost"
+                        onClick={() => onDeleteAsset(asset.id)}
+                        disabled={deletingAssetId === asset.id || saving || deleting}
+                      >
+                        {deletingAssetId === asset.id ? "Removing..." : "Remove"}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
+
           <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 10, flexWrap: "wrap" }}>
-            <button className="btn" type="submit" disabled={saving || deleting}>
+            <button className="btn" type="submit" disabled={saving || deleting || deletingAssetId !== null}>
               {saving ? "Saving..." : "Save"}
             </button>
           </div>

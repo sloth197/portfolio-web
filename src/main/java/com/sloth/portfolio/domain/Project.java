@@ -2,6 +2,8 @@ package com.sloth.portfolio.domain;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(
@@ -49,6 +51,10 @@ public class Project {
      */
     @Column(length = 300)
     private String githubUrl;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("createdAt ASC")
+    private List<ProjectAsset> assets = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -98,6 +104,7 @@ public class Project {
     public String getSummary() { return summary; }
     public String getContentMarkdown() { return contentMarkdown; }
     public String getGithubUrl() { return githubUrl; }
+    public List<ProjectAsset> getAssets() { return assets; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 

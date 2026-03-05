@@ -1,11 +1,12 @@
-"use client";
+﻿"use client";
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { clearAdminAuthHeader, getAdminAuthHeader } from "@/lib/admin-auth";
-import type { ProjectCategory } from "@/lib/types";
+import type { ProjectCategory, ProjectDto } from "@/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+const FILE_INPUT_ACCEPT = "image/*,.pdf,.zip,.md,.txt,.doc,.docx,.ppt,.pptx,.xls,.xlsx";
 
 function normalizeCategory(value: string | null): ProjectCategory {
   return value?.toUpperCase() === "FIRMWARE" ? "FIRMWARE" : "SOFTWARE";
@@ -21,6 +22,35 @@ function slugify(value: string): string {
     .replace(/^-|-$/g, "");
 }
 
+async function uploadSelectedFiles(projectId: number, auth: string, files: File[]): Promise<string[]> {
+  if (!API_BASE || files.length === 0) {
+    return [];
+  }
+
+  const failures: string[] = [];
+
+  for (const file of files) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/projects/${projectId}/assets`, {
+        method: "POST",
+        headers: { Authorization: auth },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        failures.push(file.name);
+      }
+    } catch {
+      failures.push(file.name);
+    }
+  }
+
+  return failures;
+}
+
 export default function AdminProjectCreatePage() {
   const router = useRouter();
   const [category, setCategory] = useState<ProjectCategory>("SOFTWARE");
@@ -29,6 +59,7 @@ export default function AdminProjectCreatePage() {
   const [summary, setSummary] = useState("");
   const [contentMarkdown, setContentMarkdown] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -47,13 +78,13 @@ export default function AdminProjectCreatePage() {
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!API_BASE) {
-      setError("NEXT_PUBLIC_API_BASE_URL 설정이 필요합니다.");
+      setError("NEXT_PUBLIC_API_BASE_URL is not set.");
       return;
     }
 
     const auth = getAdminAuthHeader();
     if (!auth) {
-      setError("관리자 로그인 정보가 없습니다. 다시 로그인해 주세요.");
+      setError("Admin login session is missing. Please login again.");
       return;
     }
 
@@ -86,16 +117,24 @@ export default function AdminProjectCreatePage() {
           router.replace(`/admin/login?next=${encodeURIComponent(next)}`);
           return;
         }
-        setError(payload?.message ?? `저장 실패 (${response.status})`);
+        setError(payload?.message ?? `Create failed (${response.status})`);
         return;
       }
 
-      setNotice("프로젝트가 생성되었습니다. 목록 페이지로 이동합니다.");
+      const createdProject = (await response.json()) as ProjectDto;
+      const failedUploads = await uploadSelectedFiles(createdProject.id, auth, selectedFiles);
+      const uploadedCount = selectedFiles.length - failedUploads.length;
+
+      if (failedUploads.length > 0) {
+        setError(`Project created, but ${failedUploads.length} file(s) failed: ${failedUploads.join(", ")}`);
+      }
+
+      setNotice(uploadedCount > 0 ? `Project created. Uploaded ${uploadedCount} file(s).` : "Project created.");
       setTimeout(() => {
         router.replace(`/projects?category=${category}`);
       }, 700);
     } catch {
-      setError("요청 중 오류가 발생했습니다.");
+      setError("Request failed while creating project.");
     } finally {
       setSubmitting(false);
     }
@@ -105,16 +144,16 @@ export default function AdminProjectCreatePage() {
     <div style={{ display: "grid", gap: 16 }}>
       <section className="surface-card top-banner top-banner-admin" style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 8 }}>
         <span className="badge">Admin</span>
-        <h1 className="section-title">프로젝트 작성</h1>
+        <h1 className="section-title">Create Project</h1>
         <p className="section-copy" style={{ fontSize: 14 }}>
-          관리자 인증 후 Firmware/Software 프로젝트를 작성합니다.
+          Create firmware/software projects and optionally upload image, GIF, or document files.
         </p>
       </section>
 
       <section className="panel" style={{ padding: 16, display: "grid", gap: 10 }}>
         <form onSubmit={onSubmit} style={{ display: "grid", gap: 10 }}>
           <label className="field-label" htmlFor="project-category">
-            카테고리
+            Category
           </label>
           <select
             id="project-category"
@@ -127,7 +166,7 @@ export default function AdminProjectCreatePage() {
           </select>
 
           <label className="field-label" htmlFor="project-title">
-            제목
+            Title
           </label>
           <input
             id="project-title"
@@ -139,7 +178,7 @@ export default function AdminProjectCreatePage() {
           />
 
           <label className="field-label" htmlFor="project-slug">
-            슬러그(URL)
+            Slug (URL)
           </label>
           <input
             id="project-slug"
@@ -151,7 +190,7 @@ export default function AdminProjectCreatePage() {
           />
 
           <label className="field-label" htmlFor="project-summary">
-            요약
+            Summary
           </label>
           <input
             id="project-summary"
@@ -163,7 +202,7 @@ export default function AdminProjectCreatePage() {
           />
 
           <label className="field-label" htmlFor="project-link">
-            링크(GitHub/문서)
+            Link (GitHub/Docs)
           </label>
           <input
             id="project-link"
@@ -175,7 +214,7 @@ export default function AdminProjectCreatePage() {
           />
 
           <label className="field-label" htmlFor="project-markdown">
-            상세 내용 (Markdown)
+            Content Markdown
           </label>
           <textarea
             id="project-markdown"
@@ -186,9 +225,24 @@ export default function AdminProjectCreatePage() {
             required
           />
 
+          <label className="field-label" htmlFor="project-files">
+            Files (Image/GIF/Docs)
+          </label>
+          <input
+            id="project-files"
+            className="field-input"
+            type="file"
+            multiple
+            accept={FILE_INPUT_ACCEPT}
+            onChange={(event) => setSelectedFiles(Array.from(event.target.files ?? []))}
+          />
+          <p className="helper-text" style={{ margin: 0 }}>
+            {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : "No files selected."}
+          </p>
+
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <button className="btn" type="submit" disabled={submitting}>
-              {submitting ? "저장 중..." : "작성 완료"}
+              {submitting ? "Creating..." : "Create"}
             </button>
             {notice ? <span className="success-text">{notice}</span> : null}
             {error ? <span className="error-text">{error}</span> : null}

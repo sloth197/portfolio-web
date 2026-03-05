@@ -5,6 +5,11 @@ spring:
   application:
     name: portfolio
 
+  servlet:
+    multipart:
+      max-file-size: ${APP_UPLOAD_MAX_FILE_SIZE:20MB}
+      max-request-size: ${APP_UPLOAD_MAX_REQUEST_SIZE:50MB}
+
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/portfolio}
     username: ${DB_USERNAME:portfolio}
@@ -32,3 +37,5 @@ app:
     max-requests-per-hour: ${APP_AUTH_MAX_REQUESTS_PER_HOUR:10}
     kakao-webhook-url: ${APP_AUTH_KAKAO_WEBHOOK_URL:}
     pass-webhook-url: ${APP_AUTH_PASS_WEBHOOK_URL:}
+  upload:
+    dir: ${APP_UPLOAD_DIR:uploads}

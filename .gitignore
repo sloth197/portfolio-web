@@ -59,6 +59,7 @@ frontend/node_modules/
 
 # Backend build/runtime
 target/
+uploads/
 
 # Local backup of nested git metadata
 .git_frontend_backup/

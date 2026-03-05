@@ -4,6 +4,7 @@ import com.sloth.portfolio.domain.Project;
 import com.sloth.portfolio.domain.ProjectCategory;
 
 import java.time.Instant;
+import java.util.List;
 
 public record ProjectDto(
         Long id,
@@ -13,6 +14,7 @@ public record ProjectDto(
         String summary,
         String contentMarkdown,
         String githubUrl,
+        List<ProjectAssetDto> assets,
         Instant createdAt,
         Instant updatedAt
 ) {
@@ -25,6 +27,7 @@ public record ProjectDto(
                 p.getSummary(),
                 p.getContentMarkdown(),
                 p.getGithubUrl(),
+                p.getAssets().stream().map(ProjectAssetDto::from).toList(),
                 p.getCreatedAt(),
                 p.getUpdatedAt()
         );

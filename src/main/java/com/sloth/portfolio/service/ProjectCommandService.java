@@ -10,9 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProjectCommandService {
 
     private final ProjectRepository projectRepository;
+    private final ProjectAssetService projectAssetService;
 
-    public ProjectCommandService(ProjectRepository projectRepository) {
+    public ProjectCommandService(ProjectRepository projectRepository, ProjectAssetService projectAssetService) {
         this.projectRepository = projectRepository;
+        this.projectAssetService = projectAssetService;
     }
 
     public Project create(Project project) {
@@ -47,6 +49,7 @@ public class ProjectCommandService {
         if (!projectRepository.existsById(id)) {
             throw new NotFoundException("Project not found: id=" + id);
         }
+        projectAssetService.deleteAllByProjectId(id);
         projectRepository.deleteById(id);
     }
 

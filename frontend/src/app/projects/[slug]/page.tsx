@@ -7,6 +7,8 @@ import { ApiError, fetchProjectBySlug, fetchProjects } from "@/lib/api";
 import { PREVIEW_PROJECTS, normalizeProjectCategory } from "@/lib/project-preview";
 import type { ProjectCategory, ProjectDto } from "@/lib/types";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+
 function buildProjectsPath(selectedCategory?: ProjectCategory): string {
   if (!selectedCategory) {
     return "/projects";
@@ -31,6 +33,25 @@ function sortProjectsForSidebar(items: ProjectDto[]): ProjectDto[] {
     }
     return a.title.localeCompare(b.title);
   });
+}
+
+function resolveAssetUrl(url: string): string {
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  if (API_BASE) {
+    return `${API_BASE}${url}`;
+  }
+  return url;
+}
+
+function isImageAsset(contentType: string | null, url: string): boolean {
+  if (contentType?.toLowerCase().startsWith("image/")) {
+    return true;
+  }
+  const lowered = url.toLowerCase();
+  return lowered.endsWith(".png") || lowered.endsWith(".jpg") || lowered.endsWith(".jpeg")
+    || lowered.endsWith(".gif") || lowered.endsWith(".webp") || lowered.endsWith(".svg");
 }
 
 export default async function ProjectDetailPage({
@@ -73,6 +94,7 @@ export default async function ProjectDetailPage({
   }
 
   const sortedProjects = sortProjectsForSidebar(allProjects);
+  const projectAssets = project.assets ?? [];
 
   return (
     <div id="project-detail-layout" className="project-detail-layout">
@@ -113,6 +135,28 @@ export default async function ProjectDetailPage({
               No detailed notes available yet.
             </p>
           )}
+
+          {projectAssets.length > 0 ? (
+            <section style={{ display: "grid", gap: 10 }}>
+              <h3 className="project-detail-subtitle" style={{ fontSize: "1rem" }}>Files</h3>
+              <div className="project-asset-grid">
+                {projectAssets.map((asset) => {
+                  const assetUrl = resolveAssetUrl(asset.url);
+                  const imageAsset = asset.assetType === "IMAGE" || isImageAsset(asset.contentType, assetUrl);
+                  return (
+                    <a key={asset.id} href={assetUrl} target="_blank" rel="noreferrer" className="project-asset-card">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      {imageAsset ? <img src={assetUrl} alt={asset.originalName} className="project-asset-thumb" /> : null}
+                      <span className="project-asset-name">{asset.originalName}</span>
+                      <span className="project-asset-meta">
+                        {imageAsset ? "Image" : "File"} · {(asset.fileSize / 1024).toFixed(1)} KB
+                      </span>
+                    </a>
+                  );
+                })}
+              </div>
+            </section>
+          ) : null}
         </article>
 
         <aside className="panel project-detail-sidebar">
