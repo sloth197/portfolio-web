@@ -1,4 +1,4 @@
-﻿package com.sloth.portfolio.service;
+package com.sloth.portfolio.service;
 
 import com.sloth.portfolio.domain.Project;
 import com.sloth.portfolio.repo.ProjectRepository;
