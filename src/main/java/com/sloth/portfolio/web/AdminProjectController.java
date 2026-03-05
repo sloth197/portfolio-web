@@ -56,8 +56,9 @@ public class AdminProjectController {
     }
 
     @PutMapping("/{id}")
-    public ProjectDto update(@PathVariable Long id, @Valid @RequestBody ProjectUpdateRequest request) {
-        Project updated = projectCommandService.update(id, new Project(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void update(@PathVariable Long id, @Valid @RequestBody ProjectUpdateRequest request) {
+        projectCommandService.update(id, new Project(
                 request.category(),
                 request.title(),
                 request.slug(),
@@ -65,7 +66,6 @@ public class AdminProjectController {
                 request.contentMarkdown(),
                 request.githubUrl()
         ));
-        return ProjectDto.from(updated);
     }
 
     @DeleteMapping("/{id}")
