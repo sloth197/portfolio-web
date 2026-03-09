@@ -14,14 +14,14 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [nextPath, setNextPath] = useState("/projects/admin/new");
+  const [nextPath, setNextPath] = useState("/projects");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [failedAttempts, setFailedAttempts] = useState(0);
 
   useEffect(() => {
     const next = new URLSearchParams(window.location.search).get("next");
-    setNextPath(next || "/projects/admin/new");
+    setNextPath(next || "/projects");
   }, []);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {

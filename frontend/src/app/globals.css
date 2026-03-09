@@ -150,6 +150,18 @@ a {
   gap: 0;
 }
 
+.header-auth-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-greeting {
+  font-size: 0.84rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
 .nav-link {
   color: var(--muted);
   font-weight: 600;
