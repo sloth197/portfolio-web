@@ -49,6 +49,7 @@ public class ProjectAssetService {
 
         String originalName = sanitizeFileName(file.getOriginalFilename());
         String extension = extractExtension(originalName);
+        String contentType = resolveContentType(file.getContentType(), extension);
         String storedName = projectId + "-" + UUID.randomUUID() + extension;
         Path target = resolveSafePath(storedName);
 
@@ -58,13 +59,13 @@ public class ProjectAssetService {
             throw new StorageException("Failed to store file: " + originalName, e);
         }
 
-        ProjectAssetType type = detectType(file.getContentType(), extension);
+        ProjectAssetType type = detectType(contentType, extension);
         ProjectAsset asset = new ProjectAsset(
                 project,
                 type,
                 originalName,
                 storedName,
-                file.getContentType(),
+                contentType,
                 file.getSize()
         );
         return projectAssetRepository.save(asset);
@@ -138,6 +139,26 @@ public class ProjectAssetService {
         }
         String ext = fileName.substring(dot).toLowerCase(Locale.ROOT);
         return ext.length() > 20 ? "" : ext;
+    }
+
+    private static String resolveContentType(String contentType, String extension) {
+        if (contentType != null && !contentType.isBlank()) {
+            return contentType.trim();
+        }
+        return switch (extension) {
+            case ".gif" -> "image/gif";
+            case ".png" -> "image/png";
+            case ".jpg", ".jpeg" -> "image/jpeg";
+            case ".webp" -> "image/webp";
+            case ".svg" -> "image/svg+xml";
+            case ".pdf" -> "application/pdf";
+            case ".md" -> "text/markdown; charset=UTF-8";
+            case ".txt" -> "text/plain; charset=UTF-8";
+            case ".doc", ".docx" -> "application/msword";
+            case ".ppt", ".pptx" -> "application/vnd.ms-powerpoint";
+            case ".xls", ".xlsx" -> "application/vnd.ms-excel";
+            default -> null;
+        };
     }
 
     private static ProjectAssetType detectType(String contentType, String extension) {

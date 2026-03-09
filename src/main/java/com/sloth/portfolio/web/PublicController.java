@@ -1,6 +1,7 @@
 package com.sloth.portfolio.web;
 
 import com.sloth.portfolio.domain.ProjectCategory;
+import com.sloth.portfolio.domain.ProjectAsset;
 import com.sloth.portfolio.service.ProjectAssetService;
 import com.sloth.portfolio.service.ProjectQueryService;
 import com.sloth.portfolio.web.dto.ProjectDto;
@@ -11,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Locale;
 import java.util.List;
 
 @RestController
@@ -55,7 +57,7 @@ public class PublicController {
     @GetMapping("/assets/{assetId}")
     public ResponseEntity<Resource> getAsset(@PathVariable Long assetId) {
         ProjectAssetService.AssetFile assetFile = projectAssetService.loadAsset(assetId);
-        String contentType = assetFile.asset().getContentType();
+        String contentType = resolveAssetContentType(assetFile.asset());
         MediaType mediaType;
         try {
             mediaType = (contentType == null || contentType.isBlank())
@@ -91,4 +93,24 @@ public class PublicController {
     }
 
     public record ErrorResponse(String code, String message) {}
+
+    private static String resolveAssetContentType(ProjectAsset asset) {
+        String contentType = asset.getContentType();
+        if (contentType != null && !contentType.isBlank()) {
+            return contentType.trim();
+        }
+        String originalName = asset.getOriginalName().toLowerCase(Locale.ROOT);
+        int dot = originalName.lastIndexOf('.');
+        if (dot < 0 || dot == originalName.length() - 1) {
+            return null;
+        }
+        return switch (originalName.substring(dot)) {
+            case ".gif" -> "image/gif";
+            case ".png" -> "image/png";
+            case ".jpg", ".jpeg" -> "image/jpeg";
+            case ".webp" -> "image/webp";
+            case ".svg" -> "image/svg+xml";
+            default -> null;
+        };
+    }
 }
