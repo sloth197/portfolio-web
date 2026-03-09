@@ -158,8 +158,12 @@ a {
 
 .header-greeting {
   font-size: 0.84rem;
-  color: #7a5cff;
+  color: #8c6bff;
   font-weight: 600;
+}
+
+:root[data-theme="dark"] .header-greeting {
+  color: #7a5cff;
 }
 
 .nav-link {
