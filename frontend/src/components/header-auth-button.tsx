@@ -43,7 +43,10 @@ export default function HeaderAuthButton() {
         type="button"
         className="btn-ghost header-login-link"
         onClick={() => {
-          clearAdminAuthHeader();
+          const confirmed = window.confirm("로그아웃 하시겠습니까?");
+          if (confirmed) {
+            clearAdminAuthHeader();
+          }
         }}
       >
         Logout
