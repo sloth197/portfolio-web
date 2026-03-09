@@ -17,6 +17,7 @@ export default function AdminLoginPage() {
   const [nextPath, setNextPath] = useState("/projects/admin/new");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [failedAttempts, setFailedAttempts] = useState(0);
 
   useEffect(() => {
     const next = new URLSearchParams(window.location.search).get("next");
@@ -42,10 +43,17 @@ export default function AdminLoginPage() {
       });
 
       if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          const nextAttempts = failedAttempts + 1;
+          setFailedAttempts(nextAttempts);
+          setError(nextAttempts >= 3 ? "너 관리자 아니지?" : "아이디 또는 비밀번호가 틀렸습니다");
+          return;
+        }
         setError("Login failed.");
         return;
       }
 
+      setFailedAttempts(0);
       setAdminAuthHeader(authHeader);
       router.replace(nextPath);
     } catch {
