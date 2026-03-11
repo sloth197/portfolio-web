@@ -14,12 +14,5 @@ export default function AdminCrmBanner() {
     return null;
   }
 
-  return (
-    <div className="crm-admin-banner" role="status" aria-live="polite">
-      <div className="crm-admin-banner-inner">
-        <span className="crm-admin-pill">CRM</span>
-        <span className="crm-admin-copy">Admin session active</span>
-      </div>
-    </div>
-  );
+  return <span className="crm-nav-badge">CRM</span>;
 }

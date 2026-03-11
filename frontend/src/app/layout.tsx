@@ -64,14 +64,13 @@ export default function RootLayout({
                 <Link className="nav-link" href="/contact">
                   Contact
                 </Link>
+                <AdminCrmBanner />
               </nav>
               <div className="site-header-actions">
                 <HeaderAuthButton />
               </div>
             </div>
           </header>
-
-          <AdminCrmBanner />
 
           <main className="site-main">{children}</main>
 
