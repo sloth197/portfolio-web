@@ -104,6 +104,55 @@ a {
   border-bottom: 1px solid var(--header-border);
 }
 
+.crm-admin-banner {
+  border-bottom: 1px solid var(--header-border);
+  background: linear-gradient(90deg, rgba(15, 117, 104, 0.14) 0%, rgba(15, 117, 104, 0.08) 100%);
+}
+
+.crm-admin-banner-inner {
+  width: min(1120px, 100% - 2.2rem);
+  margin: 0 auto;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.crm-admin-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 117, 104, 0.35);
+  color: #0b5d52;
+  background: rgba(255, 255, 255, 0.52);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.crm-admin-copy {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--foreground) 76%, var(--accent) 24%);
+}
+
+:root[data-theme="dark"] .crm-admin-banner {
+  background: linear-gradient(90deg, rgba(36, 163, 150, 0.2) 0%, rgba(36, 163, 150, 0.12) 100%);
+}
+
+:root[data-theme="dark"] .crm-admin-pill {
+  border-color: rgba(102, 230, 205, 0.38);
+  color: #dbfff8;
+  background: rgba(7, 19, 28, 0.45);
+}
+
+:root[data-theme="dark"] .crm-admin-copy {
+  color: rgba(228, 239, 249, 0.9);
+}
+
 .site-header-inner,
 .site-main,
 .site-footer-inner {

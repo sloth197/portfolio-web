@@ -1,6 +1,7 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { IBM_Plex_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import AdminCrmBanner from "@/components/admin-crm-banner";
 import HeaderAuthButton from "@/components/header-auth-button";
 import ThemeToggle from "@/components/theme-toggle";
 import "./globals.css";
@@ -69,6 +70,8 @@ export default function RootLayout({
               </div>
             </div>
           </header>
+
+          <AdminCrmBanner />
 
           <main className="site-main">{children}</main>
 
