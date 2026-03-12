@@ -6,6 +6,10 @@
 - Web: https://xhbt.dev
 - API Health: https://api.xhbt.dev/api/public/health
 
+## 임시관리자 계정
+- ID: readadmin
+- PW: readadmin
+
 ## 주요 기능
 - 프로젝트 목록/카테고리 필터/상세 조회
 - 관리자 로그인 후 프로젝트 등록 및 관리
