@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import { isAdminLoggedIn, subscribeAdminAuth } from "@/lib/admin-auth";
 
@@ -9,15 +10,14 @@ function getServerSnapshot(): boolean {
 
 export default function AdminCrmBanner() {
   const adminLoggedIn = useSyncExternalStore(subscribeAdminAuth, isAdminLoggedIn, getServerSnapshot);
-  const crmUrl = process.env.NEXT_PUBLIC_CRM_URL?.trim() || "https://crm.xhbt.dev";
 
   if (!adminLoggedIn) {
     return null;
   }
 
   return (
-    <a className="nav-link crm-nav-link" href={crmUrl}>
+    <Link className="nav-link crm-nav-link" href="/crm">
       CRM
-    </a>
+    </Link>
   );
 }
