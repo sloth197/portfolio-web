@@ -2,14 +2,19 @@
 
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
-import { clearAdminAuthHeader, isAdminLoggedIn, subscribeAdminAuth } from "@/lib/admin-auth";
+import { clearAdminAuthHeader, getAdminRole, isAdminLoggedIn, subscribeAdminAuth, type AdminRole } from "@/lib/admin-auth";
 
 function getServerSnapshot(): boolean {
   return false;
 }
 
+function getServerRoleSnapshot(): AdminRole | null {
+  return null;
+}
+
 export default function HeaderAuthButton() {
   const adminLoggedIn = useSyncExternalStore(subscribeAdminAuth, isAdminLoggedIn, getServerSnapshot);
+  const adminRole = useSyncExternalStore(subscribeAdminAuth, getAdminRole, getServerRoleSnapshot);
 
   if (!adminLoggedIn) {
     return (
@@ -21,7 +26,9 @@ export default function HeaderAuthButton() {
 
   return (
     <div className="header-auth-group">
-      <span className="header-greeting">임시 관리자님 안녕하세요!</span>
+      <span className="header-greeting">
+        {adminRole === "CRM" ? "임시 관리자님 안녕하세요!" : "관리자님 안녕하세요!"}
+      </span>
       <button
         type="button"
         className="btn-ghost header-login-link"
