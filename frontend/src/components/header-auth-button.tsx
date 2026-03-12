@@ -21,7 +21,7 @@ export default function HeaderAuthButton() {
 
   return (
     <div className="header-auth-group">
-      <span className="header-greeting">관리자님 안녕하세요!</span>
+      <span className="header-greeting">임시 관리자님 안녕하세요!</span>
       <button
         type="button"
         className="btn-ghost header-login-link"
