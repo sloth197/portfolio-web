@@ -58,6 +58,7 @@ export default function AdminProjectCreatePage() {
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [summary, setSummary] = useState("");
+  const [projectPeriod, setProjectPeriod] = useState("");
   const [contentMarkdown, setContentMarkdown] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -114,6 +115,7 @@ export default function AdminProjectCreatePage() {
           title: title.trim(),
           slug: (slug.trim() || slugify(title)).trim(),
           summary: summary.trim(),
+          projectPeriod: projectPeriod.trim() || null,
           contentMarkdown: contentMarkdown.trim(),
           githubUrl: linkUrl.trim() || null,
         }),
@@ -210,6 +212,19 @@ export default function AdminProjectCreatePage() {
             maxLength={300}
             required
           />
+
+          <label className="field-label" htmlFor="project-period">
+            Project Period
+          </label>
+          <input
+            id="project-period"
+            className="field-input"
+            value={projectPeriod}
+            onChange={(event) => setProjectPeriod(event.target.value)}
+            maxLength={80}
+            placeholder="2026.01 - 2026.03"
+          />
+          <p className="helper-text">예: 2026.01 - 2026.03, 진행 중이면 2026.01 - 진행중</p>
 
           <label className="field-label" htmlFor="project-link">
             Link (GitHub/Docs)

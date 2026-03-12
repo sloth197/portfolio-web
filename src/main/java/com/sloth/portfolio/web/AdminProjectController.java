@@ -53,6 +53,7 @@ public class AdminProjectController {
                 request.title(),
                 request.slug(),
                 request.summary(),
+                request.projectPeriod(),
                 request.contentMarkdown(),
                 request.githubUrl()
         ));
@@ -67,6 +68,7 @@ public class AdminProjectController {
                 request.title(),
                 request.slug(),
                 request.summary(),
+                request.projectPeriod(),
                 request.contentMarkdown(),
                 request.githubUrl()
         ));

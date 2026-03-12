@@ -28,26 +28,29 @@ public class Project {
     private String title;
 
     /**
-     * URL에 쓰는 식별자. 예: "nrf-low-latency-link"
+     * URL에 쓰는 식별자.
      */
     @Column(nullable = false, length = 160, unique = true)
     private String slug;
 
     /**
-     * 리스트에 보여줄 짧은 설명(한두 줄).
+     * 짧은 설명
      */
     @Column(nullable = false, length = 300)
     private String summary;
 
+    @Column(name = "project_period", length = 80)
+    private String projectPeriod;
+
     /**
-     * 상세 설명(마크다운). 길어질 수 있어 TEXT.
+     * 상세 설명
      */
     @Lob
     @Column(nullable = false)
     private String contentMarkdown;
 
     /**
-     * GitHub repo 주소(선택). 예: https://github.com/sloth197/Low_Letency_Firmware
+     * GitHub repositort URL
      */
     @Column(length = 300)
     private String githubUrl;
@@ -66,13 +69,14 @@ public class Project {
         // JPA용 기본 생성자
     }
 
-    public Project(ProjectCategory category, String title, String slug, String summary, String contentMarkdown, String githubUrl) {
+    public Project(ProjectCategory category, String title, String slug, String summary, String projectPeriod, String contentMarkdown, String githubUrl) {
         this.category = require(category, "category");
         this.title = requireNonBlank(title, "title");
         this.slug = normalizeSlug(requireNonBlank(slug, "slug"));
         this.summary = requireNonBlank(summary, "summary");
+        this.projectPeriod = normalizeProjectPeriod(projectPeriod);
         this.contentMarkdown = requireNonBlank(contentMarkdown, "contentMarkdown");
-        this.githubUrl = (githubUrl == null || githubUrl.isBlank()) ? null : githubUrl.trim();
+        this.githubUrl = normalizeOptional(githubUrl);
     }
 
     @PrePersist
@@ -87,13 +91,14 @@ public class Project {
         this.updatedAt = Instant.now();
     }
 
-    public void update(ProjectCategory category, String title, String slug, String summary, String contentMarkdown, String githubUrl) {
+    public void update(ProjectCategory category, String title, String slug, String summary, String projectPeriod, String contentMarkdown, String githubUrl) {
         this.category = require(category, "category");
         this.title = requireNonBlank(title, "title");
         this.slug = normalizeSlug(requireNonBlank(slug, "slug"));
         this.summary = requireNonBlank(summary, "summary");
+        this.projectPeriod = normalizeProjectPeriod(projectPeriod);
         this.contentMarkdown = requireNonBlank(contentMarkdown, "contentMarkdown");
-        this.githubUrl = (githubUrl == null || githubUrl.isBlank()) ? null : githubUrl.trim();
+        this.githubUrl = normalizeOptional(githubUrl);
     }
 
     // ===== getters (필요한 것만) =====
@@ -102,6 +107,7 @@ public class Project {
     public String getTitle() { return title; }
     public String getSlug() { return slug; }
     public String getSummary() { return summary; }
+    public String getProjectPeriod() { return projectPeriod; }
     public String getContentMarkdown() { return contentMarkdown; }
     public String getGithubUrl() { return githubUrl; }
     public List<ProjectAsset> getAssets() { return assets; }
@@ -117,6 +123,24 @@ public class Project {
     private static String requireNonBlank(String v, String field) {
         if (v == null || v.isBlank()) throw new IllegalArgumentException(field + " must not be blank");
         return v.trim();
+    }
+
+    private static String normalizeOptional(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        return raw.trim();
+    }
+
+    private static String normalizeProjectPeriod(String raw) {
+        String value = normalizeOptional(raw);
+        if (value == null) {
+            return null;
+        }
+        if (value.length() > 80) {
+            throw new IllegalArgumentException("projectPeriod length must be <= 80");
+        }
+        return value;
     }
 
     private static String normalizeSlug(String raw) {

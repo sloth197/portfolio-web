@@ -42,6 +42,7 @@ public class ProjectCommandService {
                 newValue.getTitle(),
                 newValue.getSlug(),
                 newValue.getSummary(),
+                newValue.getProjectPeriod(),
                 newValue.getContentMarkdown(),
                 newValue.getGithubUrl()
         );

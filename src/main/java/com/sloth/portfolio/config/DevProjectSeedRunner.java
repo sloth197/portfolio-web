@@ -22,6 +22,7 @@ public class DevProjectSeedRunner {
                             "Low Latency Firmware",
                             "low-latency-firmware",
                             "Real-time firmware optimization for deterministic communication.",
+                            "2025.11 - 2026.01",
                             """
                             ## Overview
 
@@ -42,6 +43,7 @@ public class DevProjectSeedRunner {
                             "Portfolio Web",
                             "portfolio-web",
                             "Full-stack portfolio web application using Spring Boot and Next.js.",
+                            "2026.01 - 진행중",
                             """
                             ## Overview
 

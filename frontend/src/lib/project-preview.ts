@@ -7,6 +7,7 @@ export const PREVIEW_PROJECTS: ProjectDto[] = [
     title: "Landing Page Website",
     slug: "landing-page-website",
     summary: "Marketing-focused landing page with reusable sections and responsive layout.",
+    projectPeriod: "2025.10 - 2025.11",
     contentMarkdown: `## Layout preview
 
 - Hero section
@@ -25,6 +26,7 @@ This is sample markdown content for local detail-page layout checks.`,
     title: "Admin Dashboard",
     slug: "admin-dashboard",
     summary: "Role-based dashboard UI with chart modules, filters, and audit timeline.",
+    projectPeriod: "2025.12 - 2026.01",
     contentMarkdown: `## Dashboard modules
 
 1. User metrics
@@ -41,6 +43,7 @@ This is sample markdown content for local detail-page layout checks.`,
     title: "Low Latency Controller",
     slug: "low-latency-controller",
     summary: "Real-time control firmware with deterministic cycle scheduling and diagnostics.",
+    projectPeriod: "2025.09 - 2025.12",
     contentMarkdown: `## Firmware notes
 
 - Deterministic loop timing
@@ -57,6 +60,7 @@ This is sample markdown content for local detail-page layout checks.`,
     title: "Portfolio Website",
     slug: "portfolio-website",
     summary: "Personal project gallery with category filters and markdown detail pages.",
+    projectPeriod: "2026.01 - 진행중",
     contentMarkdown: `## Website structure
 
 - Home
@@ -74,6 +78,7 @@ This is sample markdown content for local detail-page layout checks.`,
     title: "Sensor Bridge Firmware",
     slug: "sensor-bridge-firmware",
     summary: "UART-to-CAN bridge firmware with fault handling and packet integrity checks.",
+    projectPeriod: "2025.07 - 2025.10",
     contentMarkdown: `## Bridge pipeline
 
 UART RX -> validation -> packet map -> CAN TX`,
@@ -88,6 +93,7 @@ UART RX -> validation -> packet map -> CAN TX`,
     title: "Travel Planner App",
     slug: "travel-planner-app",
     summary: "Trip planning web app with itinerary blocks, map notes, and export support.",
+    projectPeriod: "2025.11 - 2026.01",
     contentMarkdown: `## Feature draft
 
 - Itinerary timeline

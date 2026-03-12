@@ -17,6 +17,7 @@ export type ProjectDto = {
   title: string;
   slug: string;
   summary: string;
+  projectPeriod: string | null;
   contentMarkdown: string;
   githubUrl: string | null;
   assets?: ProjectAssetDto[];

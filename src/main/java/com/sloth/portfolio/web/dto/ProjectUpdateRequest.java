@@ -10,6 +10,7 @@ public record ProjectUpdateRequest(
         @NotBlank @Size(max = 120) String title,
         @NotBlank @Size(max = 160) String slug,
         @NotBlank @Size(max = 300) String summary,
+        @Size(max = 80) String projectPeriod,
         @NotBlank String contentMarkdown,
         @Size(max = 300) String githubUrl
 ) {}

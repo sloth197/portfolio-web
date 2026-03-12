@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 import ProjectAdminActions from "@/components/project-admin-actions";
 import { ApiError, fetchProjectBySlug, fetchProjects } from "@/lib/api";
@@ -106,7 +107,10 @@ export default async function ProjectDetailPage({
           {usesPreviewData ? <span className="badge">Preview Data</span> : null}
         </div>
 
-        <span className="badge">{project.category}</span>
+        <div className="project-badge-row">
+          <span className="badge">{project.category}</span>
+          {project.projectPeriod ? <span className="project-period-badge">{project.projectPeriod}</span> : null}
+        </div>
         <h1 className="project-detail-title">{project.title}</h1>
         <p className="section-copy" style={{ margin: 0 }}>{project.summary}</p>
 
@@ -128,7 +132,7 @@ export default async function ProjectDetailPage({
           <h2 className="project-detail-subtitle">Project Details</h2>
           {project.contentMarkdown ? (
             <div className="project-markdown">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.contentMarkdown}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{project.contentMarkdown}</ReactMarkdown>
             </div>
           ) : (
             <p className="section-copy" style={{ margin: 0 }}>
@@ -185,6 +189,9 @@ export default async function ProjectDetailPage({
                 >
                   <span className="badge">{item.category}</span>
                   <div className="project-detail-related-title">{item.title}</div>
+                  {item.projectPeriod ? (
+                    <span className="project-tag-pill" style={{ width: "fit-content" }}>{item.projectPeriod}</span>
+                  ) : null}
                   <p className="section-copy" style={{ margin: 0, fontSize: 13 }}>
                     {item.summary}
                   </p>

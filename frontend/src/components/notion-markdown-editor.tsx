@@ -1,6 +1,9 @@
 "use client";
 
 import { KeyboardEvent, useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
+import remarkGfm from "remark-gfm";
 
 type BlockStyle = "p" | "h1" | "h2" | "h3";
 
@@ -69,6 +72,11 @@ function convertSlashCommand(source: string, cursor: number): { next: string; cu
   return { next, cursor: nextCursor };
 }
 
+function insertAtCursor(source: string, start: number, end: number, inserted: string): { next: string; cursor: number } {
+  const next = `${source.slice(0, start)}${inserted}${source.slice(end)}`;
+  return { next, cursor: start + inserted.length };
+}
+
 export default function NotionMarkdownEditor({
   id,
   value,
@@ -102,6 +110,15 @@ export default function NotionMarkdownEditor({
       return;
     }
     const result = applyStyleToLine(value, textarea.selectionStart, style);
+    commit(result.next, result.cursor);
+  }
+
+  function insertSnippet(snippet: string) {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      return;
+    }
+    const result = insertAtCursor(value, textarea.selectionStart, textarea.selectionEnd, snippet);
     commit(result.next, result.cursor);
   }
 
@@ -158,6 +175,16 @@ export default function NotionMarkdownEditor({
         <button type="button" className="btn-ghost notion-toolbar-btn" onClick={() => applyStyle("h3")}>
           H3
         </button>
+        <button type="button" className="btn-ghost notion-toolbar-btn" onClick={() => insertSnippet("\n")}>
+          + Line
+        </button>
+        <button
+          type="button"
+          className="btn-ghost notion-toolbar-btn"
+          onClick={() => insertSnippet("## Section Title\nWrite details here.\n\n")}
+        >
+          H2 Template
+        </button>
       </div>
 
       <textarea
@@ -174,9 +201,22 @@ export default function NotionMarkdownEditor({
       />
 
       <p className="helper-text notion-editor-help">
-        Slash commands: <code>/h1</code>, <code>/h2</code>, <code>/h3</code>, <code>/p</code> + space | Shortcuts:
-        <code>Ctrl/⌘ + Alt + 1/2/3/0</code>
+        Enter adds line breaks as rendered. Use H1/H2/H3 buttons or slash commands for heading size.
       </p>
+      <p className="helper-text notion-editor-help">
+        Slash commands: <code>/h1</code>, <code>/h2</code>, <code>/h3</code>, <code>/p</code> + space | Shortcuts:
+        <code>Ctrl/Cmd + Alt + 1/2/3/0</code>
+      </p>
+
+      <div className="project-markdown notion-editor-preview">
+        {value.trim() ? (
+          <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{value}</ReactMarkdown>
+        ) : (
+          <p className="helper-text" style={{ margin: 0 }}>
+            Preview appears here while you type.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

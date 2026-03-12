@@ -47,6 +47,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
   const [title, setTitle] = useState(project.title);
   const [slug, setSlug] = useState(project.slug);
   const [summary, setSummary] = useState(project.summary);
+  const [projectPeriod, setProjectPeriod] = useState(project.projectPeriod ?? "");
   const [contentMarkdown, setContentMarkdown] = useState(project.contentMarkdown);
   const [githubUrl, setGithubUrl] = useState(project.githubUrl ?? "");
   const [assets, setAssets] = useState<ProjectAssetDto[]>(project.assets ?? []);
@@ -172,6 +173,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
           title: title.trim(),
           slug: (slug.trim() || slugify(title)).trim(),
           summary: summary.trim(),
+          projectPeriod: projectPeriod.trim() || null,
           contentMarkdown: contentMarkdown.trim(),
           githubUrl: githubUrl.trim() || null,
         }),
@@ -363,6 +365,18 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
             value={summary}
             onChange={(event) => setSummary(event.target.value)}
             required
+          />
+
+          <label className="field-label" htmlFor="edit-period">
+            Project Period
+          </label>
+          <input
+            id="edit-period"
+            className="field-input"
+            value={projectPeriod}
+            onChange={(event) => setProjectPeriod(event.target.value)}
+            maxLength={80}
+            placeholder="2026.01 - 2026.03"
           />
 
           <label className="field-label" htmlFor="edit-github">

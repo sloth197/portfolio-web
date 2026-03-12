@@ -86,7 +86,7 @@ export default function ProjectsListPanel({ projects, selectedCategory }: Props)
 
                 <div className="project-tag-row">
                   <span className="project-tag-pill">{project.category.toLowerCase()}</span>
-                  <span className="project-tag-pill">{formatCreatedLabel(project.createdAt)}</span>
+                  <span className="project-tag-pill">{project.projectPeriod?.trim() || formatCreatedLabel(project.createdAt)}</span>
                 </div>
 
                 <Link href={buildProjectDetailPath(project.slug, selectedCategory)} className="btn project-showcase-link">
