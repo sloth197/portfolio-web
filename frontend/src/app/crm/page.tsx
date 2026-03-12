@@ -73,9 +73,9 @@ export default function CrmPage() {
     <div style={{ display: "grid", gap: 16 }}>
       <section className="surface-card top-banner top-banner-admin" style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 8 }}>
         <span className="badge">CRM</span>
-        <h1 className="section-title">CRM System</h1>
+        <h1 className="section-title">Customer Relationship Management System</h1>
         <p className="section-copy" style={{ fontSize: 14 }}>
-          CRM 페이지가 xhbt.dev 내부 라우트에서 동작합니다.
+          CRM이 xhbt.dev 내부 라우트에서 동작합니다.
         </p>
       </section>
 
