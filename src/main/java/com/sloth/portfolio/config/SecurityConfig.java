@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,6 +13,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -24,15 +27,10 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 공개
                         .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers("/", "/index.html", "/favicon.ico",
-                                "/css/**", "/js/**", "/images/**").permitAll()
-
-                        // 관리자: ADMIN 역할 필요
+                        .requestMatchers("/", "/index.html", "/favicon.ico", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/api/admin/projects/ping").hasAnyRole("ADMIN", "CRM")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-                        // 그 외는 일단 허용
                         .anyRequest().permitAll()
                 )
                 .formLogin(Customizer.withDefaults())
@@ -44,14 +42,35 @@ public class SecurityConfig {
     @Bean
     UserDetailsService userDetailsService(
             @Value("${app.admin.username}") String username,
-            @Value("${app.admin.password}") String password
+            @Value("${app.admin.password}") String password,
+            @Value("${app.crm.username:}") String crmUsername,
+            @Value("${app.crm.password:}") String crmPassword
     ) {
         UserDetails admin = User.builder()
                 .username(username)
                 .password(passwordEncoder().encode(password))
                 .roles("ADMIN")
                 .build();
-        return new InMemoryUserDetailsManager(admin);
+
+        List<UserDetails> users = new ArrayList<>();
+        users.add(admin);
+
+        boolean crmConfigured = crmUsername != null && !crmUsername.isBlank()
+                && crmPassword != null && !crmPassword.isBlank();
+        if (crmConfigured) {
+            if (crmUsername.equals(username)) {
+                throw new IllegalStateException("APP_CRM_USERNAME must be different from APP_ADMIN_USERNAME");
+            }
+
+            UserDetails crm = User.builder()
+                    .username(crmUsername)
+                    .password(passwordEncoder().encode(crmPassword))
+                    .roles("CRM")
+                    .build();
+            users.add(crm);
+        }
+
+        return new InMemoryUserDetailsManager(users);
     }
 
     @Bean

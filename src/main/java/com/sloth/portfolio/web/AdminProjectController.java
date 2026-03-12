@@ -11,6 +11,7 @@ import com.sloth.portfolio.web.dto.ProjectUpdateRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,8 +38,11 @@ public class AdminProjectController {
     }
 
     @GetMapping("/ping")
-    public PingResponse ping() {
-        return new PingResponse(true);
+    public PingResponse ping(Authentication authentication) {
+        boolean canManageProjects = authentication != null
+                && authentication.getAuthorities().stream().anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+        String role = canManageProjects ? "ADMIN" : "CRM";
+        return new PingResponse(true, role, canManageProjects);
     }
 
     @PostMapping
@@ -126,6 +130,6 @@ public class AdminProjectController {
     public record ErrorResponse(String code, String message) {
     }
 
-    public record PingResponse(boolean ok) {
+    public record PingResponse(boolean ok, String role, boolean canManageProjects) {
     }
 }

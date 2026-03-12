@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
-import { isAdminLoggedIn, subscribeAdminAuth } from "@/lib/admin-auth";
+import { canAdminManageProjects, subscribeAdminAuth } from "@/lib/admin-auth";
 import type { ProjectCategory, ProjectDto } from "@/lib/types";
 
 type Props = {
@@ -51,7 +51,7 @@ function buildSectionTitle(selectedCategory?: ProjectCategory): string {
 }
 
 export default function ProjectsListPanel({ projects, selectedCategory }: Props) {
-  const adminLoggedIn = useSyncExternalStore(subscribeAdminAuth, isAdminLoggedIn, getServerSnapshot);
+  const canManageProjects = useSyncExternalStore(subscribeAdminAuth, canAdminManageProjects, getServerSnapshot);
 
   return (
     <section className="projects-gallery">
@@ -60,7 +60,7 @@ export default function ProjectsListPanel({ projects, selectedCategory }: Props)
           <h2 className="projects-gallery-title">{buildSectionTitle(selectedCategory)}</h2>
           <p className="projects-gallery-copy">{projects.length} projects available</p>
         </div>
-        {adminLoggedIn ? (
+        {canManageProjects ? (
           <Link className="btn-ghost projects-admin-button" href={buildAdminCreatePath(selectedCategory)}>
             Add Project
           </Link>

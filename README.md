@@ -41,6 +41,8 @@ Override with env vars when needed:
 - `DB_PASSWORD`
 - `APP_ADMIN_USERNAME`
 - `APP_ADMIN_PASSWORD`
+- `APP_CRM_USERNAME` (optional, CRM-only account)
+- `APP_CRM_PASSWORD` (optional, CRM-only account)
 - `APP_AUTH_ENABLED`
 - `APP_CORS_ALLOWED_ORIGINS`
 - `APP_AUTH_KAKAO_WEBHOOK_URL`

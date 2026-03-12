@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { setAdminAuthHeader } from "@/lib/admin-auth";
+import { setAdminAuthSession, type AdminRole } from "@/lib/admin-auth";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -18,6 +18,10 @@ export default function AdminLoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [failedAttempts, setFailedAttempts] = useState(0);
+
+  function resolveRole(value: unknown): AdminRole {
+    return value === "CRM" ? "CRM" : "ADMIN";
+  }
 
   useEffect(() => {
     const next = new URLSearchParams(window.location.search).get("next");
@@ -54,7 +58,16 @@ export default function AdminLoginPage() {
       }
 
       setFailedAttempts(0);
-      setAdminAuthHeader(authHeader);
+      const payload = (await response.json().catch(() => null)) as { role?: string; canManageProjects?: boolean } | null;
+      const role = resolveRole(payload?.role);
+      const canManageProjects = payload?.canManageProjects ?? role === "ADMIN";
+
+      setAdminAuthSession(authHeader, role);
+
+      if (!canManageProjects && nextPath.startsWith("/projects/admin")) {
+        router.replace("/projects");
+        return;
+      }
       router.replace(nextPath);
     } catch {
       setError("Login request failed.");

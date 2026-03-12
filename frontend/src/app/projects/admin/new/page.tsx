@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { clearAdminAuthHeader, getAdminAuthHeader } from "@/lib/admin-auth";
+import { clearAdminAuthHeader, getAdminAuthHeader, getAdminRole } from "@/lib/admin-auth";
 import NotionMarkdownEditor from "@/components/notion-markdown-editor";
 import type { ProjectCategory, ProjectDto } from "@/lib/types";
 
@@ -73,6 +73,11 @@ export default function AdminProjectCreatePage() {
     if (!auth) {
       const next = `/projects/admin/new?category=${parsedCategory}`;
       router.replace(`/admin/login?next=${encodeURIComponent(next)}`);
+      return;
+    }
+
+    if (getAdminRole() !== "ADMIN") {
+      router.replace("/projects");
     }
   }, [router]);
 
@@ -86,6 +91,10 @@ export default function AdminProjectCreatePage() {
     const auth = getAdminAuthHeader();
     if (!auth) {
       setError("Admin login session is missing. Please login again.");
+      return;
+    }
+    if (getAdminRole() !== "ADMIN") {
+      setError("This account does not have project management permission.");
       return;
     }
 

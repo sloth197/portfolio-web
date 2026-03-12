@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { clearAdminAuthHeader, getAdminAuthHeader, isAdminLoggedIn, subscribeAdminAuth } from "@/lib/admin-auth";
+import { canAdminManageProjects, clearAdminAuthHeader, getAdminAuthHeader, subscribeAdminAuth } from "@/lib/admin-auth";
 import NotionMarkdownEditor from "@/components/notion-markdown-editor";
 import type { ProjectAssetDto, ProjectCategory, ProjectDto } from "@/lib/types";
 
@@ -41,7 +41,7 @@ function resolveAssetUrl(url: string): string {
 
 export default function ProjectAdminActions({ project, returnPath, disabled = false }: Props) {
   const router = useRouter();
-  const adminLoggedIn = useSyncExternalStore(subscribeAdminAuth, isAdminLoggedIn, getServerSnapshot);
+  const canManageProjects = useSyncExternalStore(subscribeAdminAuth, canAdminManageProjects, getServerSnapshot);
   const [editing, setEditing] = useState(false);
   const [category, setCategory] = useState<ProjectCategory>(project.category);
   const [title, setTitle] = useState(project.title);
@@ -57,13 +57,13 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const canEdit = adminLoggedIn && !disabled;
+  const canEdit = canManageProjects && !disabled;
 
   useEffect(() => {
-    if (!adminLoggedIn && editing) {
+    if (!canManageProjects && editing) {
       setEditing(false);
     }
-  }, [adminLoggedIn, editing]);
+  }, [canManageProjects, editing]);
 
   useEffect(() => {
     const root = document.getElementById("project-detail-layout");
@@ -305,7 +305,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
 
   const sortedAssets = useMemo(() => [...assets].sort((a, b) => a.id - b.id), [assets]);
 
-  if (!adminLoggedIn) {
+  if (!canManageProjects) {
     return null;
   }
 
