@@ -16,7 +16,7 @@ export default function AdminCrmBanner() {
   }
 
   return (
-    <a className="crm-nav-badge" href={crmUrl}>
+    <a className="nav-link crm-nav-link" href={crmUrl}>
       CRM
     </a>
   );
