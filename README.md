@@ -128,6 +128,7 @@ Frontend env (deployment example):
 
 - `NEXT_PUBLIC_API_BASE_URL=https://api.xhbt.dev`
 - `NEXT_PUBLIC_AUTH_ENABLED=false`
+- `NEXT_PUBLIC_CRM_URL=https://crm.xhbt.dev`
 
 ## 3-1) Frontend Auto Deploy (GitHub Actions + Vercel)
 

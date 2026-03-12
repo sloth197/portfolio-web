@@ -9,10 +9,15 @@ function getServerSnapshot(): boolean {
 
 export default function AdminCrmBanner() {
   const adminLoggedIn = useSyncExternalStore(subscribeAdminAuth, isAdminLoggedIn, getServerSnapshot);
+  const crmUrl = process.env.NEXT_PUBLIC_CRM_URL?.trim() || "https://crm.xhbt.dev";
 
   if (!adminLoggedIn) {
     return null;
   }
 
-  return <span className="crm-nav-badge">CRM</span>;
+  return (
+    <a className="crm-nav-badge" href={crmUrl}>
+      CRM
+    </a>
+  );
 }
