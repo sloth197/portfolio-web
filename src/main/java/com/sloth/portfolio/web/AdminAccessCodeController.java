@@ -3,6 +3,7 @@ package com.sloth.portfolio.web;
 import com.sloth.portfolio.domain.DeliveryChannel;
 import com.sloth.portfolio.service.AccessAuthService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +25,7 @@ public class AdminAccessCodeController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public IssueCodeResponse issueCode(@RequestBody(required = false) IssueCodeRequest request) {
         String phoneNumber = request == null ? null : request.phoneNumber();
         DeliveryChannel channel = request == null || request.channel() == null ? DeliveryChannel.KAKAO : request.channel();
@@ -47,6 +49,7 @@ public class AdminAccessCodeController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public List<AccessAuthService.AccessCodeSummary> listCodes() {
         return accessAuthService.listRecentCodes();
     }

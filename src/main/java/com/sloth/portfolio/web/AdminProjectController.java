@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,6 +39,7 @@ public class AdminProjectController {
     }
 
     @GetMapping("/ping")
+    @PreAuthorize("hasAnyRole('ADMIN','CRM')")
     public PingResponse ping(Authentication authentication) {
         boolean canManageProjects = authentication != null
                 && authentication.getAuthorities().stream().anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
@@ -47,6 +49,7 @@ public class AdminProjectController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public ProjectDto create(@Valid @RequestBody ProjectCreateRequest request) {
         Project created = projectCommandService.create(new Project(
                 request.category(),
@@ -62,6 +65,7 @@ public class AdminProjectController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void update(@PathVariable Long id, @Valid @RequestBody ProjectUpdateRequest request) {
         projectCommandService.update(id, new Project(
                 request.category(),
@@ -76,12 +80,14 @@ public class AdminProjectController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(@PathVariable Long id) {
         projectCommandService.delete(id);
     }
 
     @PostMapping(value = "/{id}/assets", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public ProjectAssetDto uploadAsset(@PathVariable Long id, @RequestPart("file") MultipartFile file) {
         ProjectAsset created = projectAssetService.upload(id, file);
         return ProjectAssetDto.from(created);
@@ -89,6 +95,7 @@ public class AdminProjectController {
 
     @DeleteMapping("/{projectId}/assets/{assetId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteAsset(@PathVariable Long projectId, @PathVariable Long assetId) {
         projectAssetService.deleteAsset(projectId, assetId);
     }
