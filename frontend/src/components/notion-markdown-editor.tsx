@@ -201,7 +201,7 @@ export default function NotionMarkdownEditor({
       />
 
       <p className="helper-text notion-editor-help">
-        Slash commands: <code>/h1</code>, <code>/h2</code>, <code>/h3</code>, <code>/p</code> + space <br /> Shortcuts:
+        Slash commands: <code>/h1</code>, <code>/h2</code>, <code>/h3</code>, <code>/p</code> + space <br /> Shortcuts: 
         <code>Ctrl/Cmd + Alt + 1/2/3/0</code>
       </p>
 

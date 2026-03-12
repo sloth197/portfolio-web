@@ -376,16 +376,16 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
             value={projectPeriod}
             onChange={(event) => setProjectPeriod(event.target.value)}
             maxLength={80}
-            placeholder="2026.01 - 2026.03"
+            placeholder="yyyy.mm - yyyy.mm"
           />
 
           <label className="field-label" htmlFor="edit-github">
-            GitHub URL
+            URL
           </label>
           <input id="edit-github" className="field-input" value={githubUrl} onChange={(event) => setGithubUrl(event.target.value)} />
 
           <label className="field-label" htmlFor="edit-markdown">
-            Project Details (Notion-style Markdown)
+            Project Details
           </label>
           <NotionMarkdownEditor
             id="edit-markdown"
