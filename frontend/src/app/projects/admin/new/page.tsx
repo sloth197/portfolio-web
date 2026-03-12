@@ -222,12 +222,10 @@ export default function AdminProjectCreatePage() {
             value={projectPeriod}
             onChange={(event) => setProjectPeriod(event.target.value)}
             maxLength={80}
-            placeholder="2026.01 - 2026.03"
+            placeholder="yyyy.mm - yyyy.mm"
           />
-          <p className="helper-text">예: 2026.01 - 2026.03, 진행 중이면 2026.01 - 진행중</p>
-
           <label className="field-label" htmlFor="project-link">
-            Link (GitHub/Docs)
+            URL
           </label>
           <input
             id="project-link"
@@ -239,7 +237,7 @@ export default function AdminProjectCreatePage() {
           />
 
           <label className="field-label" htmlFor="project-markdown">
-            Project Details (Notion-style Markdown)
+            Project Details
           </label>
           <NotionMarkdownEditor
             id="project-markdown"

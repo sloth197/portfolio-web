@@ -201,10 +201,7 @@ export default function NotionMarkdownEditor({
       />
 
       <p className="helper-text notion-editor-help">
-        Enter adds line breaks as rendered. Use H1/H2/H3 buttons or slash commands for heading size.
-      </p>
-      <p className="helper-text notion-editor-help">
-        Slash commands: <code>/h1</code>, <code>/h2</code>, <code>/h3</code>, <code>/p</code> + space | Shortcuts:
+        Slash commands: <code>/h1</code>, <code>/h2</code>, <code>/h3</code>, <code>/p</code> + space <br /> Shortcuts:
         <code>Ctrl/Cmd + Alt + 1/2/3/0</code>
       </p>
 
