@@ -157,13 +157,22 @@ a {
 .header-auth-group {
   display: inline-flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 10px;
+  width: 300px;
+  flex: 0 0 300px;
 }
 
 .header-greeting {
   font-size: 0.84rem;
   color: #8c6bff;
   font-weight: 600;
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 :root[data-theme="dark"] .header-greeting {
@@ -1767,6 +1776,11 @@ a {
   .site-header-actions {
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .header-auth-group {
+    width: auto;
+    flex: 0 1 auto;
   }
 
   .floating-theme-toggle {
