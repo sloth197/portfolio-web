@@ -73,7 +73,6 @@ export default function ContactPage() {
             <LinkedInIcon />
             <span>LinkedIn</span>
           </div>
-          <div className="section-copy">프로필 바로가기</div>
         </a>
 
         <article className="panel" style={{ padding: 16 }}>
