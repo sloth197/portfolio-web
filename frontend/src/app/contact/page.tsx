@@ -28,10 +28,10 @@ export default function ContactPage() {
           <div className="section-copy"></div>
         </a>
 
-        <div className="panel" style={{ padding: 16 }}>
+        <a className="panel" href={linkedInUrl} target="_blank" rel="noreferrer" style={{ padding: 16 }}>
           <div style={{ fontWeight: 800, fontSize: 18 }}>LinkedIn</div>
-          <div className="section-copy">{linkedInUrl}</div>
-        </div>
+          <div className="section-copy">프로필 바로가기</div>
+        </a>
 
         <article className="panel" style={{ padding: 16 }}>
           <div style={{ fontWeight: 800, fontSize: 18 }}>E-mail</div>

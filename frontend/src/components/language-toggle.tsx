@@ -60,7 +60,6 @@ function getServerSnapshot(): SiteLanguage {
 export default function LanguageToggle() {
   const language = useSyncExternalStore(subscribe, readLanguage, getServerSnapshot);
   const nextLanguage: SiteLanguage = language === "ko" ? "en" : "ko";
-  const label = language === "ko" ? "KO" : "EN";
 
   return (
     <button
@@ -69,7 +68,7 @@ export default function LanguageToggle() {
       aria-label={nextLanguage === "ko" ? "Switch language to Korean" : "Switch language to English"}
       onClick={() => applyLanguage(nextLanguage)}
     >
-      {label}
+      {language === "ko" ? "KO/EN" : "EN/KO"}
     </button>
   );
 }

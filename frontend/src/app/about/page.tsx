@@ -18,20 +18,20 @@ const WORKFLOW_CARDS = [
 ];
 
 const TOOLS = [
-  { name: "Java / Spring", level: "92%" },
-  { name: "Next.js", level: "88%" },
-  { name: "TypeScript", level: "90%" },
-  { name: "PostgreSQL", level: "85%" },
-  { name: "Docker", level: "84%" },
-  { name: "C#", level: "82%" },
+  { name: "C#", level: "89%" },
+  { name: "ASP.NET", level: "85%"},
+  { name: "WPF" , level: "84%"},
+  { name: "Docker", level: "82%"},
+  { name: "Java / Spring", level: "83%"}
+  
 ];
 
 const INTEREST_TECHS = [
-  "ASP.NET",
-  "WPF",
+  "PostgreSQL",
+  "Vercel",
+  "Next.js",
+  "TypeScript",
   "C/C++",
-  "MySQL",
-
 ];
 
 function SectionMarker({ number, title }: { number: string; title: string }) {
@@ -94,6 +94,15 @@ export default function AboutPage() {
               ))}
             </div>
           </div>
+        </section>
+      </div>
+
+      <div className="about-neo-debug-section">
+        <SectionMarker number="07" title="Hire Me" />
+        <section className="about-neo-wave">
+          <div className="about-neo-wave-overlay" />
+          <h2>Hire Me</h2>
+          <p>TEST</p>
         </section>
       </div>
 
