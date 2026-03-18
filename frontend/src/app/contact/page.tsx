@@ -78,14 +78,14 @@ export default function ContactPage() {
         <article className="panel" style={{ padding: 16 }}>
           <div style={{ fontWeight: 800, fontSize: 18 }}>E-mail</div>
           <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
-            <a href="mailto:sloth197@naver.com" style={{ display: "flex", alignItems: "center", gap: 8, color: "inherit", textDecoration: "none" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "inherit" }}>
               <NaverIcon />
               <span className="section-copy">sloth197@naver.com</span>
-            </a>
-            <a href="mailto:kuala290@gmail.com" style={{ display: "flex", alignItems: "center", gap: 8, color: "inherit", textDecoration: "none" }}>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "inherit" }}>
               <GoogleIcon />
               <span className="section-copy">kuala290@gmail.com</span>
-            </a>
+            </div>
           </div>
         </article>
       </section>
