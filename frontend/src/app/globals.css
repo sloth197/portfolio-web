@@ -141,7 +141,7 @@ a {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .crm-nav-link {
@@ -159,8 +159,8 @@ a {
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  width: 300px;
-  flex: 0 0 300px;
+  width: clamp(220px, 26vw, 300px);
+  flex: 0 0 clamp(220px, 26vw, 300px);
 }
 
 .header-greeting {
@@ -185,11 +185,9 @@ a {
   justify-content: center;
   color: var(--muted);
   font-weight: 600;
-  min-width: 80px;
-  padding: 9px 10px;
+  padding: 9px 14px;
   border-radius: 999px;
   white-space: nowrap;
-  text-align: center;
   transition: color 140ms ease, background-color 140ms ease;
 }
 
@@ -1776,6 +1774,10 @@ a {
   .site-header-actions {
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .site-nav {
+    flex-wrap: wrap;
   }
 
   .header-auth-group {
