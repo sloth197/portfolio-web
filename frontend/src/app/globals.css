@@ -126,6 +126,8 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .brand-mark::before {
@@ -142,6 +144,7 @@ a {
   align-items: center;
   gap: 8px;
   flex-wrap: nowrap;
+  margin-left: 14px;
 }
 
 .crm-nav-link {
@@ -1778,6 +1781,7 @@ a {
 
   .site-nav {
     flex-wrap: wrap;
+    margin-left: 0;
   }
 
   .header-auth-group {
