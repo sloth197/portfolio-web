@@ -464,7 +464,7 @@ a {
 .about-neo-debug-section {
   display: grid;
   gap: 10px;
-  border: 1px dashed color-mix(in srgb, var(--stroke) 66%, var(--accent) 34%);
+  border: none;
   border-radius: 14px;
   padding: 10px;
   background: color-mix(in srgb, var(--surface) 95%, var(--bg) 5%);
@@ -929,7 +929,6 @@ a {
 }
 
 :root:not([data-theme="dark"]) .about-neo-debug-section {
-  border-color: color-mix(in srgb, var(--stroke) 84%, var(--accent) 16%);
   background: color-mix(in srgb, var(--surface) 98%, var(--bg) 2%);
 }
 
