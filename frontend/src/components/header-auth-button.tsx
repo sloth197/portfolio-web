@@ -21,7 +21,7 @@ export default function HeaderAuthButton() {
   if (!adminLoggedIn) {
     return (
       <Link className="btn-ghost header-login-link" href="/admin/login">
-        {language === "en" ? "Login" : "\uB85C\uADF8\uC778"}
+        Login
       </Link>
     );
   }

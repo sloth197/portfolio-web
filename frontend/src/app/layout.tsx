@@ -1,9 +1,8 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { IBM_Plex_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import AdminCrmBanner from "@/components/admin-crm-banner";
 import HeaderAuthButton from "@/components/header-auth-button";
-import I18nText from "@/components/i18n-text";
 import LanguageToggle from "@/components/language-toggle";
 import ThemeToggle from "@/components/theme-toggle";
 import "./globals.css";
@@ -66,16 +65,16 @@ export default function RootLayout({
               </Link>
               <nav className="site-nav">
                 <Link className="nav-link" href="/">
-                  <I18nText ko="홈" en="Home" />
+                  Home
                 </Link>
                 <Link className="nav-link" href="/projects">
-                  <I18nText ko="프로젝트" en="Projects" />
+                  Projects
                 </Link>
                 <Link className="nav-link" href="/about">
-                  <I18nText ko="소개" en="About" />
+                  About
                 </Link>
                 <Link className="nav-link" href="/contact">
-                  <I18nText ko="연락처" en="Contact" />
+                  Contact
                 </Link>
                 <AdminCrmBanner />
               </nav>
@@ -90,7 +89,7 @@ export default function RootLayout({
 
           <footer className="site-footer">
             <div className="site-footer-inner">
-              © 2026 JWS. <I18nText ko="모든 권리 보유." en="All rights reserved." />
+              Copyright 2026 JWS. All rights reserved.
             </div>
           </footer>
 

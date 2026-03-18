@@ -57,7 +57,7 @@ export default function HomeItNewsStrip({ items }: HomeItNewsStripProps) {
     setIndex((prev) => (prev + 1) % items.length);
   }
 
-  const badgeLabel = language === "en" ? "Yozm IT" : "\uC694\uC998IT";
+  const badgeLabel = "\uC694\uC998IT";
   const prevNewsLabel = language === "en" ? "Previous news" : "\uC774\uC804 \uB274\uC2A4";
   const nextNewsLabel = language === "en" ? "Next news" : "\uB2E4\uC74C \uB274\uC2A4";
   const prevCardLabel = language === "en" ? "Previous news card" : "\uC774\uC804 \uB274\uC2A4 \uCE74\uB4DC";

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import I18nText from "@/components/i18n-text";
 import ProjectsListPanel from "@/components/projects-list-panel";
 import { ApiError, fetchProjects } from "@/lib/api";
 import { PREVIEW_PROJECTS, filterProjectsByCategory, normalizeProjectCategory } from "@/lib/project-preview";
@@ -58,29 +57,25 @@ export default async function ProjectsPage({
         className="surface-card top-banner top-banner-projects"
         style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 10 }}
       >
-        <span className="badge">
-          <I18nText ko="내 프로젝트" en="My Projects" />
-        </span>
-        <h1 className="section-title">
-          <I18nText ko="추천 프로젝트" en="Featured Projects" />
-        </h1>
+        <span className="badge">My Projects</span>
+        <h1 className="section-title">Featured Projects</h1>
       </section>
 
       <section className="projects-filter-bar">
         <Link className={`projects-filter-pill ${!selectedCategory ? "is-active" : ""}`} href={buildProjectsPath()}>
-          <I18nText ko={`전체 (${totalCount})`} en={`All (${totalCount})`} />
+          {`All projects (${totalCount})`}
         </Link>
         <Link
           className={`projects-filter-pill ${selectedCategory === "SOFTWARE" ? "is-active" : ""}`}
           href={buildProjectsPath("SOFTWARE")}
         >
-          <I18nText ko={`소프트웨어 (${softwareCount})`} en={`Software (${softwareCount})`} />
+          {`software (${softwareCount})`}
         </Link>
         <Link
           className={`projects-filter-pill ${selectedCategory === "FIRMWARE" ? "is-active" : ""}`}
           href={buildProjectsPath("FIRMWARE")}
         >
-          <I18nText ko={`펌웨어 (${firmwareCount})`} en={`Firmware (${firmwareCount})`} />
+          {`firmware (${firmwareCount})`}
         </Link>
       </section>
 
