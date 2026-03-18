@@ -75,7 +75,7 @@ export default function CrmPage() {
         <span className="badge">CRM</span>
         <h1 className="section-title">Customer Relationship Management System</h1>
         <p className="section-copy" style={{ fontSize: 14 }}>
-          CRM이 xhbt.dev 내부 라우트에서 동작합니다.
+          CRM이 사이트 내부 라우트에서 동작합니다.
         </p>
       </section>
 

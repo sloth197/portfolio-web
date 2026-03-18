@@ -1,5 +1,5 @@
 export default function ContactPage() {
-  const linkedInUrl = "https://www.linkedin.com/";
+  const linkedInUrl = "https://www.linkedin.com/in/%EC%9A%B0%EC%84%B1-%EC%A0%95-549379317/?skipRedirect=true";
 
   return (
     <div style={{ display: "grid", gap: 16 }}>

@@ -151,7 +151,7 @@ a {
 .site-header-actions {
   display: inline-flex;
   align-items: center;
-  gap: 0;
+  gap: 8px;
 }
 
 .header-auth-group {
@@ -187,6 +187,24 @@ a {
   padding: 8px 12px;
   border-radius: 999px;
   font-size: 0.84rem;
+}
+
+.header-lang-toggle {
+  min-width: 64px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  letter-spacing: 0.01em;
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+}
+
+.header-lang-toggle:hover {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--header-bg) 84%, var(--accent-soft) 16%);
+  color: var(--foreground);
+  transform: none;
 }
 
 .floating-theme-toggle {

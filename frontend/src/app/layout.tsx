@@ -3,6 +3,7 @@ import Link from "next/link";
 import { IBM_Plex_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import AdminCrmBanner from "@/components/admin-crm-banner";
 import HeaderAuthButton from "@/components/header-auth-button";
+import LanguageToggle from "@/components/language-toggle";
 import ThemeToggle from "@/components/theme-toggle";
 import "./globals.css";
 
@@ -28,8 +29,19 @@ const themeBootScript = `
   try {
     const saved = localStorage.getItem("portfolio-theme");
     document.documentElement.dataset.theme = saved === "dark" ? "dark" : "light";
+
+    const savedLanguage = localStorage.getItem("portfolio-language");
+    if (savedLanguage === "en" || savedLanguage === "ko") {
+      document.documentElement.lang = savedLanguage;
+      document.documentElement.dataset.lang = savedLanguage;
+    } else {
+      document.documentElement.lang = "ko";
+      document.documentElement.dataset.lang = "ko";
+    }
   } catch {
     document.documentElement.dataset.theme = "light";
+    document.documentElement.lang = "ko";
+    document.documentElement.dataset.lang = "ko";
   }
 })();
 `;
@@ -68,6 +80,7 @@ export default function RootLayout({
               </nav>
               <div className="site-header-actions">
                 <HeaderAuthButton />
+                <LanguageToggle />
               </div>
             </div>
           </header>

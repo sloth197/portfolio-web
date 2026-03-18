@@ -18,7 +18,7 @@ export default async function Home() {
             maxWidth: 760,
           }}
         >
-          테스트 중입니다
+          안녕하세요. 저는 OOO입니다. 제 포트폴리오 사이트에 오신 것을 환영합니다.
         </h1>
         <p className="section-copy" style={{ maxWidth: 700 }}></p>
       </section>

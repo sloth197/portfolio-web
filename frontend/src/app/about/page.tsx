@@ -51,9 +51,8 @@ export default function AboutPage() {
         <section className="about-neo-section">
           <h2 className="about-neo-section-title">About Me</h2>
           <div className="about-neo-about-text">
-            <p>TEST</p>
-            <p>TEST</p>
-            <p>TEST</p>
+            <p>PCB제조 및 반도체 장비 제조분야에서 근무하며 제조 공정과 장비 흐름을 경험했습니다.</p>
+            <p>현장 이해를 강점으로 실무에 활용 가능한 시스템을 개발하는 개발자로 성장하는 것을 목표로 하고 있습니다.</p>
           </div>
         </section>
       </div>
@@ -95,15 +94,6 @@ export default function AboutPage() {
               ))}
             </div>
           </div>
-        </section>
-      </div>
-
-      <div className="about-neo-debug-section">
-        <SectionMarker number="07" title="Hire Me" />
-        <section className="about-neo-wave">
-          <div className="about-neo-wave-overlay" />
-          <h2>Hire Me</h2>
-          <p>TEST</p>
         </section>
       </div>
 
