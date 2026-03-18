@@ -441,6 +441,7 @@ a {
   --neo-bg: color-mix(in srgb, var(--bg) 82%, var(--surface) 18%);
   --neo-surface: color-mix(in srgb, var(--surface) 93%, var(--bg) 7%);
   --neo-surface-soft: color-mix(in srgb, var(--surface) 86%, var(--bg) 14%);
+  --neo-section-bg: color-mix(in srgb, var(--surface) 95%, var(--bg) 5%);
   --neo-border: color-mix(in srgb, var(--stroke) 78%, var(--accent) 22%);
   --neo-accent: var(--accent);
   --neo-accent-soft: var(--accent-soft);
@@ -467,7 +468,7 @@ a {
   border: none;
   border-radius: 14px;
   padding: 10px;
-  background: color-mix(in srgb, var(--surface) 95%, var(--bg) 5%);
+  background: var(--neo-section-bg);
 }
 
 .about-neo-marker {
@@ -723,7 +724,7 @@ a {
   border: 1px solid var(--neo-border);
   border-radius: 12px;
   padding: 12px 13px;
-  background: var(--neo-surface);
+  background: var(--neo-section-bg);
 }
 
 .about-neo-work-card h3 {
@@ -748,7 +749,7 @@ a {
 .about-neo-tool-card {
   border-radius: 12px;
   border: 1px solid var(--stroke);
-  background: var(--neo-surface);
+  background: var(--neo-section-bg);
   padding: 11px 9px;
   display: grid;
   gap: 6px;
@@ -921,15 +922,12 @@ a {
   --neo-bg: color-mix(in srgb, var(--surface) 95%, var(--bg) 5%);
   --neo-surface: color-mix(in srgb, var(--surface) 97%, var(--bg) 3%);
   --neo-surface-soft: color-mix(in srgb, var(--surface) 95%, var(--bg) 5%);
+  --neo-section-bg: color-mix(in srgb, var(--surface) 98%, var(--bg) 2%);
   --neo-border: color-mix(in srgb, var(--stroke) 88%, var(--accent) 12%);
   background:
     radial-gradient(circle at 86% 10%, color-mix(in srgb, var(--bg-spot-b) 58%, transparent 42%) 0%, transparent 46%),
     linear-gradient(180deg, var(--neo-bg) 0%, color-mix(in srgb, var(--neo-bg) 96%, var(--surface) 4%) 100%);
   box-shadow: 0 14px 26px rgba(18, 24, 32, 0.08);
-}
-
-:root:not([data-theme="dark"]) .about-neo-debug-section {
-  background: color-mix(in srgb, var(--surface) 98%, var(--bg) 2%);
 }
 
 :root:not([data-theme="dark"]) .about-neo-marker span {
