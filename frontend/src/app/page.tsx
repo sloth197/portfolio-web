@@ -1,4 +1,5 @@
 import Link from "next/link";
+import I18nText from "@/components/i18n-text";
 import HomeItNewsStrip from "@/components/home-it-news-strip";
 import { fetchHomeTechNews } from "@/lib/tech-news";
 
@@ -8,7 +9,9 @@ export default async function Home() {
   return (
     <div style={{ display: "grid", gap: 26 }}>
       <section className="surface-card top-banner top-banner-home" style={{ padding: "28px clamp(20px, 4vw, 42px)", display: "grid", gap: 18 }}>
-        <span className="badge">Introduction</span>
+        <span className="badge">
+          <I18nText ko="소개" en="Introduction" />
+        </span>
         <h1
           style={{
             margin: 0,
@@ -18,13 +21,17 @@ export default async function Home() {
             maxWidth: 760,
           }}
         >
-          안녕하세요. 저는 OOO입니다. 제 포트폴리오 사이트에 오신 것을 환영합니다.
+          <I18nText ko="안녕하세요. 저는 OOO입니다. 제 포트폴리오 사이트에 오신 것을 환영합니다." en="Hello, I am OOO. Welcome to my portfolio website." />
         </h1>
-        <p className="section-copy" style={{ maxWidth: 700 }}></p>
+        <p className="section-copy" style={{ maxWidth: 700 }}>
+          <I18nText ko="영어텍스트" en="English text" />
+        </p>
       </section>
 
       <section style={{ display: "grid", gap: 14 }}>
-        <h2 className="section-title">Projects</h2>
+        <h2 className="section-title">
+          <I18nText ko="프로젝트" en="Projects" />
+        </h2>
         <div
           style={{
             display: "grid",
@@ -33,16 +40,20 @@ export default async function Home() {
           }}
         >
           <Link className="panel project-card" href="/projects?category=FIRMWARE" style={{ padding: 18, display: "grid" }}>
-            <span className="badge">Firmware</span>
+            <span className="badge">
+              <I18nText ko="펌웨어" en="Firmware" />
+            </span>
             <p className="section-copy" style={{ marginTop: 12 }}>
-              Firmware List
+              <I18nText ko="펌웨어 목록" en="Firmware List" />
             </p>
           </Link>
 
           <Link className="panel project-card" href="/projects?category=SOFTWARE" style={{ padding: 18, display: "grid" }}>
-            <span className="badge">Software</span>
+            <span className="badge">
+              <I18nText ko="소프트웨어" en="Software" />
+            </span>
             <p className="section-copy" style={{ marginTop: 12 }}>
-              Software List
+              <I18nText ko="소프트웨어 목록" en="Software List" />
             </p>
           </Link>
         </div>

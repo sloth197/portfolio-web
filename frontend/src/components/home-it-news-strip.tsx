@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { HomeNewsItem } from "@/lib/tech-news";
+import { useSiteLanguage } from "@/components/i18n-text";
 
 type HomeItNewsStripProps = {
   items: HomeNewsItem[];
 };
 
-function formatDateLabel(publishedAt: string): string {
+function formatDateLabel(publishedAt: string, language: "ko" | "en"): string {
   if (!publishedAt) {
     return "";
   }
@@ -17,7 +18,7 @@ function formatDateLabel(publishedAt: string): string {
     return "";
   }
 
-  return new Intl.DateTimeFormat("ko-KR", {
+  return new Intl.DateTimeFormat(language === "en" ? "en-US" : "ko-KR", {
     month: "2-digit",
     day: "2-digit",
   }).format(parsed);
@@ -32,6 +33,7 @@ function pickWindow(items: HomeNewsItem[], start: number, size: number): HomeNew
 }
 
 export default function HomeItNewsStrip({ items }: HomeItNewsStripProps) {
+  const language = useSiteLanguage();
   const [index, setIndex] = useState(0);
   const [cardsPerView, setCardsPerView] = useState(3);
 
@@ -55,12 +57,18 @@ export default function HomeItNewsStrip({ items }: HomeItNewsStripProps) {
     setIndex((prev) => (prev + 1) % items.length);
   }
 
+  const badgeLabel = language === "en" ? "Yozm IT" : "\uC694\uC998IT";
+  const prevNewsLabel = language === "en" ? "Previous news" : "\uC774\uC804 \uB274\uC2A4";
+  const nextNewsLabel = language === "en" ? "Next news" : "\uB2E4\uC74C \uB274\uC2A4";
+  const prevCardLabel = language === "en" ? "Previous news card" : "\uC774\uC804 \uB274\uC2A4 \uCE74\uB4DC";
+  const nextCardLabel = language === "en" ? "Next news card" : "\uB2E4\uC74C \uB274\uC2A4 \uCE74\uB4DC";
+
   if (items.length === 0) {
     return (
       <section className="panel" style={{ padding: 12, display: "grid", gap: 4 }}>
-        <span className="badge">요즘IT</span>
+        <span className="badge">{badgeLabel}</span>
         <p className="section-copy" style={{ fontSize: 13 }}>
-          뉴스를 불러오지 못했습니다.
+          {language === "en" ? "Unable to load news." : "\uB274\uC2A4\uB97C \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4."}
         </p>
       </section>
     );
@@ -78,7 +86,7 @@ export default function HomeItNewsStrip({ items }: HomeItNewsStripProps) {
           }}
         >
           <span className="badge" style={{ padding: "5px 10px" }}>
-            요즘IT
+            {badgeLabel}
           </span>
 
           <a
@@ -103,7 +111,7 @@ export default function HomeItNewsStrip({ items }: HomeItNewsStripProps) {
               type="button"
               className="btn-ghost"
               onClick={movePrev}
-              aria-label="이전 뉴스"
+              aria-label={prevNewsLabel}
               style={{ minWidth: 30, height: 30, padding: 0, borderRadius: 999 }}
             >
               {"<"}
@@ -115,7 +123,7 @@ export default function HomeItNewsStrip({ items }: HomeItNewsStripProps) {
               type="button"
               className="btn-ghost"
               onClick={moveNext}
-              aria-label="다음 뉴스"
+              aria-label={nextNewsLabel}
               style={{ minWidth: 30, height: 30, padding: 0, borderRadius: 999 }}
             >
               {">"}
@@ -136,7 +144,7 @@ export default function HomeItNewsStrip({ items }: HomeItNewsStripProps) {
           type="button"
           className="btn-ghost"
           onClick={movePrev}
-          aria-label="이전 뉴스 카드"
+          aria-label={prevCardLabel}
           style={{ width: 32, padding: 0, borderRadius: 12 }}
         >
           {"<"}
@@ -159,7 +167,8 @@ export default function HomeItNewsStrip({ items }: HomeItNewsStripProps) {
               style={{ padding: 12, display: "grid", gap: 8, minHeight: 90 }}
             >
               <div className="section-copy" style={{ fontSize: 12 }}>
-                요즘IT {formatDateLabel(item.publishedAt) ? `· ${formatDateLabel(item.publishedAt)}` : ""}
+                {badgeLabel}
+                {formatDateLabel(item.publishedAt, language) ? ` · ${formatDateLabel(item.publishedAt, language)}` : ""}
               </div>
               <div
                 style={{
@@ -195,7 +204,7 @@ export default function HomeItNewsStrip({ items }: HomeItNewsStripProps) {
           type="button"
           className="btn-ghost"
           onClick={moveNext}
-          aria-label="다음 뉴스 카드"
+          aria-label={nextCardLabel}
           style={{ width: 32, padding: 0, borderRadius: 12 }}
         >
           {">"}

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import { canAdminManageProjects, subscribeAdminAuth } from "@/lib/admin-auth";
+import I18nText, { type SiteLanguage, useSiteLanguage } from "@/components/i18n-text";
 import type { ProjectCategory, ProjectDto } from "@/lib/types";
 
 type Props = {
@@ -40,36 +41,39 @@ function formatCreatedLabel(value: string): string {
   return `${year}.${month}`;
 }
 
-function buildSectionTitle(selectedCategory?: ProjectCategory): string {
+function buildSectionTitle(selectedCategory: ProjectCategory | undefined, language: SiteLanguage): string {
   if (selectedCategory === "SOFTWARE") {
-    return "Software Projects";
+    return language === "ko" ? "소프트웨어 프로젝트" : "Software Projects";
   }
   if (selectedCategory === "FIRMWARE") {
-    return "Firmware Projects";
+    return language === "ko" ? "펌웨어 프로젝트" : "Firmware Projects";
   }
-  return "All Projects";
+  return language === "ko" ? "전체 프로젝트" : "All Projects";
 }
 
 export default function ProjectsListPanel({ projects, selectedCategory }: Props) {
   const canManageProjects = useSyncExternalStore(subscribeAdminAuth, canAdminManageProjects, getServerSnapshot);
+  const language = useSiteLanguage();
 
   return (
     <section className="projects-gallery">
       <div className="projects-gallery-head">
         <div style={{ display: "grid", gap: 6 }}>
-          <h2 className="projects-gallery-title">{buildSectionTitle(selectedCategory)}</h2>
-          <p className="projects-gallery-copy">{projects.length} projects available</p>
+          <h2 className="projects-gallery-title">{buildSectionTitle(selectedCategory, language)}</h2>
+          <p className="projects-gallery-copy">
+            {language === "ko" ? `${projects.length}개 프로젝트` : `${projects.length} projects available`}
+          </p>
         </div>
         {canManageProjects ? (
           <Link className="btn-ghost projects-admin-button" href={buildAdminCreatePath(selectedCategory)}>
-            Add Project
+            <I18nText ko="프로젝트 추가" en="Add Project" />
           </Link>
         ) : null}
       </div>
 
       {projects.length === 0 ? (
         <div className="projects-empty-state">
-          No projects yet for this category.
+          <I18nText ko="이 카테고리에 프로젝트가 없습니다." en="No projects yet for this category." />
         </div>
       ) : (
         <div className="projects-showcase-grid">
@@ -85,12 +89,16 @@ export default function ProjectsListPanel({ projects, selectedCategory }: Props)
                 <p className="project-showcase-summary">{project.summary}</p>
 
                 <div className="project-tag-row">
-                  <span className="project-tag-pill">{project.category.toLowerCase()}</span>
+                  <span className="project-tag-pill">
+                    {project.category === "SOFTWARE"
+                      ? (language === "ko" ? "소프트웨어" : "software")
+                      : (language === "ko" ? "펌웨어" : "firmware")}
+                  </span>
                   <span className="project-tag-pill">{project.projectPeriod?.trim() || formatCreatedLabel(project.createdAt)}</span>
                 </div>
 
                 <Link href={buildProjectDetailPath(project.slug, selectedCategory)} className="btn project-showcase-link">
-                  View
+                  <I18nText ko="보기" en="View" />
                 </Link>
               </div>
             </article>
