@@ -43,7 +43,7 @@ export default function HeaderAuthButton() {
           }
         }}
       >
-        {language === "en" ? "Logout" : "\uB85C\uADF8\uC544\uC6C3"}
+        Logout
       </button>
     </div>
   );

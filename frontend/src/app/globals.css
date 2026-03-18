@@ -171,10 +171,16 @@ a {
 }
 
 .nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--muted);
   font-weight: 600;
-  padding: 9px 14px;
+  min-width: 80px;
+  padding: 9px 10px;
   border-radius: 999px;
+  white-space: nowrap;
+  text-align: center;
   transition: color 140ms ease, background-color 140ms ease;
 }
 
