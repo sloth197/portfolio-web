@@ -15,9 +15,13 @@
 - 관리자 로그인 후 프로젝트 등록 및 관리
 - 헤더 CRM 바로가기 링크 제공
 - 라이트/다크 테마 전환
+- 한/영 전환 토글 버튼
 
 ## Tech Stack
 - Frontend: Next.js, React, TypeScript, Tailwind CSS
 - Backend: Spring Boot (Java)
 - Database: PostgreSQL
 - Deploy/Infra: Vercel (Frontend), Render (Backend), Namecheap (DNS)
+
+### 수정사항
+- DB이동 (Render -> Supabase)
