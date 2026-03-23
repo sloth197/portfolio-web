@@ -1769,24 +1769,72 @@ a {
 @media (max-width: 760px) {
   .site-header-inner {
     height: auto;
-    padding: 14px 0;
-    align-items: flex-start;
-    flex-direction: column;
+    padding: 12px 0 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 10px 8px;
+  }
+
+  .brand-mark {
+    order: 1;
+    font-size: 1rem;
   }
 
   .site-header-actions {
-    width: 100%;
+    order: 2;
+    width: auto;
+    margin-left: auto;
     justify-content: flex-end;
+    gap: 6px;
   }
 
   .site-nav {
-    flex-wrap: wrap;
-    margin-left: 0;
+    order: 3;
+    width: max-content;
+    max-width: 100%;
+    flex-wrap: nowrap;
+    justify-content: center;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 auto;
+    gap: 4px;
+    padding-inline: 4px;
+    scrollbar-width: none;
+  }
+
+  .site-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-link {
+    padding: 7px 9px;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .crm-nav-link {
+    padding-inline: 8px;
   }
 
   .header-auth-group {
     width: auto;
     flex: 0 1 auto;
+    gap: 6px;
+  }
+
+  .header-greeting {
+    display: none;
+  }
+
+  .header-login-link,
+  .header-lang-toggle {
+    font-size: 0.8rem;
+    padding: 7px 10px;
+  }
+
+  .header-lang-toggle {
+    min-width: 56px;
   }
 
   .floating-theme-toggle {
