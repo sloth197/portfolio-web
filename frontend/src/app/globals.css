@@ -168,7 +168,7 @@ a {
   font-weight: 600;
   letter-spacing: 0.04em;
   color: color-mix(in srgb, var(--muted) 70%, var(--foreground) 30%);
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .entry-transition-progress {

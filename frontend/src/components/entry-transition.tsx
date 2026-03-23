@@ -15,181 +15,122 @@ const INTRO_TOTAL_MS = 4000;
 const INTRO_FADE_MS = 640;
 const MOBILE_BREAKPOINT = 760;
 
-// Add/remove languages here. Positions are now randomized on each load.
 const GREETING_WORDS = [
-  "안녕하세요",
-  "Hello",
-  "こんにちは",
-  "你好",
-  "Bonjour",
-  "Hola",
-  "Hallo",
-  "Ciao",
-  "Olá",
-  "Привет",
-  "مرحبا",
-  "नमस्ते",
-  "Merhaba",
-  "Xin chào",
-  "สวัสดี",
+  "안녕하세요", // 한국어
+  "Hello", // 영어
+  "こんにちは", // 일본어
+  "你好", // 중국어
+  "Bonjour", // 프랑스어
+  "Hola", // 스페인어
+  "Guten Tag", // 독일어
+  "Ciao", // 이탈리아어
+  "Ahoj", // 체코어
+  "Γεια σας", // 그리스어
+  "Merhaba", // 튀르키예어
+  "Talofa", // 사모아어
+  "Buongiorno", // 바티칸(이탈리아어 계열)
+  "আসসালামু আলাইকুম", // 방글라어
+  "مرحبًا", // 아랍어
 ] as const;
 
+function randomBetween(min: number, max: number): number {
+  return min + Math.random() * (max - min);
+}
+
 function isWideGlyph(char: string): boolean {
-  const codePoint = char.codePointAt(0);
-  if (!codePoint) {
+  const cp = char.codePointAt(0);
+  if (!cp) {
     return false;
   }
-
   return (
-    (codePoint >= 0x1100 && codePoint <= 0x11ff) || // Hangul Jamo
-    (codePoint >= 0x2e80 && codePoint <= 0x9fff) || // CJK
-    (codePoint >= 0xac00 && codePoint <= 0xd7af) || // Hangul syllables
-    (codePoint >= 0x3040 && codePoint <= 0x30ff) || // Hiragana / Katakana
-    (codePoint >= 0x0600 && codePoint <= 0x06ff) || // Arabic
-    (codePoint >= 0x0900 && codePoint <= 0x097f) || // Devanagari
-    (codePoint >= 0x0e00 && codePoint <= 0x0e7f) // Thai
+    (cp >= 0x1100 && cp <= 0x11ff) || // Hangul Jamo
+    (cp >= 0x2e80 && cp <= 0x9fff) || // CJK
+    (cp >= 0xac00 && cp <= 0xd7af) || // Hangul syllables
+    (cp >= 0x3040 && cp <= 0x30ff) || // Hiragana/Katakana
+    (cp >= 0x0600 && cp <= 0x06ff) || // Arabic
+    (cp >= 0x0900 && cp <= 0x097f) || // Devanagari
+    (cp >= 0x0e00 && cp <= 0x0e7f) // Thai
   );
 }
 
-function estimateTextWidth(text: string, fontPx: number): number {
+function estimateTextWidthPx(text: string, fontPx: number): number {
   let units = 0;
-  for (const char of text) {
-    if (char === " ") {
+  for (const ch of text) {
+    if (ch === " ") {
       units += 0.34;
-    } else if (isWideGlyph(char)) {
+    } else if (isWideGlyph(ch)) {
       units += 1;
     } else {
-      units += 0.6;
+      units += 0.62;
     }
   }
   return units * fontPx;
 }
 
-function rectanglesOverlap(a: Rect, b: Rect, gap: number): boolean {
+function overlaps(a: Rect, b: Rect, gap: number): boolean {
   return !(a.right + gap < b.left || a.left - gap > b.right || a.bottom + gap < b.top || a.top - gap > b.bottom);
 }
 
-function shuffle<T>(items: T[]): T[] {
-  for (let i = items.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [items[i], items[j]] = [items[j], items[i]];
-  }
-  return items;
-}
+function createRandomLayout(words: readonly string[], viewportW: number, viewportH: number): GreetingPlacement[] {
+  const width = Math.max(360, viewportW);
+  const height = Math.max(620, viewportH);
+  const mobile = width <= MOBILE_BREAKPOINT;
 
-function buildGreetingLayout(words: readonly string[], viewportWidth: number, viewportHeight: number): GreetingPlacement[] {
-  const width = Math.max(360, viewportWidth);
-  const height = Math.max(600, viewportHeight);
-  const isMobile = width <= MOBILE_BREAKPOINT;
-
-  const fontPx = isMobile ? 16 : 37;
-  const horizontalPadding = isMobile ? 20 : 36;
-  const verticalPadding = isMobile ? 28 : 34;
-  const wordGap = isMobile ? 10 : 16;
-  const stepX = isMobile ? 18 : 24;
-  const stepY = isMobile ? 16 : 22;
-
-  // Keep a protected center area so greeting words don't collide with title/progress.
-  const centerHalfWidth = Math.min(width * (isMobile ? 0.35 : 0.32), isMobile ? 165 : 360);
-  const centerHalfHeight = Math.min(height * (isMobile ? 0.22 : 0.24), isMobile ? 120 : 190);
-  const protectedRect: Rect = {
-    left: width / 2 - centerHalfWidth,
-    right: width / 2 + centerHalfWidth,
-    top: height / 2 - centerHalfHeight,
-    bottom: height / 2 + centerHalfHeight,
-  };
+  const fontPx = mobile ? 16 : 36;
+  const sidePadding = mobile ? 18 : 28;
+  const verticalPadding = mobile ? 24 : 30;
+  const gap = mobile ? 8 : 14;
+  const maxAttemptsPerWord = 700;
 
   const placedRects: Rect[] = [];
   const placements: GreetingPlacement[] = [];
 
   words.forEach((text, index) => {
-    const wordWidth = estimateTextWidth(text, fontPx) + (isMobile ? 12 : 18);
-    const wordHeight = fontPx * 1.22 + (isMobile ? 6 : 10);
+    const wordW = estimateTextWidthPx(text, fontPx) + (mobile ? 12 : 20);
+    const wordH = fontPx * 1.18 + (mobile ? 6 : 10);
 
-    const minX = horizontalPadding + wordWidth / 2;
-    const maxX = width - horizontalPadding - wordWidth / 2;
-    const minY = verticalPadding + wordHeight / 2;
-    const maxY = height - verticalPadding - wordHeight / 2;
+    const minX = sidePadding + wordW / 2;
+    const maxX = width - sidePadding - wordW / 2;
+    const minY = verticalPadding + wordH / 2;
+    const maxY = height - verticalPadding - wordH / 2;
 
     if (minX >= maxX || minY >= maxY) {
-      placements.push({
-        text,
-        x: 50,
-        y: 50,
-        delayMs: 140 + index * 110,
-      });
       return;
     }
 
-    const candidates: Array<{ x: number; y: number }> = [];
-    for (let y = minY; y <= maxY; y += stepY) {
-      for (let x = minX; x <= maxX; x += stepX) {
-        candidates.push({ x, y });
-      }
-    }
-    shuffle(candidates);
+    let found: Rect | null = null;
+    let foundX = 0;
+    let foundY = 0;
 
-    let chosenRect: Rect | null = null;
-    let chosenPoint: { x: number; y: number } | null = null;
-
-    for (const candidate of candidates) {
+    for (let attempt = 0; attempt < maxAttemptsPerWord; attempt++) {
+      const x = randomBetween(minX, maxX);
+      const y = randomBetween(minY, maxY);
       const rect: Rect = {
-        left: candidate.x - wordWidth / 2,
-        right: candidate.x + wordWidth / 2,
-        top: candidate.y - wordHeight / 2,
-        bottom: candidate.y + wordHeight / 2,
+        left: x - wordW / 2,
+        right: x + wordW / 2,
+        top: y - wordH / 2,
+        bottom: y + wordH / 2,
       };
 
-      if (rectanglesOverlap(rect, protectedRect, 10)) {
+      if (placedRects.some((item) => overlaps(rect, item, gap))) {
         continue;
       }
 
-      if (placedRects.some((item) => rectanglesOverlap(rect, item, wordGap))) {
-        continue;
-      }
-
-      chosenRect = rect;
-      chosenPoint = candidate;
+      found = rect;
+      foundX = x;
+      foundY = y;
       break;
     }
 
-    // Strict fallback: keep random attempts, but never allow overlap.
-    if (!chosenRect || !chosenPoint) {
-      for (let attempt = 0; attempt < 420; attempt++) {
-        const candidate = {
-          x: minX + Math.random() * (maxX - minX),
-          y: minY + Math.random() * (maxY - minY),
-        };
-        const rect: Rect = {
-          left: candidate.x - wordWidth / 2,
-          right: candidate.x + wordWidth / 2,
-          top: candidate.y - wordHeight / 2,
-          bottom: candidate.y + wordHeight / 2,
-        };
-
-        if (rectanglesOverlap(rect, protectedRect, 10)) {
-          continue;
-        }
-
-        if (placedRects.some((item) => rectanglesOverlap(rect, item, wordGap))) {
-          continue;
-        }
-
-        chosenRect = rect;
-        chosenPoint = candidate;
-        break;
-      }
-    }
-
-    if (!chosenRect || !chosenPoint) {
+    if (!found) {
       return;
     }
 
-    placedRects.push(chosenRect);
+    placedRects.push(found);
     placements.push({
       text,
-      x: (chosenPoint.x / width) * 100,
-      y: (chosenPoint.y / height) * 100,
+      x: (foundX / width) * 100,
+      y: (foundY / height) * 100,
       delayMs: 140 + index * 110,
     });
   });
@@ -204,12 +145,12 @@ export default function EntryTransition() {
     if (typeof window === "undefined") {
       return [];
     }
-    return buildGreetingLayout(GREETING_WORDS, window.innerWidth, window.innerHeight);
+    return createRandomLayout(GREETING_WORDS, window.innerWidth, window.innerHeight);
   });
 
   useEffect(() => {
     const refreshLayout = () => {
-      setGreetings(buildGreetingLayout(GREETING_WORDS, window.innerWidth, window.innerHeight));
+      setGreetings(createRandomLayout(GREETING_WORDS, window.innerWidth, window.innerHeight));
     };
 
     refreshLayout();
@@ -262,7 +203,7 @@ export default function EntryTransition() {
 
       <div className="entry-transition-center">
         <div className="entry-transition-brand">안녕하세요</div>
-        <p className="entry-transition-copy">포트폴리오를 준비하고 있어요...</p>
+        <p className="entry-transition-copy">Loading...</p>
         <div className="entry-transition-progress">
           <span className="entry-transition-progress-fill" />
         </div>

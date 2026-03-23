@@ -29,7 +29,8 @@ const themeBootScript = `
 (() => {
   try {
     const saved = localStorage.getItem("portfolio-theme");
-    document.documentElement.dataset.theme = saved === "dark" ? "dark" : "light";
+    const userSet = localStorage.getItem("portfolio-theme-user-set") === "1";
+    document.documentElement.dataset.theme = (userSet && saved === "dark") ? "dark" : "light";
 
     const savedLanguage = localStorage.getItem("portfolio-language");
     if (savedLanguage === "en" || savedLanguage === "ko") {

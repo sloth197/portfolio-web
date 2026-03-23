@@ -5,23 +5,36 @@ import { useSyncExternalStore } from "react";
 type Theme = "light" | "dark";
 
 const STORAGE_KEY = "portfolio-theme";
+const STORAGE_USER_SET_KEY = "portfolio-theme-user-set";
 const THEME_CHANGE_EVENT = "portfolio-theme-change";
 
 function applyTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;
   window.localStorage.setItem(STORAGE_KEY, theme);
+  window.localStorage.setItem(STORAGE_USER_SET_KEY, "1");
   window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
+}
+
+function readStoredTheme(): Theme {
+  const saved = window.localStorage.getItem(STORAGE_KEY);
+  const userSet = window.localStorage.getItem(STORAGE_USER_SET_KEY) === "1";
+
+  if (userSet && (saved === "dark" || saved === "light")) {
+    return saved;
+  }
+
+  return "light";
 }
 
 function readTheme(): Theme {
   if (typeof window === "undefined" || typeof document === "undefined") {
     return "light";
   }
-  const saved = window.localStorage.getItem(STORAGE_KEY);
-  if (saved === "dark" || saved === "light") {
-    return saved;
+  const nextTheme = readStoredTheme();
+  if (document.documentElement.dataset.theme !== nextTheme) {
+    document.documentElement.dataset.theme = nextTheme;
   }
-  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+  return nextTheme;
 }
 
 function subscribe(onStoreChange: () => void): () => void {
@@ -30,11 +43,9 @@ function subscribe(onStoreChange: () => void): () => void {
   }
 
   const onStorage = (event: StorageEvent) => {
-    if (!event.key || event.key === STORAGE_KEY) {
-      const next = window.localStorage.getItem(STORAGE_KEY);
-      if (next === "dark" || next === "light") {
-        document.documentElement.dataset.theme = next;
-      }
+    if (!event.key || event.key === STORAGE_KEY || event.key === STORAGE_USER_SET_KEY) {
+      const next = readStoredTheme();
+      document.documentElement.dataset.theme = next;
       onStoreChange();
     }
   };
