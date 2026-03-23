@@ -164,11 +164,19 @@ a {
 
 .entry-transition-copy {
   margin: 0;
+  display: inline-flex;
+  align-items: baseline;
   font-size: 1.92rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   color: color-mix(in srgb, var(--muted) 70%, var(--foreground) 30%);
   text-transform: none;
+}
+
+.entry-transition-copy-dots {
+  display: inline-block;
+  width: 3ch;
+  text-align: left;
 }
 
 .entry-transition-progress {

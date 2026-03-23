@@ -17,10 +17,12 @@ export default async function Home() {
             lineHeight: 1.04,
             letterSpacing: "-0.03em",
             maxWidth: 760,
+            whiteSpace: "pre-line",
           }}
         >
-          <I18nText ko="안녕하세요. 저는 OOO입니다. 제 포트폴리오 사이트에 오신 것을 환영합니다." en="Hello, I am OOO. Welcome to my portfolio website." />
-        </h1>
+          <I18nText ko="제 포트폴리오 사이트에 오신 것을 환영합니다." en={`Hi!
+Welcome to my portfolio website.`} />
+        </h1> 
       </section>
 
       <section style={{ display: "grid", gap: 14 }}>
