@@ -21,7 +21,7 @@
 - Frontend: Next.js, React, TypeScript, Tailwind CSS
 - Backend: Spring Boot (Java)
 - Database: PostgreSQL
-- Deploy/Infra: Vercel (Frontend), Render (Backend), Namecheap (DNS)
+- Deploy/Infra: Vercel (Frontend), Render (Backend), Supabase (DB), Namecheap (DNS)
 
 ### 수정사항
 - DB이동 (Render -> Supabase)
