@@ -104,6 +104,212 @@ a {
   border-bottom: 1px solid var(--header-border);
 }
 
+.entry-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(58rem 34rem at 8% 0%, color-mix(in srgb, var(--accent-soft) 70%, var(--surface) 30%) 0%, transparent 72%),
+    radial-gradient(42rem 24rem at 100% 8%, color-mix(in srgb, var(--accent) 22%, var(--surface) 78%) 0%, transparent 74%),
+    linear-gradient(180deg, color-mix(in srgb, var(--header-bg) 78%, var(--surface) 22%) 0%, var(--bg) 100%);
+  animation: entry-transition-intro 460ms ease-out both;
+}
+
+.entry-transition-brand {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: clamp(3rem, 3.6vw + 2rem, 5.2rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--foreground);
+  text-shadow: 0 10px 24px rgba(7, 11, 16, 0.12);
+}
+
+.entry-transition-center {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: min(760px, 88vw);
+  animation: entry-transition-center-rise 620ms ease-out both;
+}
+
+.entry-transition-greetings {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.entry-transition-word {
+  position: absolute;
+  font-size: clamp(1.8rem, 1.4vw + 1.44rem, 2.36rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--muted) 62%, var(--foreground) 38%);
+  opacity: 0;
+  transform: translate(-50%, calc(-50% + 8px)) scale(0.98);
+  animation: entry-transition-word-float 1280ms ease-out forwards;
+}
+
+.entry-transition-copy {
+  margin: 0;
+  font-size: 1.92rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--muted) 70%, var(--foreground) 30%);
+  text-transform: uppercase;
+}
+
+.entry-transition-progress {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 70%, var(--stroke) 30%);
+  border: 1px solid color-mix(in srgb, var(--stroke) 88%, transparent 12%);
+  overflow: hidden;
+}
+
+.entry-transition-progress-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--accent) 64%, #7ee1d5 36%) 0%, var(--accent) 62%, #0a5d53 100%);
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation: entry-transition-progress 3260ms cubic-bezier(0.22, 0.78, 0.22, 1) 220ms forwards;
+}
+
+.entry-transition-brand::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent) 22%, transparent 78%);
+}
+
+.entry-transition-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    112deg,
+    transparent 32%,
+    rgba(255, 255, 255, 0.2) 48%,
+    rgba(255, 255, 255, 0.08) 58%,
+    transparent 76%
+  );
+  transform: translateX(-42%);
+  animation: entry-transition-sheen 1480ms ease-out both;
+}
+
+.entry-transition.is-fade {
+  animation: entry-transition-out 640ms cubic-bezier(0.2, 0.64, 0.2, 1) forwards;
+}
+
+@keyframes entry-transition-intro {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes entry-transition-sheen {
+  from {
+    opacity: 0;
+    transform: translateX(-46%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(36%);
+  }
+}
+
+@keyframes entry-transition-center-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes entry-transition-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes entry-transition-word-float {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 8px)) scale(0.98);
+  }
+  25% {
+    opacity: 0.72;
+  }
+  100% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes entry-transition-out {
+  from {
+    opacity: 1;
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    filter: blur(3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry-transition,
+  .entry-transition-sheen,
+  .entry-transition.is-fade,
+  .entry-transition-center,
+  .entry-transition-progress-fill,
+  .entry-transition-word {
+    animation: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .entry-transition-brand {
+    font-size: clamp(1.5rem, 1.8vw + 1rem, 2.6rem);
+  }
+
+  .entry-transition-copy {
+    font-size: 0.96rem;
+  }
+
+  .entry-transition-word {
+    font-size: clamp(0.84rem, 0.55vw + 0.68rem, 1rem);
+    opacity: 0.26;
+  }
+}
+
 .site-header-inner,
 .site-main,
 .site-footer-inner {
