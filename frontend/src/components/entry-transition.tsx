@@ -1,7 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 type EntryPhase = "visible" | "fade";
 type Rect = { left: number; top: number; right: number; bottom: number };
@@ -17,8 +16,6 @@ const INTRO_FADE_MS = 640;
 const MOBILE_BREAKPOINT = 760;
 const LOADING_DOTS = [".", "..", "..."] as const;
 const LOADING_DOT_INTERVAL_MS = 380;
-// 테스트 기간 동안만 사용하는 임시 안내 문구입니다. 테스트 종료 후 삭제하세요.
-const TESTING_NOTICE_TEXT = "THIS SITE IS CURRENTLY UNDER TESTING.";
 
 const GREETING_WORDS = [
   "안녕하세요", // 한국어
@@ -144,8 +141,6 @@ function createRandomLayout(words: readonly string[], viewportW: number, viewpor
 }
 
 export default function EntryTransition() {
-  const pathname = usePathname();
-  const isFirstNoticeRef = useRef(true);
   const [phase, setPhase] = useState<EntryPhase>("visible");
   const [mounted, setMounted] = useState(true);
   const [loadingDotIndex, setLoadingDotIndex] = useState(0);
@@ -186,23 +181,6 @@ export default function EntryTransition() {
       window.clearTimeout(unmountTimer);
     };
   }, []);
-
-  // 테스트용 팝업: 첫 진입(인트로 이후) + 페이지 이동마다 다시 노출합니다.
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const initialDelay = prefersReducedMotion ? 360 : INTRO_TOTAL_MS + 80;
-    const routeChangeDelay = 120;
-    const noticeDelay = isFirstNoticeRef.current ? initialDelay : routeChangeDelay;
-
-    const timer = window.setTimeout(() => {
-      window.alert(TESTING_NOTICE_TEXT);
-      isFirstNoticeRef.current = false;
-    }, noticeDelay);
-
-    return () => {
-      window.clearTimeout(timer);
-    };
-  }, [pathname]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {

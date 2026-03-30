@@ -6,16 +6,23 @@ type Theme = "light" | "dark";
 
 const STORAGE_KEY = "portfolio-theme";
 const STORAGE_USER_SET_KEY = "portfolio-theme-user-set";
+const SESSION_USER_SET_KEY = "portfolio-theme-session-user-set";
 const THEME_CHANGE_EVENT = "portfolio-theme-change";
 
 function applyTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;
   window.localStorage.setItem(STORAGE_KEY, theme);
   window.localStorage.setItem(STORAGE_USER_SET_KEY, "1");
+  window.sessionStorage.setItem(SESSION_USER_SET_KEY, "1");
   window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
 }
 
 function readStoredTheme(): Theme {
+  const sessionUserSet = window.sessionStorage.getItem(SESSION_USER_SET_KEY) === "1";
+  if (!sessionUserSet) {
+    return "dark";
+  }
+
   const saved = window.localStorage.getItem(STORAGE_KEY);
   const userSet = window.localStorage.getItem(STORAGE_USER_SET_KEY) === "1";
 
@@ -23,12 +30,12 @@ function readStoredTheme(): Theme {
     return saved;
   }
 
-  return "light";
+  return "dark";
 }
 
 function readTheme(): Theme {
   if (typeof window === "undefined" || typeof document === "undefined") {
-    return "light";
+    return "dark";
   }
   const nextTheme = readStoredTheme();
   if (document.documentElement.dataset.theme !== nextTheme) {
@@ -61,7 +68,7 @@ function subscribe(onStoreChange: () => void): () => void {
 }
 
 function getServerSnapshot(): Theme {
-  return "light";
+  return "dark";
 }
 
 export default function ThemeToggle() {

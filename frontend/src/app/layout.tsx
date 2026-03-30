@@ -5,6 +5,7 @@ import AdminCrmBanner from "@/components/admin-crm-banner";
 import EntryTransition from "@/components/entry-transition";
 import HeaderAuthButton from "@/components/header-auth-button";
 import LanguageToggle from "@/components/language-toggle";
+import SiteNoticePopups from "@/components/site-notice-popups";
 import ThemeToggle from "@/components/theme-toggle";
 import "./globals.css";
 
@@ -28,22 +29,27 @@ export const metadata: Metadata = {
 const themeBootScript = `
 (() => {
   try {
+    const sessionUserSet = sessionStorage.getItem("portfolio-theme-session-user-set") === "1";
     const saved = localStorage.getItem("portfolio-theme");
     const userSet = localStorage.getItem("portfolio-theme-user-set") === "1";
-    document.documentElement.dataset.theme = (userSet && saved === "dark") ? "dark" : "light";
+    if (sessionUserSet && userSet && (saved === "dark" || saved === "light")) {
+      document.documentElement.dataset.theme = saved;
+    } else {
+      document.documentElement.dataset.theme = "dark";
+    }
 
     const savedLanguage = localStorage.getItem("portfolio-language");
     if (savedLanguage === "en" || savedLanguage === "ko") {
       document.documentElement.lang = savedLanguage;
       document.documentElement.dataset.lang = savedLanguage;
     } else {
-      document.documentElement.lang = "ko";
-      document.documentElement.dataset.lang = "ko";
+      document.documentElement.lang = "en";
+      document.documentElement.dataset.lang = "en";
     }
   } catch {
-    document.documentElement.dataset.theme = "light";
-    document.documentElement.lang = "ko";
-    document.documentElement.dataset.lang = "ko";
+    document.documentElement.dataset.theme = "dark";
+    document.documentElement.lang = "en";
+    document.documentElement.dataset.lang = "en";
   }
 })();
 `;
@@ -54,12 +60,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
       <body className={`${jakarta.variable} ${plexMono.variable}`}>
         <EntryTransition />
+        <SiteNoticePopups />
         <div className="site-shell">
           <header className="site-header">
             <div className="site-header-inner">
@@ -78,6 +85,9 @@ export default function RootLayout({
                 </Link>
                 <Link className="nav-link" href="/contact">
                   Contact
+                </Link>
+                <Link className="nav-link" href="/Notice">
+                  Notice
                 </Link>
                 <AdminCrmBanner />
               </nav>
