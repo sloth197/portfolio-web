@@ -9,7 +9,7 @@ const LANGUAGE_CHANGE_EVENT = "portfolio-language-change";
 
 function readSiteLanguage(): SiteLanguage {
   if (typeof window === "undefined" || typeof document === "undefined") {
-    return "ko";
+    return "en";
   }
 
   const saved = window.localStorage.getItem(STORAGE_KEY);
@@ -17,7 +17,7 @@ function readSiteLanguage(): SiteLanguage {
     return saved;
   }
 
-  return document.documentElement.lang === "en" ? "en" : "ko";
+  return document.documentElement.lang === "ko" ? "ko" : "en";
 }
 
 function subscribeSiteLanguage(onStoreChange: () => void): () => void {
@@ -43,7 +43,7 @@ function subscribeSiteLanguage(onStoreChange: () => void): () => void {
 }
 
 function getServerSiteLanguage(): SiteLanguage {
-  return "ko";
+  return "en";
 }
 
 export function useSiteLanguage(): SiteLanguage {
