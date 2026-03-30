@@ -5,7 +5,9 @@ import AdminCrmBanner from "@/components/admin-crm-banner";
 import EntryTransition from "@/components/entry-transition";
 import HeaderAuthButton from "@/components/header-auth-button";
 import LanguageToggle from "@/components/language-toggle";
+import SiteNavLinks from "@/components/site-nav-links";
 import SiteNoticePopups from "@/components/site-notice-popups";
+import SiteRandomTwinkle from "@/components/site-random-twinkle";
 import ThemeToggle from "@/components/theme-toggle";
 import "./globals.css";
 
@@ -65,6 +67,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
       <body className={`${jakarta.variable} ${plexMono.variable}`}>
+        <SiteRandomTwinkle />
         <EntryTransition />
         <SiteNoticePopups />
         <div className="site-shell">
@@ -74,21 +77,7 @@ export default function RootLayout({
                 JWS Portfolio
               </Link>
               <nav className="site-nav">
-                <Link className="nav-link" href="/">
-                  Home
-                </Link>
-                <Link className="nav-link" href="/projects">
-                  Projects
-                </Link>
-                <Link className="nav-link" href="/about">
-                  About
-                </Link>
-                <Link className="nav-link" href="/contact">
-                  Contact
-                </Link>
-                <Link className="nav-link" href="/Notice">
-                  Notice
-                </Link>
+                <SiteNavLinks />
                 <AdminCrmBanner />
               </nav>
               <div className="site-header-actions">
