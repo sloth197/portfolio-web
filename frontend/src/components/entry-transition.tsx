@@ -144,12 +144,7 @@ export default function EntryTransition() {
   const [phase, setPhase] = useState<EntryPhase>("visible");
   const [mounted, setMounted] = useState(true);
   const [loadingDotIndex, setLoadingDotIndex] = useState(0);
-  const [greetings, setGreetings] = useState<GreetingPlacement[]>(() => {
-    if (typeof window === "undefined") {
-      return [];
-    }
-    return createRandomLayout(GREETING_WORDS, window.innerWidth, window.innerHeight);
-  });
+  const [greetings, setGreetings] = useState<GreetingPlacement[]>([]);
 
   useEffect(() => {
     const refreshLayout = () => {

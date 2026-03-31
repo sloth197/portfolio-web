@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { clearAdminAuthHeader, getAdminAuthHeader, getAdminRole, type AdminRole } from "@/lib/admin-auth";
+import I18nText from "@/components/i18n-text";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -75,7 +76,7 @@ export default function CrmPage() {
         <span className="badge">CRM</span>
         <h1 className="section-title">Customer Relationship Management System</h1>
         <p className="section-copy" style={{ fontSize: 14 }}>
-          CRM이 사이트 내부 라우트에서 동작합니다.
+          <I18nText ko="CRM이 사이트 내부 라우트에서 동작합니다." en="CRM operates on the internal route of the site." />
         </p>
       </section>
 

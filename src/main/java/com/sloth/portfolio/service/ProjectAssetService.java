@@ -44,6 +44,7 @@ public class ProjectAssetService {
             throw new InvalidFileException("File must not be empty");
         }
 
+        @SuppressWarnings("null")
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new NotFoundException("Project not found: id=" + projectId));
 

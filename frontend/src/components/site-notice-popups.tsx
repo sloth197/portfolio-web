@@ -97,8 +97,8 @@ export default function SiteNoticePopups() {
             .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
             .map((notice) => ({
               id: `notice-${notice.id}`,
-              title: notice.title,
-              message: notice.content,
+              title: typeof notice.title === "string" && notice.title.trim() ? notice.title : POPUP_FIXED_TITLE,
+              message: typeof notice.content === "string" ? notice.content : "",
             }))
             .filter((notice) => !isHiddenForToday(notice.id));
 
@@ -181,7 +181,7 @@ export default function SiteNoticePopups() {
               </span>
               <div className="site-popup-body-divider" aria-hidden="true" />
               <div className="site-popup-copy">
-                {notice.message.split(/\r?\n/).map((line, index) => (
+                {String(notice.message ?? "").split(/\r?\n/).map((line, index) => (
                   <p key={`${notice.id}-${index}`}>{line}</p>
                 ))}
               </div>

@@ -1,4 +1,5 @@
-﻿import I18nText from "@/components/i18n-text";
+import Image from "next/image";
+import I18nText from "@/components/i18n-text";
 
 const WORKFLOW_CARDS = [
   {
@@ -19,21 +20,88 @@ const WORKFLOW_CARDS = [
   },
 ];
 
-const TOOLS = [
-  { name: "C#", level: "90%" },
-  { name: "ASP.NET", level: "85%" },
-  { name: "WPF", level: "84%" },
-  { name: "Docker", level: "82%" },
-  { name: "Java / Spring", level: "84%" },
+type TechIcon = {
+  src: string;
+  label: string;
+};
+
+type Tool = {
+  name: string;
+  level: string;
+  icons: TechIcon[];
+};
+
+type InterestTech = {
+  name: string;
+  icons: TechIcon[];
+};
+
+const TOOLS: Tool[] = [
+  {
+    name: "C#",
+    level: "90%",
+    icons: [{ src: "/icons/tech/c-sharp.png", label: "C#" }],
+  },
+  {
+    name: "ASP.NET",
+    level: "85%",
+    icons: [{ src: "/icons/tech/aspnet.svg", label: "ASP.NET" }],
+  },
+  {
+    name: "WPF",
+    level: "84%",
+    icons: [{ src: "/icons/tech/wpf.svg", label: "WPF" }],
+  },
+  {
+    name: "Docker",
+    level: "82%",
+    icons: [{ src: "/icons/tech/docker.svg", label: "Docker" }],
+  },
+  {
+    name: "Java",
+    level: "84%",
+    icons: [{ src: "/icons/tech/java.svg", label: "Java" }],
+  },
+  {
+    name: "Spring",
+    level: "84%",
+    icons: [{ src: "/icons/tech/spring.svg", label: "Spring" }],
+  },
 ];
 
-const INTEREST_TECHS = [
-  "PostgreSQL",
-  "Vercel",
-  "Next.js",
-  "TypeScript",
-  "C/C++",
+const INTEREST_TECHS: InterestTech[] = [
+  {
+    name: "PostgreSQL",
+    icons: [{ src: "/icons/tech/postgresql.svg", label: "PostgreSQL" }],
+  },
+  {
+    name: "Vercel",
+    icons: [{ src: "/icons/tech/vercel.svg", label: "Vercel" }],
+  },
+  {
+    name: "Next.js",
+    icons: [{ src: "/icons/tech/nextjs.svg", label: "Next.js" }],
+  },
+  {
+    name: "TypeScript",
+    icons: [{ src: "/icons/tech/typescript.svg", label: "TypeScript" }],
+  },
+  {
+    name: "C",
+    icons: [{ src: "/icons/tech/c.svg", label: "C" }],
+  },
+  {
+    name: "C++",
+    icons: [{ src: "/icons/tech/cplusplus.svg", label: "C++" }],
+  },
 ];
+
+function getTechIconClass(label: string): string {
+  if (label === "Vercel") {
+    return "about-neo-tech-icon about-neo-tech-icon-vercel";
+  }
+  return "about-neo-tech-icon";
+}
 
 export default function AboutPage() {
   return (
@@ -87,7 +155,21 @@ Building projects using Java, Spring, and C#, focusing on API design and data pr
           <div className="about-neo-tool-grid">
             {TOOLS.map((tool) => (
               <article key={tool.name} className="about-neo-tool-card">
-                <span className="about-neo-tool-name">{tool.name}</span>
+                <span className="about-neo-tool-name">
+                  <span className="about-neo-tech-icon-stack" aria-hidden="true">
+                    {tool.icons.map((icon) => (
+                      <Image
+                        key={`${tool.name}-${icon.label}`}
+                        src={icon.src}
+                        alt=""
+                        width={16}
+                        height={16}
+                        className={getTechIconClass(icon.label)}
+                      />
+                    ))}
+                  </span>
+                  <span>{tool.name}</span>
+                </span>
                 <strong>{tool.level}</strong>
               </article>
             ))}
@@ -97,9 +179,21 @@ Building projects using Java, Spring, and C#, focusing on API design and data pr
               <I18nText ko="보유·관심 기술" en="Skills & Interests" />
             </h3>
             <div className="about-neo-interest-list">
-              {INTEREST_TECHS.filter((item) => item.trim().length > 0).map((item) => (
-                <span key={item} className="about-neo-interest-pill">
-                  {item}
+              {INTEREST_TECHS.filter((item) => item.name.trim().length > 0).map((item) => (
+                <span key={item.name} className="about-neo-interest-pill">
+                  <span className="about-neo-tech-icon-stack" aria-hidden="true">
+                    {item.icons.map((icon) => (
+                      <Image
+                        key={`${item.name}-${icon.label}`}
+                        src={icon.src}
+                        alt=""
+                        width={14}
+                        height={14}
+                        className={getTechIconClass(icon.label)}
+                      />
+                    ))}
+                  </span>
+                  <span>{item.name}</span>
                 </span>
               ))}
             </div>

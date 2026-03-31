@@ -42,7 +42,10 @@ public class PublicApiAuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        if (uri.startsWith("/api/public/auth/") || "/api/public/health".equals(uri) || "/api/public/health/".equals(uri)) {
+        if (uri.startsWith("/api/public/auth/")
+                || uri.startsWith("/api/public/notices")
+                || "/api/public/health".equals(uri)
+                || "/api/public/health/".equals(uri)) {
             return true;
         }
 
