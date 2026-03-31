@@ -2,6 +2,8 @@
 
 import { useEffect, useState, type CSSProperties } from "react";
 
+type Theme = "light" | "dark";
+
 type TwinkleStar = {
   x: number;
   y: number;
@@ -24,25 +26,42 @@ type StarColorOption = {
   weight: number;
 };
 
-const STAR_COLORS: StarColorOption[] = [
+const THEME_CHANGE_EVENT = "portfolio-theme-change";
+const THEME_STORAGE_KEY = "portfolio-theme";
+
+const DARK_STAR_COLORS: StarColorOption[] = [
   { color: [255, 255, 255], weight: 44 }, // neutral white
   { color: [232, 240, 255], weight: 18 }, // cool white
   { color: [206, 225, 255], weight: 12 }, // blue white
   { color: [255, 244, 222], weight: 12 }, // warm white
-  { color: [255, 232, 196], weight: 8 },  // yellow-white
-  { color: [188, 214, 255], weight: 4 },  // bluish
-  { color: [255, 220, 172], weight: 2 },  // warmer star
+  { color: [255, 232, 196], weight: 8 }, // yellow-white
+  { color: [188, 214, 255], weight: 4 }, // bluish
+  { color: [255, 220, 172], weight: 2 }, // warmer star
 ];
+
+function readTheme(): Theme {
+  if (typeof window === "undefined") {
+    return "dark";
+  }
+
+  const fromDataset = document.documentElement.dataset.theme;
+  if (fromDataset === "light" || fromDataset === "dark") {
+    return fromDataset;
+  }
+
+  const saved = window.localStorage.getItem(THEME_STORAGE_KEY);
+  return saved === "light" ? "light" : "dark";
+}
 
 function randomBetween(min: number, max: number): number {
   return min + (max - min) * Math.random();
 }
 
-function pickStarColor(alpha: number): string {
-  const total = STAR_COLORS.reduce((sum, item) => sum + item.weight, 0);
+function pickStarColor(alpha: number, palette: StarColorOption[]): string {
+  const total = palette.reduce((sum, item) => sum + item.weight, 0);
   let roll = Math.random() * total;
 
-  for (const item of STAR_COLORS) {
+  for (const item of palette) {
     roll -= item.weight;
     if (roll <= 0) {
       const [r, g, b] = item.color;
@@ -53,7 +72,7 @@ function pickStarColor(alpha: number): string {
   return `rgba(255, 255, 255, ${alpha.toFixed(2)})`;
 }
 
-function buildStars(width: number, height: number): TwinkleStar[] {
+function buildDarkStars(width: number, height: number): TwinkleStar[] {
   const area = Math.max(width * height, 1);
   const count = Math.max(234, Math.min(598, Math.round((area / 5200) * 1.3)));
   const stars: TwinkleStar[] = [];
@@ -71,7 +90,7 @@ function buildStars(width: number, height: number): TwinkleStar[] {
     const maxOpacity = huge ? randomBetween(0.84, 1) : randomBetween(0.62, 0.96);
     const blurPx = huge ? randomBetween(1.8, 3.4) : Math.random() > 0.68 ? randomBetween(0.9, 2.2) : 0;
     const alpha = huge ? randomBetween(0.88, 1) : randomBetween(0.7, 0.96);
-    const color = pickStarColor(alpha);
+    const color = pickStarColor(alpha, DARK_STAR_COLORS);
 
     stars.push({
       x,
@@ -89,32 +108,66 @@ function buildStars(width: number, height: number): TwinkleStar[] {
   return stars;
 }
 
+function buildStars(width: number, height: number, theme: Theme): TwinkleStar[] {
+  return theme === "dark" ? buildDarkStars(width, height) : [];
+}
+
 export default function SiteRandomTwinkle() {
   const [stars, setStars] = useState<TwinkleStar[]>([]);
 
   useEffect(() => {
     const apply = () => {
-      setStars(buildStars(window.innerWidth, window.innerHeight));
+      setStars(buildStars(window.innerWidth, window.innerHeight, readTheme()));
     };
 
-    let resizeTimer = 0;
-    const onResize = () => {
-      if (resizeTimer) {
-        window.clearTimeout(resizeTimer);
+    let rebuildTimer = 0;
+
+    const scheduleApply = (delayMs: number) => {
+      if (rebuildTimer) {
+        window.clearTimeout(rebuildTimer);
       }
-      resizeTimer = window.setTimeout(apply, 140);
+
+      rebuildTimer = window.setTimeout(() => {
+        apply();
+      }, delayMs);
+    };
+
+    const onResize = () => {
+      scheduleApply(140);
+    };
+
+    const onThemeChange = () => {
+      scheduleApply(40);
+    };
+
+    const onStorage = (event: StorageEvent) => {
+      if (!event.key || event.key === THEME_STORAGE_KEY) {
+        scheduleApply(40);
+      }
+    };
+
+    const onVisibility = () => {
+      if (!document.hidden) {
+        scheduleApply(0);
+      }
     };
 
     apply();
     window.addEventListener("resize", onResize);
     window.addEventListener("orientationchange", onResize);
+    window.addEventListener(THEME_CHANGE_EVENT, onThemeChange);
+    window.addEventListener("storage", onStorage);
+    document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
-      if (resizeTimer) {
-        window.clearTimeout(resizeTimer);
+      if (rebuildTimer) {
+        window.clearTimeout(rebuildTimer);
       }
       window.removeEventListener("resize", onResize);
       window.removeEventListener("orientationchange", onResize);
+      window.removeEventListener(THEME_CHANGE_EVENT, onThemeChange);
+      window.removeEventListener("storage", onStorage);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 

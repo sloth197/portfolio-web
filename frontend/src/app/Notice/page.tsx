@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import I18nText from "@/components/i18n-text";
+import I18nText, { useSiteLanguage } from "@/components/i18n-text";
 import {
   clearAdminAuthHeader,
   getAdminAuthHeader,
@@ -12,12 +12,15 @@ import {
 } from "@/lib/admin-auth";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+const DEFAULT_NOTICE_FONT_SIZE = 18;
+const MIN_NOTICE_FONT_SIZE = 12;
+const MAX_NOTICE_FONT_SIZE = 48;
 
 type NoticeDto = {
   id: number;
-  title: string;
   content: string;
   pinned: boolean;
+  fontSize: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -30,12 +33,12 @@ function getServerRoleSnapshot(): AdminRole | null {
   return null;
 }
 
-function formatDate(value: string): string {
+function formatDate(value: string, language: "ko" | "en"): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return value;
   }
-  return date.toLocaleString();
+  return date.toLocaleString(language === "en" ? "en-US" : "ko-KR");
 }
 
 function sortNotices(items: NoticeDto[]): NoticeDto[] {
@@ -47,19 +50,70 @@ function sortNotices(items: NoticeDto[]): NoticeDto[] {
   });
 }
 
+function normalizeNoticeFontSize(value: number | null | undefined): number {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return DEFAULT_NOTICE_FONT_SIZE;
+  }
+  if (value < MIN_NOTICE_FONT_SIZE) {
+    return MIN_NOTICE_FONT_SIZE;
+  }
+  if (value > MAX_NOTICE_FONT_SIZE) {
+    return MAX_NOTICE_FONT_SIZE;
+  }
+  return Math.round(value);
+}
+
 export default function NoticePage() {
+  const language = useSiteLanguage();
   const adminLoggedIn = useSyncExternalStore(subscribeAdminAuth, isAdminLoggedIn, getServerSnapshot);
   const adminRole = useSyncExternalStore(subscribeAdminAuth, getAdminRole, getServerRoleSnapshot);
   const canManageNotices = useMemo(() => adminLoggedIn && adminRole === "ADMIN", [adminLoggedIn, adminRole]);
+
+  const t = useMemo(
+    () => ({
+      apiBaseNotSet: language === "en" ? "NEXT_PUBLIC_API_BASE_URL is not set." : "NEXT_PUBLIC_API_BASE_URL이 설정되어 있지 않습니다.",
+      loadNoticesFailed: language === "en" ? "Failed to load notices." : "공지 목록을 불러오지 못했습니다.",
+      noticeManagementRequiresAdmin:
+        language === "en" ? "Notice management requires an ADMIN account." : "공지 관리는 ADMIN 계정이 필요합니다.",
+      adminSessionMissing:
+        language === "en" ? "Admin login session is missing. Please login again." : "관리자 로그인 세션이 없습니다. 다시 로그인해 주세요.",
+      adminSessionExpired:
+        language === "en" ? "Admin session expired. Please login again." : "관리자 세션이 만료되었습니다. 다시 로그인해 주세요.",
+      requestFailedWhileSaving: language === "en" ? "Request failed while saving notice." : "공지 저장 요청에 실패했습니다.",
+      requestFailedWhileDeleting: language === "en" ? "Request failed while deleting notice." : "공지 삭제 요청에 실패했습니다.",
+      noticeUpdated: language === "en" ? "Notice updated." : "공지가 수정되었습니다.",
+      noticeCreated: language === "en" ? "Notice created." : "공지가 등록되었습니다.",
+      noticeDeleted: language === "en" ? "Notice deleted." : "공지가 삭제되었습니다.",
+      deleteConfirm: language === "en" ? "Do you want to delete this notice?" : "삭제하시겠습니까?",
+      requestFailedPrefix: language === "en" ? "Request failed" : "요청 실패",
+      deleteFailedPrefix: language === "en" ? "Delete failed" : "삭제 실패",
+      loadingNotices: language === "en" ? "Loading notices..." : "공지를 불러오는 중...",
+      pinned: language === "en" ? "Pinned" : "상단 고정",
+      edit: language === "en" ? "Edit" : "수정",
+      delete: language === "en" ? "Delete" : "삭제",
+      createNotice: language === "en" ? "Create Notice" : "공지 등록",
+      editNotice: language === "en" ? "Edit Notice" : "공지 수정",
+      content: language === "en" ? "Content" : "내용",
+      textSize: language === "en" ? "Text size" : "글자 크기",
+      pinToTop: language === "en" ? "Pin to top" : "상단 고정",
+      saving: language === "en" ? "Saving..." : "저장 중...",
+      create: language === "en" ? "Create" : "등록",
+      update: language === "en" ? "Update" : "수정",
+      cancel: language === "en" ? "Cancel" : "취소",
+      register: language === "en" ? "Create" : "등록",
+      registerCancel: language === "en" ? "Cancel Create" : "등록 취소",
+    }),
+    [language],
+  );
 
   const [notices, setNotices] = useState<NoticeDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
 
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [pinned, setPinned] = useState(false);
+  const [fontSize, setFontSize] = useState(DEFAULT_NOTICE_FONT_SIZE);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -67,7 +121,7 @@ export default function NoticePage() {
 
   const loadNotices = useCallback(async () => {
     if (!API_BASE) {
-      setListError("NEXT_PUBLIC_API_BASE_URL is not set.");
+      setListError(t.apiBaseNotSet);
       setLoading(false);
       return;
     }
@@ -81,17 +135,21 @@ export default function NoticePage() {
       });
       if (!response.ok) {
         const payload = (await response.json().catch(() => null)) as { message?: string } | null;
-        setListError(payload?.message ?? `Failed to load notices (${response.status})`);
+        setListError(payload?.message ?? `${t.loadNoticesFailed} (${response.status})`);
         return;
       }
       const payload = (await response.json()) as NoticeDto[];
-      setNotices(sortNotices(payload));
+      const normalized = payload.map((item) => ({
+        ...item,
+        fontSize: normalizeNoticeFontSize(item.fontSize),
+      }));
+      setNotices(sortNotices(normalized));
     } catch {
-      setListError("Failed to load notices.");
+      setListError(t.loadNoticesFailed);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t.apiBaseNotSet, t.loadNoticesFailed]);
 
   useEffect(() => {
     void loadNotices();
@@ -99,25 +157,25 @@ export default function NoticePage() {
 
   function resetForm() {
     setEditingId(null);
-    setTitle("");
     setContent("");
     setPinned(false);
+    setFontSize(DEFAULT_NOTICE_FONT_SIZE);
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!canManageNotices) {
-      setFormError("Notice management requires an ADMIN account.");
+      setFormError(t.noticeManagementRequiresAdmin);
       return;
     }
     if (!API_BASE) {
-      setFormError("NEXT_PUBLIC_API_BASE_URL is not set.");
+      setFormError(t.apiBaseNotSet);
       return;
     }
 
     const auth = getAdminAuthHeader();
     if (!auth) {
-      setFormError("Admin login session is missing. Please login again.");
+      setFormError(t.adminSessionMissing);
       return;
     }
 
@@ -137,9 +195,9 @@ export default function NoticePage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title: title.trim(),
           content: content.trim(),
           pinned,
+          fontSize: normalizeNoticeFontSize(fontSize),
         }),
       });
 
@@ -147,26 +205,32 @@ export default function NoticePage() {
         const payload = (await response.json().catch(() => null)) as { message?: string } | null;
         if (response.status === 401 || response.status === 403) {
           clearAdminAuthHeader();
-          setFormError("Admin session expired. Please login again.");
+          setFormError(t.adminSessionExpired);
           return;
         }
-        setFormError(payload?.message ?? `Request failed (${response.status})`);
+        setFormError(payload?.message ?? `${t.requestFailedPrefix} (${response.status})`);
         return;
       }
 
       const savedNotice = (await response.json()) as NoticeDto;
+      const normalizedSavedNotice = {
+        ...savedNotice,
+        fontSize: normalizeNoticeFontSize(savedNotice.fontSize),
+      };
       if (isEditing) {
-        setNotices((current) => sortNotices(current.map((item) => (item.id === savedNotice.id ? savedNotice : item))));
-        setFormNotice("Notice updated.");
+        setNotices((current) =>
+          sortNotices(current.map((item) => (item.id === normalizedSavedNotice.id ? normalizedSavedNotice : item))),
+        );
+        setFormNotice(t.noticeUpdated);
       } else {
-        setNotices((current) => sortNotices([savedNotice, ...current]));
-        setFormNotice("Notice created.");
+        setNotices((current) => sortNotices([normalizedSavedNotice, ...current]));
+        setFormNotice(t.noticeCreated);
       }
 
       resetForm();
       setShowForm(false);
     } catch {
-      setFormError("Request failed while saving notice.");
+      setFormError(t.requestFailedWhileSaving);
     } finally {
       setSubmitting(false);
     }
@@ -174,21 +238,21 @@ export default function NoticePage() {
 
   async function onDelete(id: number) {
     if (!canManageNotices) {
-      setFormError("Notice management requires an ADMIN account.");
+      setFormError(t.noticeManagementRequiresAdmin);
       return;
     }
     if (!API_BASE) {
-      setFormError("NEXT_PUBLIC_API_BASE_URL is not set.");
+      setFormError(t.apiBaseNotSet);
       return;
     }
 
     const auth = getAdminAuthHeader();
     if (!auth) {
-      setFormError("Admin login session is missing. Please login again.");
+      setFormError(t.adminSessionMissing);
       return;
     }
 
-    const confirmed = window.confirm("삭제하시겠습니까?");
+    const confirmed = window.confirm(t.deleteConfirm);
     if (!confirmed) {
       return;
     }
@@ -206,10 +270,10 @@ export default function NoticePage() {
         const payload = (await response.json().catch(() => null)) as { message?: string } | null;
         if (response.status === 401 || response.status === 403) {
           clearAdminAuthHeader();
-          setFormError("Admin session expired. Please login again.");
+          setFormError(t.adminSessionExpired);
           return;
         }
-        setFormError(payload?.message ?? `Delete failed (${response.status})`);
+        setFormError(payload?.message ?? `${t.deleteFailedPrefix} (${response.status})`);
         return;
       }
 
@@ -217,9 +281,9 @@ export default function NoticePage() {
       if (editingId === id) {
         resetForm();
       }
-      setFormNotice("Notice deleted.");
+      setFormNotice(t.noticeDeleted);
     } catch {
-      setFormError("Request failed while deleting notice.");
+      setFormError(t.requestFailedWhileDeleting);
     }
   }
 
@@ -252,14 +316,14 @@ export default function NoticePage() {
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
             >
-              {showForm ? "등록 취소" : "등록"}
+              {showForm ? t.registerCancel : t.register}
             </button>
             {formNotice ? <span className="success-text">{formNotice}</span> : null}
             {formError ? <span className="error-text">{formError}</span> : null}
           </div>
         ) : null}
 
-        {loading ? <p className="helper-text">Loading notices...</p> : null}
+        {loading ? <p className="helper-text">{t.loadingNotices}</p> : null}
         {listError ? <p className="error-text">{listError}</p> : null}
         {!loading && !listError && notices.length === 0 ? (
           <>
@@ -278,7 +342,7 @@ export default function NoticePage() {
                     setShowForm(true);
                   }}
                 >
-                  등록
+                  {t.register}
                 </button>
               </div>
             ) : null}
@@ -288,11 +352,13 @@ export default function NoticePage() {
           ? notices.map((item) => (
               <article key={item.id} className="panel" style={{ padding: 16, display: "grid", gap: 8 }}>
                 <time style={{ fontSize: 12, fontWeight: 700, opacity: 0.78 }} dateTime={item.createdAt}>
-                  {formatDate(item.createdAt)}
+                  {formatDate(item.createdAt, language)}
                 </time>
-                {item.pinned ? <span className="badge">Pinned</span> : null}
-                <h2 style={{ margin: 0, fontSize: 20, letterSpacing: "-0.02em" }}>{item.title}</h2>
-                <p className="section-copy" style={{ margin: 0, whiteSpace: "pre-wrap" }}>
+                {item.pinned ? <span className="badge">{t.pinned}</span> : null}
+                <p
+                  className="section-copy"
+                  style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: `${normalizeNoticeFontSize(item.fontSize)}px` }}
+                >
                   {item.content}
                 </p>
                 {canManageNotices ? (
@@ -302,19 +368,19 @@ export default function NoticePage() {
                       type="button"
                       onClick={() => {
                         setEditingId(item.id);
-                        setTitle(item.title);
                         setContent(item.content);
                         setPinned(item.pinned);
+                        setFontSize(normalizeNoticeFontSize(item.fontSize));
                         setFormError(null);
                         setFormNotice(null);
                         setShowForm(true);
                         window.scrollTo({ top: 0, behavior: "smooth" });
                       }}
                     >
-                      Edit
+                      {t.edit}
                     </button>
                     <button className="btn-ghost" type="button" onClick={() => void onDelete(item.id)}>
-                      Delete
+                      {t.delete}
                     </button>
                   </div>
                 ) : null}
@@ -326,22 +392,11 @@ export default function NoticePage() {
       {canManageNotices && showForm ? (
         <section className="panel" style={{ padding: 16, display: "grid", gap: 10, maxWidth: 860 }}>
           <h2 className="project-detail-subtitle" style={{ margin: 0 }}>
-            {editingId === null ? "Create Notice" : "Edit Notice"}
+            {editingId === null ? t.createNotice : t.editNotice}
           </h2>
           <form onSubmit={onSubmit} style={{ display: "grid", gap: 10 }}>
-            <label className="field-label" htmlFor="notice-title">
-              Title
-            </label>
-            <input
-              id="notice-title"
-              className="field-input"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              maxLength={140}
-              required
-            />
             <label className="field-label" htmlFor="notice-content">
-              Content
+              {t.content}
             </label>
             <textarea
               id="notice-content"
@@ -353,6 +408,34 @@ export default function NoticePage() {
               required
               style={{ resize: "vertical", minHeight: 140 }}
             />
+            <label className="field-label" htmlFor="notice-font-size">
+              {t.textSize}
+            </label>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <input
+                id="notice-font-size"
+                type="range"
+                min={MIN_NOTICE_FONT_SIZE}
+                max={MAX_NOTICE_FONT_SIZE}
+                step={1}
+                value={fontSize}
+                onChange={(event) => setFontSize(normalizeNoticeFontSize(Number(event.target.value)))}
+                style={{ width: "min(340px, 100%)" }}
+              />
+              <input
+                type="number"
+                className="field-input"
+                min={MIN_NOTICE_FONT_SIZE}
+                max={MAX_NOTICE_FONT_SIZE}
+                step={1}
+                value={fontSize}
+                onChange={(event) => setFontSize(normalizeNoticeFontSize(Number(event.target.value)))}
+                style={{ width: 88, padding: "8px 10px" }}
+              />
+              <span className="helper-text" style={{ fontWeight: 700 }}>
+                {fontSize}px
+              </span>
+            </div>
             <label style={{ display: "inline-flex", alignItems: "center", gap: 8, width: "fit-content", cursor: "pointer" }}>
               <input
                 type="checkbox"
@@ -360,12 +443,12 @@ export default function NoticePage() {
                 onChange={(event) => setPinned(event.target.checked)}
               />
               <span className="field-label" style={{ margin: 0 }}>
-                Pin to top
+                {t.pinToTop}
               </span>
             </label>
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <button className="btn" type="submit" disabled={submitting}>
-                {submitting ? "Saving..." : editingId === null ? "Create" : "Update"}
+                {submitting ? t.saving : editingId === null ? t.create : t.update}
               </button>
               <button
                 className="btn-ghost"
@@ -377,7 +460,7 @@ export default function NoticePage() {
                   setShowForm(false);
                 }}
               >
-                Cancel
+                {t.cancel}
               </button>
               {formNotice ? <span className="success-text">{formNotice}</span> : null}
               {formError ? <span className="error-text">{formError}</span> : null}

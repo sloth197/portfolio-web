@@ -7,6 +7,7 @@ type PopupNotice = {
   id: string;
   title: string;
   message: string;
+  fontSize: number;
 };
 
 type NoticeDto = {
@@ -14,6 +15,7 @@ type NoticeDto = {
   title: string;
   content: string;
   pinned: boolean;
+  fontSize: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -25,6 +27,22 @@ const THEME_CHANGE_EVENT = "portfolio-theme-change";
 const NOTICE_BRAND_ICON_DARK_URL = "/warning-dark.png";
 const NOTICE_BRAND_ICON_LIGHT_URL = "/warning-light.png";
 const POPUP_FIXED_TITLE = "NOTICE";
+const DEFAULT_NOTICE_FONT_SIZE = 18;
+const MIN_NOTICE_FONT_SIZE = 12;
+const MAX_NOTICE_FONT_SIZE = 48;
+
+function normalizeNoticeFontSize(value: number | null | undefined): number {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return DEFAULT_NOTICE_FONT_SIZE;
+  }
+  if (value < MIN_NOTICE_FONT_SIZE) {
+    return MIN_NOTICE_FONT_SIZE;
+  }
+  if (value > MAX_NOTICE_FONT_SIZE) {
+    return MAX_NOTICE_FONT_SIZE;
+  }
+  return Math.round(value);
+}
 
 function popupStorageKey(id: string): string {
   return `${POPUP_STORAGE_PREFIX}${id}`;
@@ -99,6 +117,7 @@ export default function SiteNoticePopups() {
               id: `notice-${notice.id}`,
               title: typeof notice.title === "string" && notice.title.trim() ? notice.title : POPUP_FIXED_TITLE,
               message: typeof notice.content === "string" ? notice.content : "",
+              fontSize: normalizeNoticeFontSize(notice.fontSize),
             }))
             .filter((notice) => !isHiddenForToday(notice.id));
 
@@ -180,7 +199,7 @@ export default function SiteNoticePopups() {
                 <span className="site-popup-brand site-popup-brand-main">{POPUP_FIXED_TITLE}</span>
               </span>
               <div className="site-popup-body-divider" aria-hidden="true" />
-              <div className="site-popup-copy">
+              <div className="site-popup-copy" style={{ fontSize: `${notice.fontSize}px` }}>
                 {String(notice.message ?? "").split(/\r?\n/).map((line, index) => (
                   <p key={`${notice.id}-${index}`}>{line}</p>
                 ))}

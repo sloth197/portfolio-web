@@ -10,13 +10,13 @@
   --accent-strong: #08584d;
   --accent-soft: #dff2ed;
   --header-bg: #f4f1e9;
-  --header-border: rgba(120, 130, 148, 0.18);
-  --footer-border: rgba(120, 130, 148, 0.2);
+  --header-border: #7882942e;
+  --footer-border: #78829433;
   --bg-spot-a: #efe6d6;
   --bg-spot-b: #d9ece7;
   --bg-linear-a: #f6f2ea;
   --bg-linear-b: #f3efe7;
-  --ghost-bg: rgba(250, 247, 239, 0.8);
+  --ghost-bg: #faf7efcc;
   --ghost-hover: #fffdf8;
   --field-border: #cad1da;
   --field-bg: #ffffff;
@@ -24,8 +24,11 @@
   --success: #115948;
   --error: #b21e32;
   --card-hover-border: #b9c4d0;
-  --card-hover-shadow: 0 18px 30px rgba(20, 28, 38, 0.1);
-  --shadow: 0 20px 36px rgba(19, 24, 32, 0.08);
+  --card-hover-shadow: 0 18px 30px #141c261a;
+  --shadow: 0 20px 36px #13182014;
+  --light-card-opacity: 0.88;
+  --light-tech-card-opacity: var(--light-card-opacity);
+  --light-interest-pill-opacity: var(--light-card-opacity);
   --radius-lg: 20px;
   /* Rollback switch: set to 0 to disable animated starlight background */
   --starlight-enabled: 1;
@@ -39,24 +42,24 @@
   --stroke: #2f3a46;
   --accent: #24a396;
   --accent-strong: #58d1c4;
-  --accent-soft: rgba(36, 163, 150, 0.16);
+  --accent-soft: #24a39629;
   --header-bg: #0f1216;
-  --header-border: rgba(102, 121, 143, 0.32);
-  --footer-border: rgba(102, 121, 143, 0.3);
+  --header-border: #66798f52;
+  --footer-border: #66798f4d;
   --bg-spot-a: #1a2632;
   --bg-spot-b: #1a2f2f;
   --bg-linear-a: #0e1218;
   --bg-linear-b: #111821;
-  --ghost-bg: rgba(31, 39, 48, 0.78);
-  --ghost-hover: rgba(44, 55, 67, 0.85);
+  --ghost-bg: #1f2730c7;
+  --ghost-hover: #2c3743d9;
   --field-border: #3a4552;
   --field-bg: #131921;
   --field-label: #c2cbda;
   --success: #6be0c1;
   --error: #ff8fa0;
   --card-hover-border: #4a5b70;
-  --card-hover-shadow: 0 18px 30px rgba(2, 6, 12, 0.46);
-  --shadow: 0 20px 36px rgba(2, 6, 12, 0.32);
+  --card-hover-shadow: 0 18px 30px #02060c75;
+  --shadow: 0 20px 36px #02060c52;
 }
 
 @theme inline {
@@ -111,6 +114,33 @@ body::after {
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+  opacity: calc(1 * var(--starlight-enabled));
+}
+
+.site-light-lottie-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 220ms ease;
+  overflow: hidden;
+}
+
+.site-light-lottie-bg.is-active {
+  opacity: calc(1 * var(--starlight-enabled));
+}
+
+.site-light-lottie-canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: 220%;
+  height: 220%;
+  transform: translate(-50%, -50%) scale(0.46);
+  transform-origin: center center;
+  display: block;
 }
 
 .site-random-twinkle-star {
@@ -128,8 +158,20 @@ body::after {
   mix-blend-mode: screen;
 }
 
-:root[data-theme="light"] .site-random-twinkle-star {
-  filter: saturate(0.96);
+:root[data-theme="dark"] .site-light-lottie-bg {
+  opacity: 0 !important;
+}
+
+:root[data-theme="light"] body {
+  background: var(--bg);
+}
+
+:root[data-theme="light"] .site-light-lottie-bg {
+  display: none !important;
+}
+
+:root[data-theme="light"] .site-random-twinkle {
+  display: none !important;
 }
 
 @keyframes site-random-twinkle {
@@ -726,8 +768,8 @@ a {
 }
 
 .top-banner {
-  --banner-a: #efe3cf;
-  --banner-b: #e3d3b8;
+  --banner-a: var(--bg);
+  --banner-b: var(--bg);
   position: relative;
   overflow: hidden;
   color: #322a1f;
@@ -779,38 +821,42 @@ a {
 }
 
 .top-banner-home {
-  --banner-a: #efe3cf;
-  --banner-b: #e3d3b8;
+  --banner-a: var(--bg);
+  --banner-b: var(--bg);
 }
 
 .top-banner-projects {
-  --banner-a: #efe3cf;
-  --banner-b: #e3d3b8;
+  --banner-a: var(--bg);
+  --banner-b: var(--bg);
 }
 
 .top-banner-about {
-  --banner-a: #efe3cf;
-  --banner-b: #e3d3b8;
+  --banner-a: var(--bg);
+  --banner-b: var(--bg);
 }
 
 .top-banner-contact {
-  --banner-a: #efe3cf;
-  --banner-b: #e3d3b8;
+  --banner-a: var(--bg);
+  --banner-b: var(--bg);
 }
 
 .top-banner-login {
-  --banner-a: #efe3cf;
-  --banner-b: #e3d3b8;
+  --banner-a: var(--bg);
+  --banner-b: var(--bg);
 }
 
 .top-banner-admin {
-  --banner-a: #efe3cf;
-  --banner-b: #e3d3b8;
+  --banner-a: var(--bg);
+  --banner-b: var(--bg);
 }
 
 .top-banner-project-detail {
-  --banner-a: #efe3cf;
-  --banner-b: #e3d3b8;
+  --banner-a: var(--bg);
+  --banner-b: var(--bg);
+}
+
+:root[data-theme="light"] .top-banner::before {
+  content: none;
 }
 
 :root[data-theme="dark"] .top-banner {
@@ -892,11 +938,11 @@ a {
 }
 
 .about-neo-shell {
-  --neo-bg: color-mix(in srgb, var(--bg) 82%, var(--surface) 18%);
-  --neo-surface: color-mix(in srgb, var(--surface) 93%, var(--bg) 7%);
-  --neo-surface-soft: color-mix(in srgb, var(--surface) 86%, var(--bg) 14%);
-  --neo-section-bg: color-mix(in srgb, var(--surface) 95%, var(--bg) 5%);
-  --neo-border: color-mix(in srgb, var(--stroke) 78%, var(--accent) 22%);
+  --neo-bg: #101418;
+  --neo-surface: #161a20;
+  --neo-surface-soft: #151a1f;
+  --neo-section-bg: #161b20;
+  --neo-border: #2d5158;
   --neo-accent: var(--accent);
   --neo-accent-soft: var(--accent-soft);
   --neo-text: var(--foreground);
@@ -905,9 +951,9 @@ a {
   gap: clamp(22px, 3vw, 34px);
   color: var(--foreground);
   background:
-    radial-gradient(circle at 84% 8%, color-mix(in srgb, var(--bg-spot-b) 86%, transparent 14%) 0%, transparent 38%),
-    radial-gradient(circle at 6% 2%, color-mix(in srgb, var(--bg-spot-a) 84%, transparent 16%) 0%, transparent 42%),
-    linear-gradient(170deg, var(--neo-bg) 0%, color-mix(in srgb, var(--neo-bg) 88%, var(--surface) 12%) 100%);
+    radial-gradient(circle at 84% 8%, #1a2f2fdb 0%, #0000 38%),
+    radial-gradient(circle at 6% 2%, #1a2632d6 0%, #0000 42%),
+    linear-gradient(170deg, var(--neo-bg) 0%, #111519 100%);
   border-radius: 28px;
   padding: clamp(18px, 3.6vw, 34px);
   border: 1px solid var(--stroke);
@@ -935,7 +981,7 @@ a {
 }
 
 .about-neo-marker span {
-  background: color-mix(in srgb, var(--accent) 24%, var(--surface) 76%);
+  background: #193c3d;
   color: var(--accent-strong);
   border-radius: 999px;
   padding: 4px 9px;
@@ -1008,12 +1054,12 @@ a {
 .about-neo-btn-primary {
   color: #f5fffd;
   background: var(--accent);
-  border: 1px solid color-mix(in srgb, var(--accent-strong) 44%, transparent 56%);
+  border: 1px solid #58d1c470;
 }
 
 .about-neo-btn-ghost {
   color: var(--foreground);
-  background: color-mix(in srgb, var(--surface) 90%, var(--bg) 10%);
+  background: #151a20;
   border: 1px solid var(--stroke);
 }
 
@@ -1027,13 +1073,13 @@ a {
   width: min(290px, 82%);
   aspect-ratio: 3 / 4;
   border-radius: 18px;
-  border: 1px solid color-mix(in srgb, var(--accent) 58%, var(--stroke) 42%);
+  border: 1px solid #297774;
   background:
-    radial-gradient(circle at 66% 26%, rgba(255, 255, 255, 0.24), transparent 35%),
+    radial-gradient(circle at 66% 26%, #ffffff3d, #0000 35%),
     linear-gradient(
       155deg,
-      color-mix(in srgb, var(--bg-spot-b) 36%, var(--surface) 64%) 0%,
-      color-mix(in srgb, var(--bg-spot-a) 42%, var(--surface) 58%) 100%
+      #172226 0%,
+      #182028 100%
     );
   transform: rotate(4deg);
   display: grid;
@@ -1047,7 +1093,7 @@ a {
   width: 240px;
   aspect-ratio: 1;
   border-radius: 999px;
-  background: radial-gradient(circle at center, color-mix(in srgb, var(--accent-soft) 74%, transparent 26%) 0%, transparent 68%);
+  background: radial-gradient(circle at center, #24a3961e 0%, #0000 68%);
 }
 
 .about-neo-portrait-mark {
@@ -1110,9 +1156,9 @@ a {
   border-radius: 16px;
   border: 1px solid var(--stroke);
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 56%, transparent 44%), transparent 52%),
-    radial-gradient(circle at 52% 24%, rgba(255, 255, 255, 0.2), transparent 33%),
-    color-mix(in srgb, var(--surface) 88%, var(--bg) 12%);
+    linear-gradient(180deg, #24a39617, #0000 52%),
+    radial-gradient(circle at 52% 24%, #ffffff33, #0000 33%),
+    #151a20;
 }
 
 .about-neo-about-text {
@@ -1132,9 +1178,9 @@ a {
 }
 
 .about-neo-service-item {
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid #ffffff24;
   border-radius: 12px;
-  background: rgba(8, 11, 10, 0.74);
+  background: #080b0abd;
   padding: 8px 12px;
 }
 
@@ -1231,6 +1277,26 @@ a {
   margin-left: auto;
 }
 
+:root[data-theme="light"] .about-neo-work-card,
+:root[data-theme="light"] .about-neo-tool-card {
+  background: rgba(255, 255, 255, var(--light-tech-card-opacity)) !important;
+}
+
+:root[data-theme="light"] .about-neo-work-card :where(*),
+:root[data-theme="light"] .about-neo-tool-card :where(*) {
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
+:root[data-theme="light"] .about-neo-interest-pill {
+  background: rgba(255, 255, 255, var(--light-interest-pill-opacity)) !important;
+}
+
+:root[data-theme="light"] .about-neo-interest-pill :where(*) {
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
 .about-neo-tech-icon-stack {
   display: inline-flex;
   align-items: center;
@@ -1274,8 +1340,8 @@ a {
   gap: 6px;
   padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--stroke) 80%, var(--accent) 20%);
-  background: color-mix(in srgb, var(--surface) 92%, var(--accent-soft) 8%);
+  border: 1px solid #2d4f56;
+  background: #17262a;
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 600;
@@ -1288,8 +1354,8 @@ a {
   border: 1px solid var(--stroke);
   padding: clamp(18px, 3vw, 32px);
   background:
-    radial-gradient(circle at 25% 68%, color-mix(in srgb, var(--accent-soft) 70%, transparent 30%) 0%, transparent 42%),
-    linear-gradient(160deg, var(--neo-surface) 0%, color-mix(in srgb, var(--neo-surface) 86%, var(--bg) 14%) 70%);
+    radial-gradient(circle at 25% 68%, #24a3961d 0%, #0000 42%),
+    linear-gradient(160deg, var(--neo-surface) 0%, #15191f 70%);
 }
 
 .about-neo-wave-overlay {
@@ -1297,8 +1363,8 @@ a {
   inset: auto -10% -36% -10%;
   height: 64%;
   background:
-    radial-gradient(120% 80% at 45% 0%, color-mix(in srgb, var(--accent-soft) 74%, transparent 26%), transparent 58%),
-    radial-gradient(100% 70% at 80% 20%, color-mix(in srgb, var(--accent-soft) 56%, transparent 44%), transparent 64%);
+    radial-gradient(120% 80% at 45% 0%, #24a3961e, #0000 58%),
+    radial-gradient(100% 70% at 80% 20%, #24a39617, #0000 64%);
   filter: blur(2px);
   pointer-events: none;
 }
@@ -1326,8 +1392,8 @@ a {
 
 .about-neo-faq-item {
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(8, 12, 10, 0.78);
+  border: 1px solid #ffffff24;
+  background: #080c0ac7;
   padding: 8px 11px;
 }
 
@@ -1401,36 +1467,36 @@ a {
   cursor: pointer;
 }
 
-:root:not([data-theme="dark"]) .about-neo-shell {
-  --neo-bg: color-mix(in srgb, var(--surface) 95%, var(--bg) 5%);
-  --neo-surface: color-mix(in srgb, var(--surface) 97%, var(--bg) 3%);
-  --neo-surface-soft: color-mix(in srgb, var(--surface) 95%, var(--bg) 5%);
-  --neo-section-bg: color-mix(in srgb, var(--surface) 98%, var(--bg) 2%);
-  --neo-border: color-mix(in srgb, var(--stroke) 88%, var(--accent) 12%);
+:root[data-theme="light"] .about-neo-shell {
+  --neo-bg: #fefcf7;
+  --neo-surface: #fffdf8;
+  --neo-surface-soft: #fefcf7;
+  --neo-section-bg: #fffdf8;
+  --neo-border: #bfc6b9;
   background:
-    radial-gradient(circle at 86% 10%, color-mix(in srgb, var(--bg-spot-b) 58%, transparent 42%) 0%, transparent 46%),
-    linear-gradient(180deg, var(--neo-bg) 0%, color-mix(in srgb, var(--neo-bg) 96%, var(--surface) 4%) 100%);
-  box-shadow: 0 14px 26px rgba(18, 24, 32, 0.08);
+    radial-gradient(circle at 86% 10%, #d9ece794 0%, #0000 46%),
+    linear-gradient(180deg, #fefcf7 0%, #fefcf7 100%);
+  box-shadow: 0 14px 26px #12182014;
 }
 
-:root:not([data-theme="dark"]) .about-neo-marker span {
-  background: color-mix(in srgb, var(--accent-soft) 38%, var(--surface) 62%);
+:root[data-theme="light"] .about-neo-marker span {
+  background: #f3f9f4;
 }
 
-:root:not([data-theme="dark"]) .about-neo-kicker {
-  color: var(--accent-strong);
-  background: color-mix(in srgb, var(--accent-soft) 60%, var(--surface) 40%);
+:root[data-theme="light"] .about-neo-kicker {
+  color: #08584d;
+  background: #ecf6f1;
 }
 
-:root:not([data-theme="dark"]) .about-neo-portrait-glow,
-:root:not([data-theme="dark"]) .about-neo-wave-overlay {
+:root[data-theme="light"] .about-neo-portrait-glow,
+:root[data-theme="light"] .about-neo-wave-overlay {
   opacity: 0.48;
 }
 
-:root:not([data-theme="dark"]) .about-neo-wave {
+:root[data-theme="light"] .about-neo-wave {
   background:
-    radial-gradient(circle at 25% 68%, color-mix(in srgb, var(--accent-soft) 42%, transparent 58%) 0%, transparent 42%),
-    linear-gradient(160deg, var(--neo-surface) 0%, color-mix(in srgb, var(--neo-surface) 96%, var(--bg) 4%) 70%);
+    radial-gradient(circle at 25% 68%, #dff2ed6b 0%, #0000 42%),
+    linear-gradient(160deg, #fffdf8 0%, #fffdf7 70%);
 }
 
 @media (max-width: 980px) {
@@ -1771,7 +1837,7 @@ a {
 
 .home-profile-slot {
   justify-self: end;
-  transform: translate(-10px, 99px);
+  transform: translate(-45px, 130px);
 }
 
 .home-profile-photo {
@@ -2391,9 +2457,9 @@ mark {
 }
 
 .site-popup-stack {
-  width: min(760px, 100%);
+  width: min(608px, 100%);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 256px), 1fr));
   gap: 12px;
   align-items: start;
 }
@@ -2402,7 +2468,8 @@ mark {
   pointer-events: auto;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  max-height: min(72vh, 580px);
+  width: 100%;
+  height: min(78vh, 960px);
   border-radius: 8px;
   border: 1px solid #9098a6;
   background: #fefefe;
@@ -2529,7 +2596,7 @@ mark {
 
 :root[data-theme="light"] .site-popup {
   border-color: #7f7f7f;
-  background: #f4f4f4;
+  background: #ffffff;
   color: #202020;
   box-shadow: 0 18px 28px rgba(8, 12, 18, 0.24);
 }
@@ -2555,11 +2622,46 @@ mark {
 
 :root[data-theme="light"] .site-popup-foot {
   border-top-color: #8d8d8d;
-  background: #f4f4f4;
+  background: #ffffff;
 }
 
 :root[data-theme="light"] .site-popup-foot-btn + .site-popup-foot-btn {
   border-left-color: #8d8d8d;
+}
+
+:root[data-theme="dark"] .site-popup {
+  border-color: #2f3a46;
+  background: #161b21;
+  color: #edf1f6;
+  box-shadow: 0 22px 34px rgba(2, 6, 12, 0.44);
+}
+
+:root[data-theme="dark"] .site-popup-brand,
+:root[data-theme="dark"] .site-popup-icon-close,
+:root[data-theme="dark"] .site-popup-foot-btn {
+  color: #edf1f6;
+}
+
+:root[data-theme="dark"] .site-popup-copy {
+  color: #d5dbe5;
+}
+
+:root[data-theme="dark"] .site-popup-body-divider {
+  background: #2f3a46;
+}
+
+:root[data-theme="dark"] .site-popup-icon-close:hover,
+:root[data-theme="dark"] .site-popup-foot-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .site-popup-foot {
+  border-top-color: #2f3a46;
+  background: #111821;
+}
+
+:root[data-theme="dark"] .site-popup-foot-btn + .site-popup-foot-btn {
+  border-left-color: #2f3a46;
 }
 
 body.site-popup-lock-active .site-shell :is(a, button, input, select, textarea, summary, [role="button"]) {
@@ -2687,12 +2789,12 @@ body.site-popup-lock-active .site-shell .floating-theme-toggle * {
   }
 
   .site-popup-stack {
-    width: min(94vw, 720px);
+    width: min(75vw, 576px);
   }
 
   .site-popup {
     width: 100%;
-    height: min(80vh, 700px);
+    height: min(78vh, 1120px);
   }
 
   .site-popup-copy {
@@ -2714,5 +2816,36 @@ body.site-popup-lock-active .site-shell .floating-theme-toggle * {
     padding: 12px 8px;
   }
 }
+
+:root[data-theme="light"] .site-shell :where(*):not(img):not(svg):not(path):not(circle):not(rect):not(line):not(polyline):not(polygon):not(canvas):not(hr):not([class*="divider"]):not(.site-popup-body-divider):not(.theme-switch):not(.theme-pill):not(.about-neo-work-card):not(.about-neo-tool-card):not(.about-neo-interest-pill):not(.about-neo-work-card *):not(.about-neo-tool-card *):not(.about-neo-interest-pill *),
+:root[data-theme="light"] .site-popup-layer :where(*):not(img):not(svg):not(path):not(circle):not(rect):not(line):not(polyline):not(polygon):not(canvas):not(hr):not([class*="divider"]):not(.site-popup-body-divider):not(.theme-switch):not(.theme-pill):not(.about-neo-work-card):not(.about-neo-tool-card):not(.about-neo-interest-pill):not(.about-neo-work-card *):not(.about-neo-tool-card *):not(.about-neo-interest-pill *) {
+  background-image: none !important;
+  background-color: var(--bg) !important;
+}
+
+:root[data-theme="light"] :is(.site-header, .site-main, .site-footer, .site-popup-layer) :where(*):not(img):not(svg):not(path):not(circle):not(rect):not(line):not(polyline):not(polygon):not(canvas):not(.theme-switch):not(.theme-pill) {
+  color: var(--foreground) !important;
+}
+
+:root[data-theme="light"] :is(
+  .panel,
+  .surface-card,
+  .top-banner,
+  .project-card,
+  .projects-filter-bar,
+  .projects-filter-pill,
+  .projects-empty-state,
+  .project-showcase-card,
+  .project-tag-pill,
+  .project-period-badge,
+  .project-detail-related-item,
+  .project-detail-related-item.is-current,
+  .project-asset-card,
+  .admin-asset-item
+) {
+  background-image: none !important;
+  background-color: rgba(255, 255, 255, var(--light-card-opacity)) !important;
+}
+
 
 
