@@ -38,14 +38,14 @@ public class PublicApiAuthInterceptor implements HandlerInterceptor {
         }
 
         String uri = request.getRequestURI();
+        String normalizedUri = normalizeUri(uri);
         if (!uri.startsWith("/api/public/")) {
             return true;
         }
 
-        if (uri.startsWith("/api/public/auth/")
-                || uri.startsWith("/api/public/notices")
-                || "/api/public/health".equals(uri)
-                || "/api/public/health/".equals(uri)) {
+        if (normalizedUri.startsWith("/api/public/auth")
+                || normalizedUri.startsWith("/api/public/notices")
+                || "/api/public/health".equals(normalizedUri)) {
             return true;
         }
 
@@ -56,6 +56,16 @@ public class PublicApiAuthInterceptor implements HandlerInterceptor {
         }
 
         return true;
+    }
+
+    private static String normalizeUri(String uri) {
+        if (uri == null || uri.isBlank() || "/".equals(uri)) {
+            return "/";
+        }
+        if (uri.endsWith("/")) {
+            return uri.substring(0, uri.length() - 1);
+        }
+        return uri;
     }
 
     private static String readCookie(HttpServletRequest request, String name) {
