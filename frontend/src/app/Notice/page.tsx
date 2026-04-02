@@ -195,6 +195,8 @@ export default function NoticePage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          // Keep legacy compatibility with older backend versions requiring title.
+          title: "공지",
           content: content.trim(),
           pinned,
           fontSize: normalizeNoticeFontSize(fontSize),
