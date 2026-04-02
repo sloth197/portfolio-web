@@ -335,8 +335,8 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
             value={category}
             onChange={(event) => setCategory(event.target.value as ProjectCategory)}
           >
-            <option value="SOFTWARE">Software</option>
-            <option value="FIRMWARE">Firmware</option>
+            <option value="SOFTWARE">C#</option>
+            <option value="FIRMWARE">Java</option>
           </select>
 
           <label className="field-label" htmlFor="edit-title">

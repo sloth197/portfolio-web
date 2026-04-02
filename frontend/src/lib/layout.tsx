@@ -4,7 +4,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Portfolio",
-  description: "Firmware & Software Portfolio",
+  description: "Java & C# Portfolio",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

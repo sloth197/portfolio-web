@@ -36,6 +36,10 @@ function sortProjectsForSidebar(items: ProjectDto[]): ProjectDto[] {
   });
 }
 
+function getLanguageLabelByCategory(category: ProjectCategory): string {
+  return category === "SOFTWARE" ? "C#" : "Java";
+}
+
 function resolveAssetUrl(url: string): string {
   if (url.startsWith("http://") || url.startsWith("https://")) {
     return url;
@@ -113,7 +117,7 @@ export default async function ProjectDetailPage({
 
         <div className="project-badge-row">
           <span className="badge">
-            {project.category === "SOFTWARE" ? "software" : "firmware"}
+            {getLanguageLabelByCategory(project.category)}
           </span>
           {project.projectPeriod ? <span className="project-period-badge">{project.projectPeriod}</span> : null}
         </div>
@@ -175,8 +179,8 @@ export default async function ProjectDetailPage({
           <h2 className="project-detail-subtitle">Other Projects</h2>
 
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <Link className="badge" href="/projects?category=SOFTWARE">software</Link>
-            <Link className="badge" href="/projects?category=FIRMWARE">firmware</Link>
+            <Link className="badge" href="/projects?category=SOFTWARE">C#</Link>
+            <Link className="badge" href="/projects?category=FIRMWARE">Java</Link>
             <Link className="badge" href="/projects">Projects</Link>
           </div>
 
@@ -190,7 +194,7 @@ export default async function ProjectDetailPage({
                   className={`project-detail-related-item ${isCurrent ? "is-current" : ""}`}
                 >
                   <span className="badge">
-                    {item.category === "SOFTWARE" ? "software" : "firmware"}
+                    {getLanguageLabelByCategory(item.category)}
                   </span>
                   <div className="project-detail-related-title">{item.title}</div>
                   {item.projectPeriod ? (

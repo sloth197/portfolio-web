@@ -40,14 +40,18 @@ function formatCreatedLabel(value: string): string {
   return `${year}.${month}`;
 }
 
-function buildSectionTitle(selectedCategory?: ProjectCategory): string {
+function buildLanguageSectionTitle(selectedCategory?: ProjectCategory): string {
   if (selectedCategory === "SOFTWARE") {
-    return "Software projects";
+    return "C# projects";
   }
   if (selectedCategory === "FIRMWARE") {
-    return "Firmware projects";
+    return "Java projects";
   }
   return "All projects";
+}
+
+function getLanguageLabelByCategory(category: ProjectCategory): string {
+  return category === "SOFTWARE" ? "C#" : "Java";
 }
 
 export default function ProjectsListPanel({ projects, selectedCategory }: Props) {
@@ -57,7 +61,7 @@ export default function ProjectsListPanel({ projects, selectedCategory }: Props)
     <section className="projects-gallery">
       <div className="projects-gallery-head">
         <div style={{ display: "grid", gap: 6 }}>
-          <h2 className="projects-gallery-title">{buildSectionTitle(selectedCategory)}</h2>
+          <h2 className="projects-gallery-title">{buildLanguageSectionTitle(selectedCategory)}</h2>
           <p className="projects-gallery-copy">{`${projects.length} projects available`}</p>
         </div>
         {canManageProjects ? (
@@ -74,7 +78,7 @@ export default function ProjectsListPanel({ projects, selectedCategory }: Props)
           {projects.map((project, index) => (
             <article key={project.id} className="project-showcase-card">
               <div className={`project-showcase-shot shot-variant-${index % 6}`}>
-                <span className="project-showcase-category">{project.category}</span>
+                <span className="project-showcase-category">{getLanguageLabelByCategory(project.category)}</span>
                 <span className="project-showcase-slug">{project.slug}</span>
               </div>
 
@@ -83,9 +87,7 @@ export default function ProjectsListPanel({ projects, selectedCategory }: Props)
                 <p className="project-showcase-summary">{project.summary}</p>
 
                 <div className="project-tag-row">
-                  <span className="project-tag-pill">
-                    {project.category === "SOFTWARE" ? "software" : "firmware"}
-                  </span>
+                  <span className="project-tag-pill">{getLanguageLabelByCategory(project.category)}</span>
                   <span className="project-tag-pill">{project.projectPeriod?.trim() || formatCreatedLabel(project.createdAt)}</span>
                 </div>
 

@@ -1836,6 +1836,18 @@ LIGHT_THEME_DISABLED_END */
   border-radius: 999px;
 }
 
+.badge.badge-java {
+  color: #26FF00;
+  background: #6845FF;
+  border-color: #2E11D4;
+}
+
+.badge.badge-csharp {
+  color: #26FF00;
+  background: #6845FF;
+  border-color: #2E11D4;
+}
+
 .btn,
 .btn-ghost {
   display: inline-flex;
@@ -2060,7 +2072,11 @@ LIGHT_THEME_DISABLED_END */
 }
 
 .home-merged-home {
-  padding: 2px 2px 0;
+  padding: 2px 2px clamp(8px, 1.2vw, 14px);
+}
+
+.home-merged-page {
+  margin-top: clamp(40px, 6vw, 88px);
 }
 
 .home-merged-home-layout {
@@ -2084,6 +2100,10 @@ LIGHT_THEME_DISABLED_END */
   max-width: 720px;
 }
 
+.home-hero-heading {
+  min-height: clamp(84px, 8.8vw, 114px);
+}
+
 .home-hero-subtitle {
   margin: 0;
   max-width: 720px;
@@ -2101,12 +2121,12 @@ LIGHT_THEME_DISABLED_END */
 
 .home-profile-slot {
   justify-self: end;
-  transform: translate(-45px, 130px);
+  transform: translate(clamp(-45px, -3.2vw, -20px), 90px);
 }
 
 .home-profile-photo {
   position: relative;
-  width: clamp(84px, 8vw, 112px);
+  width: clamp(97px, 9.2vw, 135px);
   aspect-ratio: 1 / 1;
   border-radius: 999px;
   border: 0;
@@ -2134,16 +2154,16 @@ LIGHT_THEME_DISABLED_END */
   .home-merged-home-layout {
     grid-template-columns: 1fr;
     justify-items: start;
-    gap: 14px;
+    gap: 18px;
   }
 
   .home-profile-slot {
     justify-self: start;
-    transform: translate(0, 6px);
+    transform: translate(0, 2px);
   }
 
   .home-profile-photo {
-    width: 96px;
+    width: clamp(98px, 30vw, 110px);
   }
 }
 
@@ -2152,7 +2172,7 @@ LIGHT_THEME_DISABLED_END */
   border: 0;
   box-shadow: none;
   padding: 0;
-  gap: clamp(30px, 3.4vw, 42px);
+  gap: clamp(56px, 7vw, 92px);
   overflow: visible;
 }
 
@@ -2168,11 +2188,30 @@ LIGHT_THEME_DISABLED_END */
 
 .home-merged-about-section .about-neo-about-text {
   padding-inline-start: 2px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0;
+  min-height: clamp(142px, 12.8vw, 176px);
+}
+
+.home-merged-about-section .about-neo-work-title {
+  min-height: 2.6em;
+  display: flex;
+  align-items: center;
 }
 
 .home-merged-about-section .about-neo-tool-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
+}
+
+.home-merged-about-section .about-neo-debug-section:nth-of-type(2) {
+  margin-bottom: clamp(36px, 5.6vw, 72px);
+}
+
+.home-merged-project-section {
+  margin-top: clamp(60px, 8vw, 104px);
 }
 
 @media (min-width: 981px) {
@@ -2196,6 +2235,7 @@ LIGHT_THEME_DISABLED_END */
 }
 
 .home-merged-contact-section {
+  margin-top: clamp(96px, 12vw, 168px);
   margin-bottom: clamp(64px, 9vw, 132px);
 }
 
@@ -3153,6 +3193,7 @@ LIGHT_THEME_DISABLED_END */
   background-color: rgba(255, 255, 255, var(--light-card-opacity)) !important;
 }
 LIGHT_THEME_DISABLED_END */
+
 
 
 

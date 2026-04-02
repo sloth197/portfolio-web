@@ -24,7 +24,7 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: "JWS Portfolio",
-  description: "Firmware and software portfolio",
+  description: "Java and C# portfolio",
 };
 
 const themeBootScript = `

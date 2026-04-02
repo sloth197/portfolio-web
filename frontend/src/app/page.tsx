@@ -14,6 +14,7 @@ export default async function Home() {
       <section id="home" className="home-merged-home" style={{ display: "grid", gap: 18 }}>
         <div className="home-merged-home-layout">
           <h1
+            className="home-hero-heading"
             style={{
               margin: 0,
               fontSize: "clamp(2rem, 5vw, 3.3rem)",
@@ -23,9 +24,8 @@ export default async function Home() {
               whiteSpace: "pre-line",
             }}
           >
-            <I18nText ko="안녕하세요!" en={""} /> <br />
-            <I18nText ko="제 포트폴리오에 오신 것을 환영합니다." en={`Hi!
-Welcome to my Portfolio!`} />
+            <I18nText ko="안녕하세요!" en="Hi!" /> <br />
+            <I18nText ko="제 포트폴리오에 오신 것을 환영합니다." en="Welcome to my Portfolio!" />
           </h1>
 
           <div className="home-profile-slot" aria-label="Profile photo placeholder">
@@ -35,7 +35,7 @@ Welcome to my Portfolio!`} />
                 alt="Profile photo"
                 fill
                 className="home-profile-photo-image"
-                sizes="(max-width: 900px) 96px, 8vw"
+                sizes="(max-width: 900px) 110px, (max-width: 1400px) 9.2vw, 129px"
                 priority
               />
             </div>
@@ -47,7 +47,7 @@ Welcome to my Portfolio!`} />
         <AboutPage />
       </section>
 
-      <section style={{ display: "grid", gap: 20 }}>
+      <section className="home-merged-project-section" style={{ display: "grid", gap: 20 }}>
         <h2 className="section-title">PROJECT</h2>
         <div
           style={{
@@ -56,9 +56,11 @@ Welcome to my Portfolio!`} />
             gap: 14,
           }}
         >
+          <Link className="panel project-card" href="/projects?category=FIRMWARE" style={{ padding: 18, display: "grid" }}>
+            <span className="badge badge-java">Java</span>
+          </Link>
           <Link className="panel project-card" href="/projects?category=SOFTWARE" style={{ padding: 18, display: "grid" }}>
-            <span className="badge">Software</span>
-            <p className="section-copy" style={{ marginTop: 12 }}>Software List</p>
+            <span className="badge badge-csharp">C#</span>
           </Link>
         </div>
       </section>

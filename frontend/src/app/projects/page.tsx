@@ -16,6 +16,10 @@ function buildProjectsPath(category?: ProjectCategory): string {
   return query ? `/projects?${query}` : "/projects";
 }
 
+function getLanguageLabelByCategory(category: ProjectCategory): string {
+  return category === "SOFTWARE" ? "C#" : "Java";
+}
+
 export default async function ProjectsPage({
   searchParams,
 }: {
@@ -47,19 +51,17 @@ export default async function ProjectsPage({
 
   const filteredProjects = filterProjectsByCategory(allProjects, selectedCategory);
   const totalCount = allProjects.length;
-  const softwareCount = allProjects.filter((project) => project.category === "SOFTWARE").length;
-  const firmwareCount = allProjects.filter((project) => project.category === "FIRMWARE").length;
+  const csharpProjectCount = allProjects.filter((project) => project.category === "SOFTWARE").length;
+  const javaProjectCount = allProjects.filter((project) => project.category === "FIRMWARE").length;
   const sortedProjects = [...filteredProjects].sort((a, b) => a.title.localeCompare(b.title));
 
   return (
     <div className="projects-layout-preview">
-      <section
-        className="surface-card top-banner top-banner-projects"
-        style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 10 }}
-      >
-        <span className="badge">My Projects</span>
-        <h1 className="section-title">Featured Projects</h1>
-      </section>
+      <div style={{ display: "grid", justifyItems: "center" }}>
+        <h1 className="section-title" style={{ textAlign: "center", margin: 0 }}>
+          Featured Project
+        </h1>
+      </div>
 
       <section className="projects-filter-bar">
         <Link className={`projects-filter-pill ${!selectedCategory ? "is-active" : ""}`} href={buildProjectsPath()}>
@@ -69,13 +71,13 @@ export default async function ProjectsPage({
           className={`projects-filter-pill ${selectedCategory === "SOFTWARE" ? "is-active" : ""}`}
           href={buildProjectsPath("SOFTWARE")}
         >
-          {`software (${softwareCount})`}
+          {`${getLanguageLabelByCategory("SOFTWARE")} (${csharpProjectCount})`}
         </Link>
         <Link
           className={`projects-filter-pill ${selectedCategory === "FIRMWARE" ? "is-active" : ""}`}
           href={buildProjectsPath("FIRMWARE")}
         >
-          {`firmware (${firmwareCount})`}
+          {`${getLanguageLabelByCategory("FIRMWARE")} (${javaProjectCount})`}
         </Link>
       </section>
 

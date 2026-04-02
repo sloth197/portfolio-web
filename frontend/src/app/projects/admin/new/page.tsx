@@ -158,7 +158,7 @@ export default function AdminProjectCreatePage() {
         <span className="badge">Admin</span>
         <h1 className="section-title">Create Project</h1>
         <p className="section-copy" style={{ fontSize: 14 }}>
-          Create firmware/software projects and optionally upload image, GIF, or document files.
+          Create Java/C# projects and optionally upload image, GIF, or document files.
         </p>
       </section>
 
@@ -173,8 +173,8 @@ export default function AdminProjectCreatePage() {
             value={category}
             onChange={(event) => setCategory(event.target.value as ProjectCategory)}
           >
-            <option value="SOFTWARE">Software</option>
-            <option value="FIRMWARE">Firmware</option>
+            <option value="SOFTWARE">C#</option>
+            <option value="FIRMWARE">Java</option>
           </select>
 
           <label className="field-label" htmlFor="project-title">
