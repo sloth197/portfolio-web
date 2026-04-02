@@ -32,14 +32,14 @@ public class AdminNoticeController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
     public NoticeDto create(@Valid @RequestBody NoticeCreateRequest request) {
-        Notice created = noticeCommandService.create(new Notice(request.title(), request.content(), request.pinned()));
+        Notice created = noticeCommandService.create(new Notice(request.content(), request.pinned(), request.fontSize()));
         return NoticeDto.from(created);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public NoticeDto update(@PathVariable Long id, @Valid @RequestBody NoticeUpdateRequest request) {
-        Notice updated = noticeCommandService.update(id, new Notice(request.title(), request.content(), request.pinned()));
+        Notice updated = noticeCommandService.update(id, new Notice(request.content(), request.pinned(), request.fontSize()));
         return NoticeDto.from(updated);
     }
 

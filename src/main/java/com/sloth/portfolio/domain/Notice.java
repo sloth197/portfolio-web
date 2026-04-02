@@ -22,6 +22,11 @@ import java.time.Instant;
 )
 public class Notice {
 
+    private static final String DEFAULT_TITLE = "공지";
+    private static final int DEFAULT_FONT_SIZE = 18;
+    private static final int MIN_FONT_SIZE = 12;
+    private static final int MAX_FONT_SIZE = 48;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,6 +41,9 @@ public class Notice {
     @Column(name = "is_pinned")
     private Boolean pinned;
 
+    @Column(name = "font_size")
+    private Integer fontSize;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -46,10 +54,11 @@ public class Notice {
         // JPA
     }
 
-    public Notice(String title, String content, boolean pinned) {
-        this.title = requireNonBlank(title, "title", 140);
+    public Notice(String content, boolean pinned, Integer fontSize) {
+        this.title = DEFAULT_TITLE;
         this.content = requireNonBlank(content, "content", 5000);
         this.pinned = pinned;
+        this.fontSize = normalizeFontSize(fontSize);
     }
 
     @PrePersist
@@ -60,6 +69,7 @@ public class Notice {
         if (this.pinned == null) {
             this.pinned = false;
         }
+        this.fontSize = normalizeFontSize(this.fontSize);
     }
 
     @PreUpdate
@@ -67,10 +77,10 @@ public class Notice {
         this.updatedAt = Instant.now();
     }
 
-    public void update(String title, String content, boolean pinned) {
-        this.title = requireNonBlank(title, "title", 140);
+    public void update(String content, boolean pinned, Integer fontSize) {
         this.content = requireNonBlank(content, "content", 5000);
         this.pinned = pinned;
+        this.fontSize = normalizeFontSize(fontSize);
     }
 
     public Long getId() {
@@ -87,6 +97,10 @@ public class Notice {
 
     public boolean isPinned() {
         return Boolean.TRUE.equals(pinned);
+    }
+
+    public int getFontSize() {
+        return normalizeFontSize(fontSize);
     }
 
     public Instant getCreatedAt() {
@@ -106,5 +120,15 @@ public class Notice {
             throw new IllegalArgumentException(field + " length must be <= " + maxLength);
         }
         return trimmed;
+    }
+
+    private static int normalizeFontSize(Integer value) {
+        if (value == null) {
+            return DEFAULT_FONT_SIZE;
+        }
+        if (value < MIN_FONT_SIZE || value > MAX_FONT_SIZE) {
+            throw new IllegalArgumentException("fontSize must be between " + MIN_FONT_SIZE + " and " + MAX_FONT_SIZE);
+        }
+        return value;
     }
 }

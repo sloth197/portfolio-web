@@ -9,6 +9,7 @@ public record NoticeDto(
         String title,
         String content,
         boolean pinned,
+        int fontSize,
         Instant createdAt,
         Instant updatedAt
 ) {
@@ -18,6 +19,7 @@ public record NoticeDto(
                 notice.getTitle(),
                 notice.getContent(),
                 notice.isPinned(),
+                notice.getFontSize(),
                 notice.getCreatedAt(),
                 notice.getUpdatedAt()
         );

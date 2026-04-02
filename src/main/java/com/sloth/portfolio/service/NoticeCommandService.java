@@ -22,7 +22,7 @@ public class NoticeCommandService {
     public Notice update(Long id, Notice newValue) {
         Notice existing = noticeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Notice not found: id=" + id));
-        existing.update(newValue.getTitle(), newValue.getContent(), newValue.isPinned());
+        existing.update(newValue.getContent(), newValue.isPinned(), newValue.getFontSize());
         return existing;
     }
 
