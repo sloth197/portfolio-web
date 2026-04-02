@@ -103,6 +103,14 @@ function getTechIconClass(label: string): string {
   return "about-neo-tech-icon";
 }
 
+function splitLevelText(level: string): { value: string; unit: string } {
+  const trimmed = level.trim();
+  if (trimmed.endsWith("%")) {
+    return { value: trimmed.slice(0, -1).trim(), unit: "%" };
+  }
+  return { value: trimmed, unit: "" };
+}
+
 export default function AboutPage() {
   return (
     <div className="about-neo-shell">
@@ -123,7 +131,7 @@ Building projects using Java, Spring, and C#, focusing on API design and data pr
             <p>
               <I18nText
                 ko="사용가능한 실제 서비스를 구현함에 있어 안정적인 시스템을 구현하는 것을 목표로 하고 있습니다."
-                en="My goal is to build stable systems for practical, real-world services."
+                en="My goal is to build stable systems for practical, real services."
               />
             </p>
           </div>
@@ -153,26 +161,32 @@ Building projects using Java, Spring, and C#, focusing on API design and data pr
             <I18nText ko="주요 기술 스택" en="Core Tech Stack" />
           </h2>
           <div className="about-neo-tool-grid">
-            {TOOLS.map((tool) => (
-              <article key={tool.name} className="about-neo-tool-card">
-                <span className="about-neo-tool-name">
-                  <span className="about-neo-tech-icon-stack" aria-hidden="true">
-                    {tool.icons.map((icon) => (
-                      <Image
-                        key={`${tool.name}-${icon.label}`}
-                        src={icon.src}
-                        alt=""
-                        width={16}
-                        height={16}
-                        className={getTechIconClass(icon.label)}
-                      />
-                    ))}
+            {TOOLS.map((tool) => {
+              const level = splitLevelText(tool.level);
+              return (
+                <article key={tool.name} className="about-neo-tool-card">
+                  <span className="about-neo-tool-name">
+                    <span className="about-neo-tech-icon-stack" aria-hidden="true">
+                      {tool.icons.map((icon) => (
+                        <Image
+                          key={`${tool.name}-${icon.label}`}
+                          src={icon.src}
+                          alt=""
+                          width={16}
+                          height={16}
+                          className={getTechIconClass(icon.label)}
+                        />
+                      ))}
+                    </span>
+                    <span>{tool.name}</span>
                   </span>
-                  <span>{tool.name}</span>
-                </span>
-                <strong>{tool.level}</strong>
-              </article>
-            ))}
+                  <strong>
+                    <span className="about-neo-level-value">{level.value}</span>
+                    <span className="about-neo-level-unit">{level.unit}</span>
+                  </strong>
+                </article>
+              );
+            })}
           </div>
           <div className="about-neo-interest-wrap">
             <h3 className="about-neo-interest-title">

@@ -16,14 +16,8 @@ export default function SiteNavLinks() {
       <Link className="nav-link" href="/#home">
         Home
       </Link>
-      <Link className="nav-link" href="/#about">
-        About
-      </Link>
-      <Link className="nav-link" href="/#contact">
-        Contact
-      </Link>
-      <Link className="nav-link" href="/projects">
-        Projects
+      <Link className="nav-link" href="/#projects">
+        Project
       </Link>
       {adminLoggedIn ? (
         <Link className="nav-link" href="/Notice">

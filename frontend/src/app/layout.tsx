@@ -70,7 +70,7 @@ export default function RootLayout({
           <header className="site-header">
             <div className="site-header-inner">
               <Link className="brand-mark" href="/">
-                JWS Portfolio
+                JWS
               </Link>
               <nav className="site-nav">
                 <SiteNavLinks />
@@ -91,7 +91,7 @@ export default function RootLayout({
             </div>
           </footer>
 
-          {/* 테마 토클 버튼 주석 
+          {/* 테마 토글 버튼 주석 처리
           <div className="floating-theme-toggle">
             <ThemeToggle />
           </div>

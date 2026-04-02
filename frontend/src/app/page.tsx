@@ -7,10 +7,10 @@ import HomeItNewsStrip from "@/components/home-it-news-strip";
 import { fetchHomeTechNews } from "@/lib/tech-news";
 
 export default async function Home() {
-  const newsItems = await fetchHomeTechNews(10);
+  const newsItems = await fetchHomeTechNews(30);
 
   return (
-    <div className="home-merged-page" style={{ display: "grid", gap: 32 }}>
+    <div className="home-merged-page" style={{ display: "grid", gap: 18 }}>
       <section id="home" className="home-merged-home" style={{ display: "grid", gap: 18 }}>
         <div className="home-merged-home-layout">
           <h1
@@ -47,8 +47,8 @@ Welcome to my Portfolio!`} />
         <AboutPage />
       </section>
 
-      <section style={{ display: "grid", gap: 14 }}>
-        <h2 className="section-title">Projects</h2>
+      <section style={{ display: "grid", gap: 20 }}>
+        <h2 className="section-title">PROJECT</h2>
         <div
           style={{
             display: "grid",
@@ -56,12 +56,6 @@ Welcome to my Portfolio!`} />
             gap: 14,
           }}
         >
-          <Link className="panel project-card" href="/projects?category=FIRMWARE" style={{ padding: 18, display: "grid" }}>
-            <span className="badge">Firmware</span>
-            <p className="section-copy" style={{ marginTop: 12 }}>Firmware List</p>
-          </Link>
-          
-
           <Link className="panel project-card" href="/projects?category=SOFTWARE" style={{ padding: 18, display: "grid" }}>
             <span className="badge">Software</span>
             <p className="section-copy" style={{ marginTop: 12 }}>Software List</p>

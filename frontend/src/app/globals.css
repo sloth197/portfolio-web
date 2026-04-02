@@ -9,6 +9,10 @@
   --accent: #0f7568;
   --accent-strong: #08584d;
   --accent-soft: #dff2ed;
+  --tool-level-value-color: #08584d;
+  --tool-level-unit-color: #0f7568;
+  --about-tool-icon-size: 16px;
+  --about-interest-icon-size: 14px;
   --header-bg: #f4f1e9;
   --header-border: #7882942e;
   --footer-border: #78829433;
@@ -43,6 +47,10 @@
   --accent: #24a396;
   --accent-strong: #58d1c4;
   --accent-soft: #24a39629;
+  --tool-level-value-color: #6845FF;
+  --tool-level-unit-color: #6845FF;
+  --about-tool-icon-size: 18px;
+  --about-interest-icon-size: 16px;
   --header-bg: #0f1216;
   --header-border: #66798f52;
   --footer-border: #66798f4d;
@@ -1480,7 +1488,6 @@ LIGHT_THEME_DISABLED_END */
   text-align: left;
   min-height: 52px;
 }
-
 .about-neo-tool-name {
   display: flex;
   align-items: center;
@@ -1493,10 +1500,20 @@ LIGHT_THEME_DISABLED_END */
 }
 
 .about-neo-tool-card strong {
-  color: var(--accent-strong);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
   font-size: 1.02rem;
   white-space: nowrap;
   margin-left: auto;
+}
+
+.about-neo-level-value {
+  color: var(--tool-level-value-color);
+}
+
+.about-neo-level-unit {
+  color: var(--tool-level-unit-color);
 }
 
 /* 밝은(Gen)테마 주석 처리
@@ -1537,9 +1554,14 @@ LIGHT_THEME_DISABLED_END */
 
 .about-neo-tech-icon {
   display: block;
-  width: 1em;
-  height: 1em;
+  width: var(--about-tool-icon-size);
+  height: var(--about-tool-icon-size);
   object-fit: contain;
+}
+
+.about-neo-interest-pill .about-neo-tech-icon {
+  width: var(--about-interest-icon-size);
+  height: var(--about-interest-icon-size);
 }
 
 :root[data-theme="dark"] .about-neo-tech-icon-vercel {
@@ -2087,7 +2109,7 @@ LIGHT_THEME_DISABLED_END */
   width: clamp(84px, 8vw, 112px);
   aspect-ratio: 1 / 1;
   border-radius: 999px;
-  border: 6px solid rgba(140, 148, 160, 0.9);
+  border: 0;
   background:
     radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.92), rgba(232, 234, 238, 0.94) 56%, rgba(214, 217, 223, 0.94) 100%);
   display: grid;
@@ -2122,7 +2144,6 @@ LIGHT_THEME_DISABLED_END */
 
   .home-profile-photo {
     width: 96px;
-    border-width: 5px;
   }
 }
 
@@ -2131,7 +2152,7 @@ LIGHT_THEME_DISABLED_END */
   border: 0;
   box-shadow: none;
   padding: 0;
-  gap: 18px;
+  gap: clamp(30px, 3.4vw, 42px);
   overflow: visible;
 }
 
@@ -2172,6 +2193,10 @@ LIGHT_THEME_DISABLED_END */
 
 .home-merged-contact-section .top-banner-contact {
   display: none !important;
+}
+
+.home-merged-contact-section {
+  margin-bottom: clamp(64px, 9vw, 132px);
 }
 
 .home-merged-contact-section > div {
@@ -2658,6 +2683,25 @@ mark {
   font-size: 0.9rem;
   font-weight: 600;
   word-break: break-word;
+}
+
+:root[data-theme="dark"] :is(
+  .surface-card,
+  .panel,
+  .project-card,
+  .about-neo-shell,
+  .about-neo-work-card,
+  .about-neo-tool-card,
+  .about-neo-interest-pill,
+  .about-neo-stat-card,
+  .about-neo-about-photo,
+  .about-neo-wave,
+  .project-detail-related-item,
+  .project-asset-card,
+  .admin-asset-item,
+  .site-popup
+) {
+  border-color: #544A8C;
 }
 
 .theme-switch {
