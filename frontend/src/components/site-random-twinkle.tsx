@@ -2,8 +2,6 @@
 
 import { useEffect, useState, type CSSProperties } from "react";
 
-type Theme = "light" | "dark";
-
 type TwinkleStar = {
   x: number;
   y: number;
@@ -38,20 +36,6 @@ const DARK_STAR_COLORS: StarColorOption[] = [
   { color: [188, 214, 255], weight: 4 }, // bluish
   { color: [255, 220, 172], weight: 2 }, // warmer star
 ];
-
-function readTheme(): Theme {
-  if (typeof window === "undefined") {
-    return "dark";
-  }
-
-  const fromDataset = document.documentElement.dataset.theme;
-  if (fromDataset === "light" || fromDataset === "dark") {
-    return fromDataset;
-  }
-
-  const saved = window.localStorage.getItem(THEME_STORAGE_KEY);
-  return saved === "light" ? "light" : "dark";
-}
 
 function randomBetween(min: number, max: number): number {
   return min + (max - min) * Math.random();
@@ -108,8 +92,8 @@ function buildDarkStars(width: number, height: number): TwinkleStar[] {
   return stars;
 }
 
-function buildStars(width: number, height: number, theme: Theme): TwinkleStar[] {
-  return theme === "dark" ? buildDarkStars(width, height) : [];
+function buildStars(width: number, height: number): TwinkleStar[] {
+  return buildDarkStars(width, height);
 }
 
 export default function SiteRandomTwinkle() {
@@ -117,7 +101,7 @@ export default function SiteRandomTwinkle() {
 
   useEffect(() => {
     const apply = () => {
-      setStars(buildStars(window.innerWidth, window.innerHeight, readTheme()));
+      setStars(buildStars(window.innerWidth, window.innerHeight));
     };
 
     let rebuildTimer = 0;

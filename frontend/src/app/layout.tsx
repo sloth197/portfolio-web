@@ -8,7 +8,6 @@ import LanguageToggle from "@/components/language-toggle";
 import SiteNavLinks from "@/components/site-nav-links";
 import SiteNoticePopups from "@/components/site-notice-popups";
 import SiteRandomTwinkle from "@/components/site-random-twinkle";
-import ThemeToggle from "@/components/theme-toggle";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -31,14 +30,11 @@ export const metadata: Metadata = {
 const themeBootScript = `
 (() => {
   try {
-    const sessionUserSet = sessionStorage.getItem("portfolio-theme-session-user-set") === "1";
-    const saved = localStorage.getItem("portfolio-theme");
-    const userSet = localStorage.getItem("portfolio-theme-user-set") === "1";
-    if (sessionUserSet && userSet && (saved === "dark" || saved === "light")) {
-      document.documentElement.dataset.theme = saved;
-    } else {
-      document.documentElement.dataset.theme = "dark";
-    }
+    // Light theme is disabled. Always use dark theme on boot.
+    document.documentElement.dataset.theme = "dark";
+    localStorage.setItem("portfolio-theme", "dark");
+    localStorage.setItem("portfolio-theme-user-set", "1");
+    sessionStorage.setItem("portfolio-theme-session-user-set", "1");
 
     const savedLanguage = localStorage.getItem("portfolio-language");
     if (savedLanguage === "en" || savedLanguage === "ko") {
@@ -62,7 +58,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-theme="dark">
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
@@ -95,9 +91,11 @@ export default function RootLayout({
             </div>
           </footer>
 
+          {/* 테마 토클 버튼 주석 
           <div className="floating-theme-toggle">
             <ThemeToggle />
           </div>
+          */}
         </div>
       </body>
     </html>

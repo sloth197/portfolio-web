@@ -23,9 +23,8 @@ type NoticeDto = {
 const INTRO_TOTAL_MS = 4000;
 const POPUP_STORAGE_PREFIX = "xhbt-popup-hide-until:";
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
-const THEME_CHANGE_EVENT = "portfolio-theme-change";
 const NOTICE_BRAND_ICON_DARK_URL = "/warning-dark.png";
-const NOTICE_BRAND_ICON_LIGHT_URL = "/warning-light.png";
+// const NOTICE_BRAND_ICON_LIGHT_URL = "/warning-light.png";
 const POPUP_FIXED_TITLE = "NOTICE";
 const DEFAULT_NOTICE_FONT_SIZE = 18;
 const MIN_NOTICE_FONT_SIZE = 12;
@@ -70,21 +69,6 @@ export default function SiteNoticePopups() {
   const pathname = usePathname();
   const [visibleNotices, setVisibleNotices] = useState<PopupNotice[]>([]);
   const [showBrandIcon, setShowBrandIcon] = useState(true);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
-
-  useEffect(() => {
-    const readTheme = () => (document.documentElement.dataset.theme === "light" ? "light" : "dark");
-    const syncTheme = () => setTheme(readTheme());
-
-    syncTheme();
-    window.addEventListener(THEME_CHANGE_EVENT, syncTheme);
-    window.addEventListener("storage", syncTheme);
-
-    return () => {
-      window.removeEventListener(THEME_CHANGE_EVENT, syncTheme);
-      window.removeEventListener("storage", syncTheme);
-    };
-  }, []);
 
   useEffect(() => {
     if (pathname !== "/") {
@@ -166,7 +150,7 @@ export default function SiteNoticePopups() {
     return null;
   }
 
-  const noticeBrandIconSrc = theme === "light" ? NOTICE_BRAND_ICON_LIGHT_URL : NOTICE_BRAND_ICON_DARK_URL;
+  const noticeBrandIconSrc = NOTICE_BRAND_ICON_DARK_URL;
 
   return (
     <div className="site-popup-layer" aria-live="polite">
