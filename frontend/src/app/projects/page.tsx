@@ -14,15 +14,22 @@ export default async function ProjectsPage() {
       revalidateSeconds: PROJECTS_REVALIDATE_SECONDS,
     });
   } catch (error) {
+    let handledApiError = false;
+
     if (error instanceof ApiError) {
       if (error.status === 404) {
         notFound();
+      }
+
+      if (error.status === 401 || error.status === 403 || error.status >= 500) {
+        allProjects = [];
+        handledApiError = true;
       }
     }
 
     if (process.env.NODE_ENV !== "production") {
       allProjects = PREVIEW_PROJECTS;
-    } else {
+    } else if (!handledApiError) {
       throw error;
     }
   }
