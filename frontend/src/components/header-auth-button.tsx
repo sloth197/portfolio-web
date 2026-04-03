@@ -11,6 +11,7 @@ import {
   subscribeAdminAuth,
   type AdminRole,
 } from "@/lib/admin-auth";
+import { getPublicApiBaseUrl } from "@/lib/api-base";
 
 function getServerSnapshot(): boolean {
   return false;
@@ -20,7 +21,7 @@ function getServerRoleSnapshot(): AdminRole | null {
   return null;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE = getPublicApiBaseUrl();
 
 function normalizeRole(value: unknown): AdminRole {
   return value === "CRM" ? "CRM" : "ADMIN";

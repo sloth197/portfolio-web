@@ -1,12 +1,9 @@
 import "server-only";
 
+import { getPublicApiBaseUrl } from "./api-base";
 import type { ProjectCategory, ProjectDto } from "./types";
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-if (!BASE) {
-  throw new Error("NEXT_PUBLIC_API_BASE_URL is not set. Add it to .env.local");
-}
+const BASE = getPublicApiBaseUrl();
 
 export class ApiError extends Error {
   status: number;

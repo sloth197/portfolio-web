@@ -1,14 +1,7 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+import { getPublicApiBaseUrl, getPublicApiOrigin } from "./api-base";
 
 function getApiOrigin(): string | null {
-  if (!API_BASE) {
-    return null;
-  }
-  try {
-    return new URL(API_BASE).origin;
-  } catch {
-    return null;
-  }
+  return getPublicApiOrigin();
 }
 
 function isLegacyPortfolioApiHost(hostname: string): boolean {
@@ -17,6 +10,7 @@ function isLegacyPortfolioApiHost(hostname: string): boolean {
 }
 
 export function resolvePublicAssetUrl(url: string): string {
+  const apiBase = getPublicApiBaseUrl();
   const trimmed = url.trim();
   if (!trimmed) {
     return trimmed;
@@ -37,5 +31,5 @@ export function resolvePublicAssetUrl(url: string): string {
     }
   }
 
-  return API_BASE ? `${API_BASE}${trimmed}` : trimmed;
+  return apiBase ? `${apiBase}${trimmed}` : trimmed;
 }

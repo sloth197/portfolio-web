@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getPublicApiBaseUrl } from "@/lib/api-base";
 
 type PopupNotice = {
   id: string;
@@ -22,7 +23,7 @@ type NoticeDto = {
 
 const INTRO_TOTAL_MS = 4000;
 const POPUP_STORAGE_PREFIX = "xhbt-popup-hide-until:";
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE = getPublicApiBaseUrl();
 const NOTICE_BRAND_ICON_DARK_URL = "/warning-dark.png";
 // const NOTICE_BRAND_ICON_LIGHT_URL = "/warning-light.png";
 const POPUP_FIXED_TITLE = "NOTICE";

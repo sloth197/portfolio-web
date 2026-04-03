@@ -3,10 +3,11 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { clearAdminAuthHeader, getAdminRole, isAdminLoggedIn, setAdminAuthSession } from "@/lib/admin-auth";
+import { getPublicApiBaseUrl } from "@/lib/api-base";
 import NotionMarkdownEditor from "@/components/notion-markdown-editor";
 import type { ProjectCategory, ProjectDto } from "@/lib/types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE = getPublicApiBaseUrl();
 const FILE_INPUT_ACCEPT = "image/*,.pdf,.zip,.md,.txt,.doc,.docx,.ppt,.pptx,.xls,.xlsx";
 
 function normalizeCategory(value: string | null): ProjectCategory {

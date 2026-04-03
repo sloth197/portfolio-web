@@ -3,8 +3,9 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { setAdminAuthSession, type AdminRole } from "@/lib/admin-auth";
+import { getPublicApiBaseUrl } from "@/lib/api-base";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE = getPublicApiBaseUrl();
 
 function sanitizeNextPath(value: string | null): string {
   if (!value) {

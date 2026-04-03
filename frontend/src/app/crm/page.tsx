@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { clearAdminAuthHeader, getAdminRole, isAdminLoggedIn, setAdminAuthSession, type AdminRole } from "@/lib/admin-auth";
+import { getPublicApiBaseUrl } from "@/lib/api-base";
 import I18nText from "@/components/i18n-text";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE = getPublicApiBaseUrl();
 
 type CrmStatus = "checking" | "ok" | "error";
 

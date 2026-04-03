@@ -9,8 +9,9 @@ import {
   subscribeAdminAuth,
   type AdminRole,
 } from "@/lib/admin-auth";
+import { getPublicApiBaseUrl } from "@/lib/api-base";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE = getPublicApiBaseUrl();
 const DEFAULT_NOTICE_FONT_SIZE = 18;
 const MIN_NOTICE_FONT_SIZE = 12;
 const MAX_NOTICE_FONT_SIZE = 48;
