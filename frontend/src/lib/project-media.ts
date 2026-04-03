@@ -1,6 +1,5 @@
 import type { ProjectAssetDto, ProjectDto } from "./types";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+import { resolvePublicAssetUrl } from "./asset-url";
 
 function hasImageExtension(value: string): boolean {
   const lower = value.toLowerCase();
@@ -24,13 +23,6 @@ function isImageAsset(asset: ProjectAssetDto): boolean {
   return hasImageExtension(asset.originalName) || hasImageExtension(asset.url);
 }
 
-function resolveAssetUrl(url: string): string {
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    return url;
-  }
-  return API_BASE ? `${API_BASE}${url}` : url;
-}
-
 export type ProjectPreviewMedia = {
   alt: string;
   url: string;
@@ -44,7 +36,7 @@ export function pickProjectPreviewMedia(project: ProjectDto): ProjectPreviewMedi
   }
 
   return {
-    url: resolveAssetUrl(imageAsset.url),
+    url: resolvePublicAssetUrl(imageAsset.url),
     alt: imageAsset.originalName?.trim() || `${project.title} preview`,
   };
 }

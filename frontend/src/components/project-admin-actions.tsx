@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { canAdminManageProjects, clearAdminAuthHeader, isAdminLoggedIn, subscribeAdminAuth } from "@/lib/admin-auth";
+import { resolvePublicAssetUrl } from "@/lib/asset-url";
 import { useSiteLanguage } from "@/components/i18n-text";
 import NotionMarkdownEditor from "@/components/notion-markdown-editor";
 import type { ProjectAssetDto, ProjectCategory, ProjectDto } from "@/lib/types";
@@ -28,16 +29,6 @@ function slugify(value: string): string {
     .replace(/[^a-z0-9-]/g, "")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
-}
-
-function resolveAssetUrl(url: string): string {
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    return url;
-  }
-  if (API_BASE) {
-    return `${API_BASE}${url}`;
-  }
-  return url;
 }
 
 export default function ProjectAdminActions({ project, returnPath, disabled = false }: Props) {
@@ -473,7 +464,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
               <div className="field-label">{t.currentFiles}</div>
               <div className="admin-asset-list">
                 {sortedAssets.map((asset) => {
-                  const assetUrl = resolveAssetUrl(asset.url);
+                  const assetUrl = resolvePublicAssetUrl(asset.url);
                   return (
                     <div key={asset.id} className="admin-asset-item">
                       <a href={assetUrl} target="_blank" rel="noreferrer" className="admin-asset-link">

@@ -6,10 +6,9 @@ import remarkGfm from "remark-gfm";
 import I18nText from "@/components/i18n-text";
 import ProjectAdminActions from "@/components/project-admin-actions";
 import { ApiError, fetchProjectBySlug, fetchProjects } from "@/lib/api";
+import { resolvePublicAssetUrl } from "@/lib/asset-url";
 import { PREVIEW_PROJECTS, normalizeProjectCategory } from "@/lib/project-preview";
 import type { ProjectCategory, ProjectDto } from "@/lib/types";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
 function buildProjectsPath(selectedCategory?: ProjectCategory): string {
   if (!selectedCategory) {
@@ -39,16 +38,6 @@ function sortProjectsForSidebar(items: ProjectDto[]): ProjectDto[] {
 
 function getLanguageLabelByCategory(category: ProjectCategory): string {
   return category === "SOFTWARE" ? "C#" : "Java";
-}
-
-function resolveAssetUrl(url: string): string {
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    return url;
-  }
-  if (API_BASE) {
-    return `${API_BASE}${url}`;
-  }
-  return url;
 }
 
 function isImageAsset(contentType: string | null, url: string): boolean {
@@ -124,7 +113,7 @@ export default async function ProjectDetailPage({
   const sortedProjects = sortProjectsForSidebar(allProjects);
   const projectAssets = project.assets ?? [];
   const resolvedAssets = projectAssets.map((asset) => {
-    const assetUrl = resolveAssetUrl(asset.url);
+    const assetUrl = resolvePublicAssetUrl(asset.url);
     return {
       ...asset,
       assetUrl,
