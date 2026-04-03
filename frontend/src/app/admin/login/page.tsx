@@ -3,9 +3,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { setAdminAuthSession, type AdminRole } from "@/lib/admin-auth";
-import { getPublicApiBaseUrl } from "@/lib/api-base";
-
-const API_BASE = getPublicApiBaseUrl();
 
 function sanitizeNextPath(value: string | null): string {
   if (!value) {
@@ -40,16 +37,11 @@ export default function AdminLoginPage() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!API_BASE) {
-      setError("NEXT_PUBLIC_API_BASE_URL is not set.");
-      return;
-    }
-
     setSubmitting(true);
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE}/api/admin/auth/login`, {
+      const response = await fetch("/api/admin/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -11,7 +11,6 @@ import {
   subscribeAdminAuth,
   type AdminRole,
 } from "@/lib/admin-auth";
-import { getPublicApiBaseUrl } from "@/lib/api-base";
 
 function getServerSnapshot(): boolean {
   return false;
@@ -20,8 +19,6 @@ function getServerSnapshot(): boolean {
 function getServerRoleSnapshot(): AdminRole | null {
   return null;
 }
-
-const API_BASE = getPublicApiBaseUrl();
 
 function normalizeRole(value: unknown): AdminRole {
   return value === "CRM" ? "CRM" : "ADMIN";
@@ -33,14 +30,11 @@ export default function HeaderAuthButton() {
   const adminRole = useSyncExternalStore(subscribeAdminAuth, getAdminRole, getServerRoleSnapshot);
 
   useEffect(() => {
-    if (!API_BASE) {
-      return;
-    }
     const controller = new AbortController();
 
     async function syncSession() {
       try {
-        const response = await fetch(`${API_BASE}/api/admin/auth/session`, {
+        const response = await fetch("/api/admin/auth/session", {
           method: "GET",
           credentials: "include",
           cache: "no-store",
@@ -89,15 +83,13 @@ export default function HeaderAuthButton() {
         onClick={async () => {
           const confirmed = window.confirm(language === "en" ? "Do you want to log out?" : "\uB85C\uADF8\uC544\uC6C3 \uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?");
           if (confirmed) {
-            if (API_BASE) {
-              try {
-                await fetch(`${API_BASE}/api/admin/auth/logout`, {
-                  method: "POST",
-                  credentials: "include",
-                });
-              } catch {
-                // no-op
-              }
+            try {
+              await fetch("/api/admin/auth/logout", {
+                method: "POST",
+                credentials: "include",
+              });
+            } catch {
+              // no-op
             }
             clearAdminAuthHeader();
           }

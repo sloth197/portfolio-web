@@ -4,10 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { clearAdminAuthHeader, getAdminRole, isAdminLoggedIn, setAdminAuthSession, type AdminRole } from "@/lib/admin-auth";
-import { getPublicApiBaseUrl } from "@/lib/api-base";
 import I18nText from "@/components/i18n-text";
-
-const API_BASE = getPublicApiBaseUrl();
 
 type CrmStatus = "checking" | "ok" | "error";
 
@@ -17,9 +14,9 @@ function normalizeRole(value: unknown): AdminRole {
 
 export default function CrmPage() {
   const router = useRouter();
-  const [status, setStatus] = useState<CrmStatus>(API_BASE ? "checking" : "error");
+  const [status, setStatus] = useState<CrmStatus>("checking");
   const [role, setRole] = useState<AdminRole | null>(() => getAdminRole());
-  const [error, setError] = useState<string | null>(API_BASE ? null : "NEXT_PUBLIC_API_BASE_URL is not set.");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAdminLoggedIn()) {
@@ -27,15 +24,11 @@ export default function CrmPage() {
       return;
     }
 
-    if (!API_BASE) {
-      return;
-    }
-
     const controller = new AbortController();
 
     async function checkSession() {
       try {
-        const response = await fetch(`${API_BASE}/api/admin/auth/session`, {
+        const response = await fetch("/api/admin/auth/session", {
           method: "GET",
           credentials: "include",
           cache: "no-store",

@@ -80,11 +80,8 @@ export default function AdminProjectCreatePage() {
     const controller = new AbortController();
 
     async function verifySession() {
-      if (!API_BASE) {
-        return;
-      }
       try {
-        const response = await fetch(`${API_BASE}/api/admin/auth/session`, {
+        const response = await fetch("/api/admin/auth/session", {
           method: "GET",
           credentials: "include",
           cache: "no-store",
