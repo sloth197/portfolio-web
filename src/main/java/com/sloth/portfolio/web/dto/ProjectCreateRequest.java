@@ -8,7 +8,6 @@ import jakarta.validation.constraints.Size;
 public record ProjectCreateRequest(
         @NotNull ProjectCategory category,
         @NotBlank @Size(max = 120) String title,
-        @NotBlank @Size(max = 160) String slug,
         @NotBlank @Size(max = 300) String summary,
         @Size(max = 80) String projectPeriod,
         @NotBlank String contentMarkdown,

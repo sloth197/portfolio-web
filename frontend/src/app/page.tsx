@@ -1,13 +1,31 @@
-import Link from "next/link";
 import Image from "next/image";
 import AboutPage from "@/app/about/page";
 import ContactPage from "@/app/contact/page";
 import I18nText from "@/components/i18n-text";
 import HomeItNewsStrip from "@/components/home-it-news-strip";
+import ProjectShowcaseCard from "@/components/project-showcase-card";
+import { ApiError, fetchProjects } from "@/lib/api";
+import { PREVIEW_PROJECTS } from "@/lib/project-preview";
 import { fetchHomeTechNews } from "@/lib/tech-news";
+
+const HOME_PROJECTS_REVALIDATE_SECONDS = 120;
 
 export default async function Home() {
   const newsItems = await fetchHomeTechNews(30);
+  let projects: Awaited<ReturnType<typeof fetchProjects>> = [];
+
+  try {
+    projects = await fetchProjects(undefined, {
+      policy: "cached",
+      revalidateSeconds: HOME_PROJECTS_REVALIDATE_SECONDS,
+    });
+  } catch (error) {
+    if (error instanceof ApiError && process.env.NODE_ENV !== "production") {
+      projects = PREVIEW_PROJECTS;
+    }
+  }
+
+  const sortedProjects = [...projects].sort((a, b) => a.title.localeCompare(b.title));
 
   return (
     <div className="home-merged-page" style={{ display: "grid", gap: 18 }}>
@@ -24,8 +42,11 @@ export default async function Home() {
               whiteSpace: "pre-line",
             }}
           >
+            <I18nText ko="웹사이트 리뉴얼 중입니다. 곧 멋진 사이트로 돌아오겠습니다!" en="I am renewing my website. I'll be back with cool website soon!" />
+            {/*  사이트 리뉴얼 중이므로 임시 주석 처리
             <I18nText ko="안녕하세요!" en="Hi!" /> <br />
-            <I18nText ko="제 포트폴리오에 오신 것을 환영합니다." en="Welcome to my Portfolio!" />
+            <I18nText ko="제 포트폴리오에 오신 것을 환영합니다. " en="Welcome to my Portfolio!" />
+            */}
           </h1>
 
           <div className="home-profile-slot" aria-label="Profile photo placeholder">
@@ -49,20 +70,23 @@ export default async function Home() {
 
       <section className="home-merged-project-section" style={{ display: "grid", gap: 20 }}>
         <h2 className="section-title">PROJECT</h2>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: 14,
-          }}
-        >
-          <Link className="panel project-card" href="/projects?category=FIRMWARE" style={{ padding: 18, display: "grid" }}>
-            <span className="badge badge-java">Java</span>
-          </Link>
-          <Link className="panel project-card" href="/projects?category=SOFTWARE" style={{ padding: 18, display: "grid" }}>
-            <span className="badge badge-csharp">C#</span>
-          </Link>
-        </div>
+        {sortedProjects.length === 0 ? (
+          <div className="projects-empty-state">
+            <I18nText ko="표시할 프로젝트가 없습니다." en="No projects available yet." />
+          </div>
+        ) : (
+          <div className="projects-showcase-grid">
+            {sortedProjects.map((project, index) => (
+              <ProjectShowcaseCard
+                key={project.id}
+                href={`/projects/${project.slug}`}
+                index={index}
+                periodText={project.projectPeriod}
+                project={project}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       <section id="contact" className="home-merged-contact-section" style={{ display: "grid", gap: 10 }}>

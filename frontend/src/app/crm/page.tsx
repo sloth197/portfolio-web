@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { clearAdminAuthHeader, getAdminAuthHeader, getAdminRole, type AdminRole } from "@/lib/admin-auth";
+import { clearAdminAuthHeader, getAdminRole, isAdminLoggedIn, setAdminAuthSession, type AdminRole } from "@/lib/admin-auth";
 import I18nText from "@/components/i18n-text";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -21,12 +21,10 @@ export default function CrmPage() {
   const [error, setError] = useState<string | null>(API_BASE ? null : "NEXT_PUBLIC_API_BASE_URL is not set.");
 
   useEffect(() => {
-    const authHeader = getAdminAuthHeader();
-    if (!authHeader) {
+    if (!isAdminLoggedIn()) {
       router.replace("/admin/login?next=/crm");
       return;
     }
-    const authValue: string = authHeader;
 
     if (!API_BASE) {
       return;
@@ -36,9 +34,9 @@ export default function CrmPage() {
 
     async function checkSession() {
       try {
-        const response = await fetch(`${API_BASE}/api/admin/projects/ping`, {
+        const response = await fetch(`${API_BASE}/api/admin/auth/session`, {
           method: "GET",
-          headers: { Authorization: authValue },
+          credentials: "include",
           cache: "no-store",
           signal: controller.signal,
         });
@@ -54,8 +52,15 @@ export default function CrmPage() {
           return;
         }
 
-        const payload = (await response.json().catch(() => null)) as { role?: string } | null;
-        setRole(normalizeRole(payload?.role));
+        const payload = (await response.json().catch(() => null)) as { authenticated?: boolean; role?: string } | null;
+        if (!payload?.authenticated) {
+          clearAdminAuthHeader();
+          router.replace("/admin/login?next=/crm");
+          return;
+        }
+        const normalizedRole = normalizeRole(payload.role);
+        setAdminAuthSession(normalizedRole);
+        setRole(normalizedRole);
         setStatus("ok");
       } catch {
         setStatus("error");

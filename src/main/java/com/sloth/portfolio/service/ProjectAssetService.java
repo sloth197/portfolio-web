@@ -77,14 +77,26 @@ public class ProjectAssetService {
         ProjectAsset asset = projectAssetRepository.findById(assetId)
                 .orElseThrow(() -> new NotFoundException("Asset not found: id=" + assetId));
 
-        Path path = resolveSafePath(asset.getStoredName());
-        if (!Files.exists(path)) {
-            throw new NotFoundException("Asset file not found: id=" + assetId);
-        }
+        return loadAssetByStoredNameInternal(
+                asset.getStoredName(),
+                asset.getAssetType() == ProjectAssetType.IMAGE,
+                asset.getOriginalName(),
+                asset.getContentType()
+        );
+    }
 
-        Resource resource = new FileSystemResource(path.toFile());
-        boolean inline = asset.getAssetType() == ProjectAssetType.IMAGE;
-        return new AssetFile(asset, resource, inline);
+    @Transactional(readOnly = true)
+    public AssetFile loadAssetByStoredName(String storedName) {
+        String normalizedStoredName = normalizeStoredName(storedName);
+
+        ProjectAsset asset = projectAssetRepository.findByStoredName(normalizedStoredName).orElse(null);
+        boolean inline = asset != null
+                ? asset.getAssetType() == ProjectAssetType.IMAGE
+                : isImageByExtension(normalizedStoredName);
+        String originalName = asset != null ? asset.getOriginalName() : normalizedStoredName;
+        String contentType = asset != null ? asset.getContentType() : null;
+
+        return loadAssetByStoredNameInternal(normalizedStoredName, inline, originalName, contentType);
     }
 
     public void deleteAsset(Long projectId, Long assetId) {
@@ -116,6 +128,27 @@ public class ProjectAssetService {
             throw new InvalidFileException("Invalid file path");
         }
         return resolved;
+    }
+
+    private AssetFile loadAssetByStoredNameInternal(
+            String storedName,
+            boolean inline,
+            String originalName,
+            String contentType
+    ) {
+        Path path = resolveSafePath(storedName);
+        if (!Files.exists(path)) {
+            throw new NotFoundException("Asset file not found: storedName=" + storedName);
+        }
+        Resource resource = new FileSystemResource(path.toFile());
+        return new AssetFile(resource, originalName, contentType, inline);
+    }
+
+    private static String normalizeStoredName(String storedName) {
+        if (storedName == null || storedName.isBlank()) {
+            throw new NotFoundException("Asset not found: storedName is blank");
+        }
+        return storedName.trim();
     }
 
     private static String sanitizeFileName(String rawName) {
@@ -166,11 +199,21 @@ public class ProjectAssetService {
         if (contentType != null && contentType.toLowerCase(Locale.ROOT).startsWith("image/")) {
             return ProjectAssetType.IMAGE;
         }
-        if (".gif".equals(extension) || ".png".equals(extension) || ".jpg".equals(extension)
-                || ".jpeg".equals(extension) || ".webp".equals(extension) || ".svg".equals(extension)) {
+        if (isImageByExtension(extension)) {
             return ProjectAssetType.IMAGE;
         }
         return ProjectAssetType.FILE;
+    }
+
+    private static boolean isImageByExtension(String value) {
+        String lower = value.toLowerCase(Locale.ROOT);
+        return lower.endsWith(".gif")
+                || lower.endsWith(".png")
+                || lower.endsWith(".jpg")
+                || lower.endsWith(".jpeg")
+                || lower.endsWith(".webp")
+                || lower.endsWith(".svg")
+                || lower.endsWith(".avif");
     }
 
     private void deleteStoredFileQuietly(String storedName) {
@@ -181,7 +224,7 @@ public class ProjectAssetService {
         }
     }
 
-    public record AssetFile(ProjectAsset asset, Resource resource, boolean inline) {
+    public record AssetFile(Resource resource, String originalName, String contentType, boolean inline) {
     }
 
     public static class NotFoundException extends RuntimeException {

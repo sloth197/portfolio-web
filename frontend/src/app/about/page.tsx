@@ -11,12 +11,12 @@ const WORKFLOW_CARDS = [
     enTitle: "Structure-Driven Development",
   },
   {
-    koTitle: "TEST",
-    enTitle: "TEST",
+    koTitle: "협업",
+    enTitle: "Work Together",
   },
   {
-    koTitle: "TEST",
-    enTitle: "TEST",
+    koTitle: "아직 미정",
+    enTitle: "Not Yet",
   },
 ];
 
@@ -121,6 +121,10 @@ export default function AboutPage() {
           </h2>
           <div className="about-neo-about-text">
             <p className="about-neo-about-copy about-neo-about-copy-intro" style={{ whiteSpace: "pre-line" }}>
+              
+              <I18nText ko="리뉴얼! 개편! 리뉴얼! 개편! 리뉴얼! 게편! 리뉴얼! 개편! 리뉴얼! 개편! 리뉴얼! 개편! 리뉴얼! 개편! " 
+                        en="RENEWAL! REORGANIZATION! RENEWAL! REORGANIZATION! RENEWAL! REORGANIZATION!" />
+              {/* 임시 주석 처리, 리뉴얼 후 해제 예정
               <I18nText
                 ko={`백엔드 개발자를 목표로 준비 중입니다.
 Java와 Spring, C# 기반으로 API 설계와 데이터 처리 구조를 학습하며 프로젝트를 진행하고 있습니다.`}
@@ -133,6 +137,7 @@ Building projects using Java, Spring, and C#, focusing on API design and data pr
                 ko="사용가능한 실제 서비스를 구현함에 있어 안정적인 시스템을 구현하는 것을 목표로 하고 있습니다."
                 en="My goal is to build stable systems for practical, real services."
               />
+              */}
             </p>
           </div>
         </section>

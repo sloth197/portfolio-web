@@ -2,7 +2,8 @@
 
 import { FormEvent, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { canAdminManageProjects, clearAdminAuthHeader, getAdminAuthHeader, subscribeAdminAuth } from "@/lib/admin-auth";
+import { canAdminManageProjects, clearAdminAuthHeader, isAdminLoggedIn, subscribeAdminAuth } from "@/lib/admin-auth";
+import { useSiteLanguage } from "@/components/i18n-text";
 import NotionMarkdownEditor from "@/components/notion-markdown-editor";
 import type { ProjectAssetDto, ProjectCategory, ProjectDto } from "@/lib/types";
 
@@ -42,10 +43,10 @@ function resolveAssetUrl(url: string): string {
 export default function ProjectAdminActions({ project, returnPath, disabled = false }: Props) {
   const router = useRouter();
   const canManageProjects = useSyncExternalStore(subscribeAdminAuth, canAdminManageProjects, getServerSnapshot);
+  const language = useSiteLanguage();
   const [editing, setEditing] = useState(false);
   const [category, setCategory] = useState<ProjectCategory>(project.category);
   const [title, setTitle] = useState(project.title);
-  const [slug, setSlug] = useState(project.slug);
   const [summary, setSummary] = useState(project.summary);
   const [projectPeriod, setProjectPeriod] = useState(project.projectPeriod ?? "");
   const [contentMarkdown, setContentMarkdown] = useState(project.contentMarkdown);
@@ -59,6 +60,75 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
   const [notice, setNotice] = useState<string | null>(null);
 
   const canEdit = canManageProjects && !disabled;
+  const t = language === "ko"
+    ? {
+        previewNoEdit: "미리보기 모드에서는 수정/삭제를 지원하지 않습니다.",
+        apiBaseMissing: "NEXT_PUBLIC_API_BASE_URL이 설정되어 있지 않습니다.",
+        updateFailed: (status: number) => `수정 실패 (${status})`,
+        projectUpdated: "프로젝트가 수정되었습니다.",
+        projectUpdatedUploaded: (count: number) => `프로젝트가 수정되었습니다. 파일 ${count}개를 업로드했습니다.`,
+        uploadFailed: (names: string) => `일부 파일 업로드에 실패했습니다: ${names}`,
+        updateRequestFailed: "수정 요청에 실패했습니다.",
+        deleteConfirm: "이 프로젝트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+        deleteFailed: (status: number) => `삭제 실패 (${status})`,
+        deleteRequestFailed: "삭제 요청에 실패했습니다.",
+        assetDeleteFailed: (status: number) => `파일 삭제 실패 (${status})`,
+        assetRemoved: "파일이 삭제되었습니다.",
+        assetDeleteRequestFailed: "파일 삭제 요청에 실패했습니다.",
+        cancelEdit: "수정 취소",
+        edit: "수정",
+        deleting: "삭제 중...",
+        delete: "삭제",
+        category: "카테고리",
+        title: "제목",
+        summary: "요약",
+        projectPeriod: "프로젝트 기간",
+        periodPlaceholder: "yyyy.mm - yyyy.mm",
+        url: "URL",
+        projectDetails: "프로젝트 상세",
+        addFilesLabel: "파일 추가 (이미지/GIF/문서)",
+        addFiles: "파일 추가",
+        noFilesSelected: "선택된 새 파일이 없습니다.",
+        currentFiles: "현재 파일",
+        removing: "삭제 중...",
+        remove: "삭제",
+        saving: "저장 중...",
+        save: "저장",
+      }
+    : {
+        previewNoEdit: "Preview mode does not support edit/delete.",
+        apiBaseMissing: "NEXT_PUBLIC_API_BASE_URL is not set.",
+        updateFailed: (status: number) => `Update failed (${status})`,
+        projectUpdated: "Project updated.",
+        projectUpdatedUploaded: (count: number) => `Project updated. Uploaded ${count} file(s).`,
+        uploadFailed: (names: string) => `Some files failed to upload: ${names}`,
+        updateRequestFailed: "Update request failed.",
+        deleteConfirm: "Delete this project? This action cannot be undone.",
+        deleteFailed: (status: number) => `Delete failed (${status})`,
+        deleteRequestFailed: "Delete request failed.",
+        assetDeleteFailed: (status: number) => `Asset delete failed (${status})`,
+        assetRemoved: "Asset removed.",
+        assetDeleteRequestFailed: "Asset delete request failed.",
+        cancelEdit: "Cancel Edit",
+        edit: "Edit",
+        deleting: "Deleting...",
+        delete: "Delete",
+        category: "Category",
+        title: "Title",
+        summary: "Summary",
+        projectPeriod: "Project Period",
+        periodPlaceholder: "yyyy.mm - yyyy.mm",
+        url: "URL",
+        projectDetails: "Project Details",
+        addFilesLabel: "Add Files (Image/GIF/Docs)",
+        addFiles: "Add files",
+        noFilesSelected: "No new files selected.",
+        currentFiles: "Current Files",
+        removing: "Removing...",
+        remove: "Remove",
+        saving: "Saving...",
+        save: "Save",
+      };
 
   useEffect(() => {
     if (!canManageProjects && editing) {
@@ -88,16 +158,15 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
     return `${window.location.pathname}${window.location.search}`;
   }
 
-  function requireAuthHeader(): string | null {
-    const auth = getAdminAuthHeader();
-    if (!auth) {
+  function requireSession(): boolean {
+    if (!isAdminLoggedIn()) {
       router.replace(`/admin/login?next=${encodeURIComponent(resolveCurrentPath())}`);
-      return null;
+      return false;
     }
-    return auth;
+    return true;
   }
 
-  async function uploadSelectedFiles(auth: string): Promise<{ uploaded: ProjectAssetDto[]; failed: string[] }> {
+  async function uploadSelectedFiles(): Promise<{ uploaded: ProjectAssetDto[]; failed: string[] }> {
     const uploaded: ProjectAssetDto[] = [];
     const failed: string[] = [];
 
@@ -108,7 +177,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
       try {
         const response = await fetch(`${API_BASE}/api/admin/projects/${project.id}/assets`, {
           method: "POST",
-          headers: { Authorization: auth },
+          credentials: "include",
           body: formData,
         });
 
@@ -129,11 +198,10 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
 
   function onStartEdit() {
     if (disabled) {
-      setError("Preview mode does not support edit/delete.");
+      setError(t.previewNoEdit);
       return;
     }
-    const auth = requireAuthHeader();
-    if (!auth) {
+    if (!requireSession()) {
       return;
     }
     setError(null);
@@ -144,16 +212,15 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
   async function onSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (disabled) {
-      setError("Preview mode does not support edit/delete.");
+      setError(t.previewNoEdit);
       return;
     }
     if (!API_BASE) {
-      setError("NEXT_PUBLIC_API_BASE_URL is not set.");
+      setError(t.apiBaseMissing);
       return;
     }
 
-    const auth = requireAuthHeader();
-    if (!auth) {
+    if (!requireSession()) {
       return;
     }
 
@@ -162,16 +229,18 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
     setNotice(null);
 
     try {
+      const autoSlug = slugify(title);
       const response = await fetch(`${API_BASE}/api/admin/projects/${project.id}`, {
         method: "PUT",
         headers: {
-          Authorization: auth,
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           category,
           title: title.trim(),
-          slug: (slug.trim() || slugify(title)).trim(),
+          // Keep backward compatibility with older backend versions that still require slug.
+          slug: project.slug || autoSlug || `project-${project.id}`,
           summary: summary.trim(),
           projectPeriod: projectPeriod.trim() || null,
           contentMarkdown: contentMarkdown.trim(),
@@ -186,21 +255,21 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
           router.replace(`/admin/login?next=${encodeURIComponent(resolveCurrentPath())}`);
           return;
         }
-        setError(payload?.message ?? `Update failed (${response.status})`);
+        setError(payload?.message ?? t.updateFailed(response.status));
         return;
       }
 
-      let noticeMessage = "Project updated.";
+      let noticeMessage = t.projectUpdated;
 
       if (selectedFiles.length > 0) {
-        const uploadResult = await uploadSelectedFiles(auth);
+        const uploadResult = await uploadSelectedFiles();
         if (uploadResult.uploaded.length > 0) {
           setAssets((prev) => [...prev, ...uploadResult.uploaded]);
-          noticeMessage = `Project updated. Uploaded ${uploadResult.uploaded.length} file(s).`;
+          noticeMessage = t.projectUpdatedUploaded(uploadResult.uploaded.length);
           setSelectedFiles([]);
         }
         if (uploadResult.failed.length > 0) {
-          setError(`Some files failed to upload: ${uploadResult.failed.join(", ")}`);
+          setError(t.uploadFailed(uploadResult.failed.join(", ")));
         }
       }
 
@@ -208,7 +277,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
       setEditing(false);
       router.refresh();
     } catch {
-      setError("Update request failed.");
+      setError(t.updateRequestFailed);
     } finally {
       setSaving(false);
     }
@@ -216,19 +285,18 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
 
   async function onDelete() {
     if (disabled) {
-      setError("Preview mode does not support edit/delete.");
+      setError(t.previewNoEdit);
       return;
     }
     if (!API_BASE) {
-      setError("NEXT_PUBLIC_API_BASE_URL is not set.");
+      setError(t.apiBaseMissing);
       return;
     }
-    if (!confirm("Delete this project? This action cannot be undone.")) {
+    if (!confirm(t.deleteConfirm)) {
       return;
     }
 
-    const auth = requireAuthHeader();
-    if (!auth) {
+    if (!requireSession()) {
       return;
     }
 
@@ -239,9 +307,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
     try {
       const response = await fetch(`${API_BASE}/api/admin/projects/${project.id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: auth,
-        },
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -251,14 +317,14 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
           router.replace(`/admin/login?next=${encodeURIComponent(resolveCurrentPath())}`);
           return;
         }
-        setError(payload?.message ?? `Delete failed (${response.status})`);
+        setError(payload?.message ?? t.deleteFailed(response.status));
         return;
       }
 
       router.replace(returnPath);
       router.refresh();
     } catch {
-      setError("Delete request failed.");
+      setError(t.deleteRequestFailed);
     } finally {
       setDeleting(false);
     }
@@ -266,12 +332,11 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
 
   async function onDeleteAsset(assetId: number) {
     if (!API_BASE) {
-      setError("NEXT_PUBLIC_API_BASE_URL is not set.");
+      setError(t.apiBaseMissing);
       return;
     }
 
-    const auth = requireAuthHeader();
-    if (!auth) {
+    if (!requireSession()) {
       return;
     }
 
@@ -282,7 +347,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
     try {
       const response = await fetch(`${API_BASE}/api/admin/projects/${project.id}/assets/${assetId}`, {
         method: "DELETE",
-        headers: { Authorization: auth },
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -292,14 +357,14 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
           router.replace(`/admin/login?next=${encodeURIComponent(resolveCurrentPath())}`);
           return;
         }
-        setError(payload?.message ?? `Asset delete failed (${response.status})`);
+        setError(payload?.message ?? t.assetDeleteFailed(response.status));
         return;
       }
 
       setAssets((prev) => prev.filter((item) => item.id !== assetId));
-      setNotice("Asset removed.");
+      setNotice(t.assetRemoved);
     } catch {
-      setError("Asset delete request failed.");
+      setError(t.assetDeleteRequestFailed);
     } finally {
       setDeletingAssetId(null);
     }
@@ -319,7 +384,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
         </button>
         {editing && canEdit ? (
           <button type="button" className="btn-ghost" onClick={onDelete} disabled={deleting || saving}>
-            {deleting ? "Deleting..." : "Delete"}
+            {deleting ? t.deleting : t.delete}
           </button>
         ) : null}
       </div>
@@ -327,7 +392,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
       {editing && canEdit ? (
         <form onSubmit={onSave} style={{ display: "grid", gap: 10 }}>
           <label className="field-label" htmlFor="edit-category">
-            Category
+            {t.category}
           </label>
           <select
             id="edit-category"
@@ -340,24 +405,12 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
           </select>
 
           <label className="field-label" htmlFor="edit-title">
-            Title
+            {t.title}
           </label>
           <input id="edit-title" className="field-input" value={title} onChange={(event) => setTitle(event.target.value)} required />
 
-          <label className="field-label" htmlFor="edit-slug">
-            Slug
-          </label>
-          <input
-            id="edit-slug"
-            className="field-input"
-            value={slug}
-            onChange={(event) => setSlug(event.target.value)}
-            placeholder={slugify(title) || "auto-generated-from-title"}
-            required
-          />
-
           <label className="field-label" htmlFor="edit-summary">
-            Summary
+            {t.summary}
           </label>
           <input
             id="edit-summary"
@@ -368,7 +421,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
           />
 
           <label className="field-label" htmlFor="edit-period">
-            Project Period
+            {t.projectPeriod}
           </label>
           <input
             id="edit-period"
@@ -376,16 +429,16 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
             value={projectPeriod}
             onChange={(event) => setProjectPeriod(event.target.value)}
             maxLength={80}
-            placeholder="yyyy.mm - yyyy.mm"
+            placeholder={t.periodPlaceholder}
           />
 
           <label className="field-label" htmlFor="edit-github">
-            URL
+            {t.url}
           </label>
           <input id="edit-github" className="field-input" value={githubUrl} onChange={(event) => setGithubUrl(event.target.value)} />
 
           <label className="field-label" htmlFor="edit-markdown">
-            Project Details
+            {t.projectDetails}
           </label>
           <NotionMarkdownEditor
             id="edit-markdown"
@@ -396,7 +449,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
           />
 
           <label className="field-label" htmlFor="edit-files">
-            Add Files (Image/GIF/Docs)
+            {t.addFilesLabel}
           </label>
           <div className="file-picker-row">
             <input
@@ -408,16 +461,16 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
               onChange={(event) => setSelectedFiles(Array.from(event.target.files ?? []))}
             />
             <label htmlFor="edit-files" className="btn-ghost file-picker-button">
-              Add files
+              {t.addFiles}
             </label>
             <p className="helper-text file-picker-names">
-              {selectedFiles.length > 0 ? selectedFiles.map((file) => file.name).join(", ") : "No new files selected."}
+              {selectedFiles.length > 0 ? selectedFiles.map((file) => file.name).join(", ") : t.noFilesSelected}
             </p>
           </div>
 
           {sortedAssets.length > 0 ? (
             <div style={{ display: "grid", gap: 8 }}>
-              <div className="field-label">Current Files</div>
+              <div className="field-label">{t.currentFiles}</div>
               <div className="admin-asset-list">
                 {sortedAssets.map((asset) => {
                   const assetUrl = resolveAssetUrl(asset.url);
@@ -432,7 +485,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
                         onClick={() => onDeleteAsset(asset.id)}
                         disabled={deletingAssetId === asset.id || saving || deleting}
                       >
-                        {deletingAssetId === asset.id ? "Removing..." : "Remove"}
+                        {deletingAssetId === asset.id ? t.removing : t.remove}
                       </button>
                     </div>
                   );
@@ -443,7 +496,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 10, flexWrap: "wrap" }}>
             <button className="btn" type="submit" disabled={saving || deleting || deletingAssetId !== null}>
-              {saving ? "Saving..." : "Save"}
+              {saving ? t.saving : t.save}
             </button>
           </div>
         </form>

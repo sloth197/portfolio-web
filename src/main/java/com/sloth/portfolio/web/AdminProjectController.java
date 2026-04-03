@@ -2,6 +2,7 @@ package com.sloth.portfolio.web;
 
 import com.sloth.portfolio.domain.Project;
 import com.sloth.portfolio.domain.ProjectAsset;
+import com.sloth.portfolio.repo.ProjectRepository;
 import com.sloth.portfolio.service.ProjectAssetService;
 import com.sloth.portfolio.service.ProjectCommandService;
 import com.sloth.portfolio.web.dto.ProjectAssetDto;
@@ -26,16 +27,24 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Locale;
+
 @RestController
 @RequestMapping("/api/admin/projects")
 public class AdminProjectController {
 
     private final ProjectCommandService projectCommandService;
     private final ProjectAssetService projectAssetService;
+    private final ProjectRepository projectRepository;
 
-    public AdminProjectController(ProjectCommandService projectCommandService, ProjectAssetService projectAssetService) {
+    public AdminProjectController(
+            ProjectCommandService projectCommandService,
+            ProjectAssetService projectAssetService,
+            ProjectRepository projectRepository
+    ) {
         this.projectCommandService = projectCommandService;
         this.projectAssetService = projectAssetService;
+        this.projectRepository = projectRepository;
     }
 
     @GetMapping("/ping")
@@ -51,10 +60,11 @@ public class AdminProjectController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
     public ProjectDto create(@Valid @RequestBody ProjectCreateRequest request) {
+        String resolvedSlug = resolveUniqueSlug(request.title());
         Project created = projectCommandService.create(new Project(
                 request.category(),
                 request.title(),
-                request.slug(),
+                resolvedSlug,
                 request.summary(),
                 request.projectPeriod(),
                 request.contentMarkdown(),
@@ -67,15 +77,43 @@ public class AdminProjectController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMIN')")
     public void update(@PathVariable Long id, @Valid @RequestBody ProjectUpdateRequest request) {
+        Project existing = projectRepository.findById(id)
+                .orElseThrow(() -> new ProjectCommandService.NotFoundException("Project not found: id=" + id));
+
         projectCommandService.update(id, new Project(
                 request.category(),
                 request.title(),
-                request.slug(),
+                existing.getSlug(),
                 request.summary(),
                 request.projectPeriod(),
                 request.contentMarkdown(),
                 request.githubUrl()
         ));
+    }
+
+    private String resolveUniqueSlug(String title) {
+        String baseSlug = slugify(title);
+        String candidate = baseSlug;
+        int suffix = 2;
+
+        while (projectRepository.existsBySlug(candidate)) {
+            candidate = baseSlug + "-" + suffix;
+            suffix++;
+        }
+
+        return candidate;
+    }
+
+    private String slugify(String value) {
+        String normalized = value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
+        normalized = normalized.replaceAll("\\s+", "-");
+        normalized = normalized.replaceAll("[^a-z0-9\\-]", "");
+        normalized = normalized.replaceAll("\\-+", "-");
+        normalized = normalized.replaceAll("(^\\-)|(\\-$)", "");
+        if (normalized.isBlank()) {
+            return "project";
+        }
+        return normalized;
     }
 
     @DeleteMapping("/{id}")

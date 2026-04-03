@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: portfolio
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:.env.local[.properties]
 
   servlet:
     multipart:
@@ -24,8 +28,12 @@ app:
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,https://xhbt.dev,https://www.xhbt.dev}
   admin:
-    username: ${APP_ADMIN_USERNAME:admin}
-    password: ${APP_ADMIN_PASSWORD:change-me-before-prod}
+    username: ${APP_ADMIN_USERNAME:}
+    password: ${APP_ADMIN_PASSWORD:}
+    session-hours: ${APP_ADMIN_SESSION_HOURS:12}
+    login-max-attempts: ${APP_ADMIN_LOGIN_MAX_ATTEMPTS:5}
+    login-window-seconds: ${APP_ADMIN_LOGIN_WINDOW_SECONDS:300}
+    login-lock-seconds: ${APP_ADMIN_LOGIN_LOCK_SECONDS:900}
   crm:
     username: ${APP_CRM_USERNAME:}
     password: ${APP_CRM_PASSWORD:}
@@ -43,3 +51,6 @@ app:
     pass-webhook-url: ${APP_AUTH_PASS_WEBHOOK_URL:}
   upload:
     dir: ${APP_UPLOAD_DIR:uploads}
+  migration:
+    rewrite-legacy-asset-links:
+      enabled: ${APP_MIGRATION_REWRITE_LEGACY_ASSET_LINKS_ENABLED:true}

@@ -6,8 +6,17 @@ import { setAdminAuthSession, type AdminRole } from "@/lib/admin-auth";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-function toBasicAuth(username: string, password: string): string {
-  return `Basic ${btoa(`${username}:${password}`)}`;
+function sanitizeNextPath(value: string | null): string {
+  if (!value) {
+    return "/projects";
+  }
+  if (!value.startsWith("/") || value.startsWith("//")) {
+    return "/projects";
+  }
+  if (value.startsWith("/admin/login")) {
+    return "/projects";
+  }
+  return value;
 }
 
 export default function AdminLoginPage() {
@@ -25,7 +34,7 @@ export default function AdminLoginPage() {
 
   useEffect(() => {
     const next = new URLSearchParams(window.location.search).get("next");
-    setNextPath(next || "/projects");
+    setNextPath(sanitizeNextPath(next));
   }, []);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -39,18 +48,27 @@ export default function AdminLoginPage() {
     setError(null);
 
     try {
-      const authHeader = toBasicAuth(username, password);
-      const response = await fetch(`${API_BASE}/api/admin/projects/ping`, {
-        method: "GET",
-        headers: { Authorization: authHeader },
+      const response = await fetch(`${API_BASE}/api/admin/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: username.trim(),
+          password,
+        }),
+        credentials: "include",
         cache: "no-store",
       });
 
       if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { message?: string } | null;
         if (response.status === 401 || response.status === 403) {
           const nextAttempts = failedAttempts + 1;
           setFailedAttempts(nextAttempts);
           setError(nextAttempts >= 3 ? "너 관리자 아니지?" : "아이디 또는 비밀번호가 틀렸습니다");
+          return;
+        }
+        if (response.status === 429) {
+          setError(payload?.message ?? "로그인 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.");
           return;
         }
         setError("Login failed.");
@@ -58,11 +76,19 @@ export default function AdminLoginPage() {
       }
 
       setFailedAttempts(0);
-      const payload = (await response.json().catch(() => null)) as { role?: string; canManageProjects?: boolean } | null;
+      const payload = (await response.json().catch(() => null)) as {
+        authenticated?: boolean;
+        role?: string;
+        canManageProjects?: boolean;
+      } | null;
+      if (!payload?.authenticated) {
+        setError("Login failed.");
+        return;
+      }
       const role = resolveRole(payload?.role);
       const canManageProjects = payload?.canManageProjects ?? role === "ADMIN";
 
-      setAdminAuthSession(authHeader, role);
+      setAdminAuthSession(role);
 
       if (!canManageProjects && nextPath.startsWith("/projects/admin")) {
         router.replace("/projects");

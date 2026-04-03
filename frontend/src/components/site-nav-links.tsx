@@ -13,9 +13,6 @@ export default function SiteNavLinks() {
 
   return (
     <>
-      <Link className="nav-link" href="/#home">
-        Home
-      </Link>
       <Link className="nav-link" href="/projects">
         Project
       </Link>

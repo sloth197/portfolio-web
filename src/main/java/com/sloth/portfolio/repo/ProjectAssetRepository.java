@@ -11,4 +11,6 @@ public interface ProjectAssetRepository extends JpaRepository<ProjectAsset, Long
     List<ProjectAsset> findByProjectIdOrderByCreatedAtAsc(Long projectId);
 
     Optional<ProjectAsset> findByIdAndProjectId(Long id, Long projectId);
+
+    Optional<ProjectAsset> findByStoredName(String storedName);
 }

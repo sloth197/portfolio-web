@@ -21,7 +21,7 @@ public record ProjectAssetDto(
                 asset.getOriginalName(),
                 asset.getContentType(),
                 asset.getFileSize(),
-                "/api/public/assets/" + asset.getId(),
+                "/api/public/assets/file/" + asset.getStoredName(),
                 asset.getCreatedAt()
         );
     }

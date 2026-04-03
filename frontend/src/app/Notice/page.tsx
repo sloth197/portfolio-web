@@ -4,7 +4,6 @@ import { FormEvent, useCallback, useEffect, useMemo, useState, useSyncExternalSt
 import I18nText, { useSiteLanguage } from "@/components/i18n-text";
 import {
   clearAdminAuthHeader,
-  getAdminAuthHeader,
   getAdminRole,
   isAdminLoggedIn,
   subscribeAdminAuth,
@@ -173,8 +172,7 @@ export default function NoticePage() {
       return;
     }
 
-    const auth = getAdminAuthHeader();
-    if (!auth) {
+    if (!adminLoggedIn) {
       setFormError(t.adminSessionMissing);
       return;
     }
@@ -191,9 +189,9 @@ export default function NoticePage() {
       const response = await fetch(endpoint, {
         method,
         headers: {
-          Authorization: auth,
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           // Keep legacy compatibility with older backend versions requiring title.
           title: "공지",
@@ -248,8 +246,7 @@ export default function NoticePage() {
       return;
     }
 
-    const auth = getAdminAuthHeader();
-    if (!auth) {
+    if (!adminLoggedIn) {
       setFormError(t.adminSessionMissing);
       return;
     }
@@ -265,7 +262,7 @@ export default function NoticePage() {
     try {
       const response = await fetch(`${API_BASE}/api/admin/notices/${id}`, {
         method: "DELETE",
-        headers: { Authorization: auth },
+        credentials: "include",
       });
 
       if (!response.ok) {

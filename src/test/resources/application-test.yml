@@ -11,5 +11,11 @@ spring:
     show-sql: false
 
 app:
+  admin:
+    username: test-admin
+    password: test-admin-pass-123
   auth:
     enabled: false
+  migration:
+    rewrite-legacy-asset-links:
+      enabled: false

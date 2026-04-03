@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { clearAdminAuthHeader, getAdminAuthHeader, getAdminRole } from "@/lib/admin-auth";
+import { clearAdminAuthHeader, getAdminRole, isAdminLoggedIn, setAdminAuthSession } from "@/lib/admin-auth";
 import NotionMarkdownEditor from "@/components/notion-markdown-editor";
 import type { ProjectCategory, ProjectDto } from "@/lib/types";
 
@@ -23,7 +23,7 @@ function slugify(value: string): string {
     .replace(/^-|-$/g, "");
 }
 
-async function uploadSelectedFiles(projectId: number, auth: string, files: File[]): Promise<string[]> {
+async function uploadSelectedFiles(projectId: number, files: File[]): Promise<string[]> {
   if (!API_BASE || files.length === 0) {
     return [];
   }
@@ -37,7 +37,7 @@ async function uploadSelectedFiles(projectId: number, auth: string, files: File[
     try {
       const response = await fetch(`${API_BASE}/api/admin/projects/${projectId}/assets`, {
         method: "POST",
-        headers: { Authorization: auth },
+        credentials: "include",
         body: formData,
       });
 
@@ -56,7 +56,6 @@ export default function AdminProjectCreatePage() {
   const router = useRouter();
   const [category, setCategory] = useState<ProjectCategory>("SOFTWARE");
   const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
   const [summary, setSummary] = useState("");
   const [projectPeriod, setProjectPeriod] = useState("");
   const [contentMarkdown, setContentMarkdown] = useState("");
@@ -70,16 +69,59 @@ export default function AdminProjectCreatePage() {
     const parsedCategory = normalizeCategory(new URLSearchParams(window.location.search).get("category"));
     setCategory(parsedCategory);
 
-    const auth = getAdminAuthHeader();
-    if (!auth) {
+    if (!isAdminLoggedIn()) {
       const next = `/projects/admin/new?category=${parsedCategory}`;
       router.replace(`/admin/login?next=${encodeURIComponent(next)}`);
       return;
     }
 
-    if (getAdminRole() !== "ADMIN") {
-      router.replace("/projects");
+    let cancelled = false;
+    const controller = new AbortController();
+
+    async function verifySession() {
+      if (!API_BASE) {
+        return;
+      }
+      try {
+        const response = await fetch(`${API_BASE}/api/admin/auth/session`, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          clearAdminAuthHeader();
+          const next = `/projects/admin/new?category=${parsedCategory}`;
+          router.replace(`/admin/login?next=${encodeURIComponent(next)}`);
+          return;
+        }
+        const payload = (await response.json().catch(() => null)) as { authenticated?: boolean; role?: string } | null;
+        if (!payload?.authenticated) {
+          clearAdminAuthHeader();
+          const next = `/projects/admin/new?category=${parsedCategory}`;
+          router.replace(`/admin/login?next=${encodeURIComponent(next)}`);
+          return;
+        }
+        const role = payload.role === "CRM" ? "CRM" : "ADMIN";
+        if (!cancelled) {
+          setAdminAuthSession(role);
+        }
+        if (role !== "ADMIN") {
+          router.replace("/projects");
+        }
+      } catch {
+        if (!cancelled) {
+          setError("Failed to verify admin session.");
+        }
+      }
     }
+
+    void verifySession();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, [router]);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -89,8 +131,7 @@ export default function AdminProjectCreatePage() {
       return;
     }
 
-    const auth = getAdminAuthHeader();
-    if (!auth) {
+    if (!isAdminLoggedIn()) {
       setError("Admin login session is missing. Please login again.");
       return;
     }
@@ -104,16 +145,18 @@ export default function AdminProjectCreatePage() {
     setNotice(null);
 
     try {
+      const autoSlug = slugify(title);
       const response = await fetch(`${API_BASE}/api/admin/projects`, {
         method: "POST",
         headers: {
-          Authorization: auth,
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           category,
           title: title.trim(),
-          slug: (slug.trim() || slugify(title)).trim(),
+          // Keep backward compatibility with older backend versions that still require slug.
+          slug: autoSlug || `project-${Date.now()}`,
           summary: summary.trim(),
           projectPeriod: projectPeriod.trim() || null,
           contentMarkdown: contentMarkdown.trim(),
@@ -134,7 +177,7 @@ export default function AdminProjectCreatePage() {
       }
 
       const createdProject = (await response.json()) as ProjectDto;
-      const failedUploads = await uploadSelectedFiles(createdProject.id, auth, selectedFiles);
+      const failedUploads = await uploadSelectedFiles(createdProject.id, selectedFiles);
       const uploadedCount = selectedFiles.length - failedUploads.length;
 
       if (failedUploads.length > 0) {
@@ -187,18 +230,6 @@ export default function AdminProjectCreatePage() {
             onChange={(event) => setTitle(event.target.value)}
             maxLength={120}
             required
-          />
-
-          <label className="field-label" htmlFor="project-slug">
-            Slug (URL)
-          </label>
-          <input
-            id="project-slug"
-            className="field-input"
-            value={slug}
-            onChange={(event) => setSlug(event.target.value)}
-            placeholder={slugify(title) || "auto-generated-from-title"}
-            maxLength={160}
           />
 
           <label className="field-label" htmlFor="project-summary">

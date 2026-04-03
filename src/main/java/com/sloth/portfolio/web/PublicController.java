@@ -1,7 +1,6 @@
 package com.sloth.portfolio.web;
 
 import com.sloth.portfolio.domain.ProjectCategory;
-import com.sloth.portfolio.domain.ProjectAsset;
 import com.sloth.portfolio.service.ProjectAssetService;
 import com.sloth.portfolio.service.ProjectQueryService;
 import com.sloth.portfolio.web.dto.ProjectDto;
@@ -57,7 +56,18 @@ public class PublicController {
     @GetMapping("/assets/{assetId}")
     public ResponseEntity<Resource> getAsset(@PathVariable Long assetId) {
         ProjectAssetService.AssetFile assetFile = projectAssetService.loadAsset(assetId);
-        String contentType = resolveAssetContentType(assetFile.asset());
+        String contentType = resolveAssetContentType(assetFile.contentType(), assetFile.originalName());
+        return buildAssetResponse(assetFile, contentType);
+    }
+
+    @GetMapping("/assets/file/{storedName:.+}")
+    public ResponseEntity<Resource> getAssetByStoredName(@PathVariable String storedName) {
+        ProjectAssetService.AssetFile assetFile = projectAssetService.loadAssetByStoredName(storedName);
+        String contentType = resolveAssetContentType(assetFile.contentType(), assetFile.originalName());
+        return buildAssetResponse(assetFile, contentType);
+    }
+
+    private static ResponseEntity<Resource> buildAssetResponse(ProjectAssetService.AssetFile assetFile, String contentType) {
         MediaType mediaType;
         try {
             mediaType = (contentType == null || contentType.isBlank())
@@ -69,8 +79,12 @@ public class PublicController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(mediaType);
-        headers.setContentLength(assetFile.asset().getFileSize());
-        String filename = assetFile.asset().getOriginalName().replace("\"", "");
+        try {
+            headers.setContentLength(assetFile.resource().contentLength());
+        } catch (Exception ignored) {
+            // Content-Length may be unavailable for some resources.
+        }
+        String filename = (assetFile.originalName() == null ? "asset" : assetFile.originalName()).replace("\"", "");
         String dispositionValue = (assetFile.inline() ? "inline" : "attachment") + "; filename=\"" + filename + "\"";
         headers.set(HttpHeaders.CONTENT_DISPOSITION, dispositionValue);
 
@@ -94,21 +108,21 @@ public class PublicController {
 
     public record ErrorResponse(String code, String message) {}
 
-    private static String resolveAssetContentType(ProjectAsset asset) {
-        String contentType = asset.getContentType();
+    private static String resolveAssetContentType(String contentType, String originalName) {
         if (contentType != null && !contentType.isBlank()) {
             return contentType.trim();
         }
-        String originalName = asset.getOriginalName().toLowerCase(Locale.ROOT);
-        int dot = originalName.lastIndexOf('.');
-        if (dot < 0 || dot == originalName.length() - 1) {
+        String normalizedName = originalName == null ? "" : originalName.toLowerCase(Locale.ROOT);
+        int dot = normalizedName.lastIndexOf('.');
+        if (dot < 0 || dot == normalizedName.length() - 1) {
             return null;
         }
-        return switch (originalName.substring(dot)) {
+        return switch (normalizedName.substring(dot)) {
             case ".gif" -> "image/gif";
             case ".png" -> "image/png";
             case ".jpg", ".jpeg" -> "image/jpeg";
             case ".webp" -> "image/webp";
+            case ".avif" -> "image/avif";
             case ".svg" -> "image/svg+xml";
             default -> null;
         };
