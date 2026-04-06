@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
@@ -56,6 +57,55 @@ function isImageAsset(contentType: string | null, url: string): boolean {
 
 function escapeMarkdownAltText(value: string): string {
   return value.replace(/]/g, "\\]");
+}
+
+function trimSeoDescription(value: string, maxLength = 160): string {
+  const compact = value.replace(/\s+/g, " ").trim();
+  if (compact.length <= maxLength) {
+    return compact;
+  }
+  return `${compact.slice(0, maxLength - 1).trim()}…`;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const encodedSlug = encodeURIComponent(slug);
+
+  try {
+    const project = await fetchProjectBySlug(slug);
+    const description = trimSeoDescription(project.summary);
+    const primaryImageAsset = (project.assets ?? []).find((asset) => {
+      const assetUrl = resolvePublicAssetUrl(asset.url);
+      return asset.assetType === "IMAGE" || isImageAsset(asset.contentType, assetUrl);
+    });
+    const primaryImageUrl = primaryImageAsset ? resolvePublicAssetUrl(primaryImageAsset.url) : null;
+
+    return {
+      title: project.title,
+      description,
+      alternates: {
+        canonical: `/projects/${encodedSlug}`,
+      },
+      openGraph: {
+        title: `${project.title} | JWS Portfolio`,
+        description,
+        url: `/projects/${encodedSlug}`,
+        images: primaryImageUrl ? [{ url: primaryImageUrl, alt: project.title }] : undefined,
+      },
+    };
+  } catch {
+    return {
+      title: "Project",
+      description: "프로젝트 상세 페이지",
+      alternates: {
+        canonical: `/projects/${encodedSlug}`,
+      },
+    };
+  }
 }
 
 function buildMarkdownWithImageAssets(

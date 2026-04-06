@@ -5,7 +5,10 @@ import com.sloth.portfolio.domain.ProjectAsset;
 import com.sloth.portfolio.domain.ProjectAssetType;
 import com.sloth.portfolio.repo.ProjectAssetRepository;
 import com.sloth.portfolio.repo.ProjectRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -13,9 +16,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -24,19 +34,47 @@ import java.util.UUID;
 @Transactional
 public class ProjectAssetService {
 
+    private static final Logger log = LoggerFactory.getLogger(ProjectAssetService.class);
+    private static final Duration STORAGE_REQUEST_TIMEOUT = Duration.ofSeconds(60);
+
     private final ProjectRepository projectRepository;
     private final ProjectAssetRepository projectAssetRepository;
+    private final UploadProvider uploadProvider;
     private final Path uploadRoot;
+    private final HttpClient httpClient;
+    private final String supabaseObjectBaseUrl;
+    private final String supabaseServiceRoleKey;
+
+    private enum UploadProvider {
+        LOCAL,
+        SUPABASE
+    }
 
     public ProjectAssetService(
             ProjectRepository projectRepository,
             ProjectAssetRepository projectAssetRepository,
-            @Value("${app.upload.dir:uploads}") String uploadDir
+            @Value("${app.upload.provider:auto}") String uploadProvider,
+            @Value("${app.upload.dir:uploads}") String uploadDir,
+            @Value("${app.upload.supabase.url:}") String supabaseUrl,
+            @Value("${app.upload.supabase.bucket:}") String supabaseBucket,
+            @Value("${app.upload.supabase.service-role-key:}") String supabaseServiceRoleKey
     ) {
         this.projectRepository = projectRepository;
         this.projectAssetRepository = projectAssetRepository;
         this.uploadRoot = Path.of(uploadDir).toAbsolutePath().normalize();
-        ensureUploadDirExists();
+        this.httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
+        this.supabaseServiceRoleKey = normalizeBlankToNull(supabaseServiceRoleKey);
+        this.uploadProvider = resolveUploadProvider(uploadProvider, supabaseUrl, supabaseBucket, this.supabaseServiceRoleKey);
+        this.supabaseObjectBaseUrl = this.uploadProvider == UploadProvider.SUPABASE
+                ? buildSupabaseObjectBaseUrl(supabaseUrl, supabaseBucket)
+                : null;
+
+        if (this.uploadProvider == UploadProvider.LOCAL) {
+            ensureUploadDirExists();
+            log.info("Project asset storage provider: LOCAL (dir={})", this.uploadRoot);
+        } else {
+            log.info("Project asset storage provider: SUPABASE (bucket={})", normalizeBlankToNull(supabaseBucket));
+        }
     }
 
     public ProjectAsset upload(Long projectId, MultipartFile file) {
@@ -52,12 +90,11 @@ public class ProjectAssetService {
         String extension = extractExtension(originalName);
         String contentType = resolveContentType(file.getContentType(), extension);
         String storedName = projectId + "-" + UUID.randomUUID() + extension;
-        Path target = resolveSafePath(storedName);
 
-        try {
-            Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new StorageException("Failed to store file: " + originalName, e);
+        if (uploadProvider == UploadProvider.SUPABASE) {
+            uploadToSupabase(storedName, file, contentType, originalName);
+        } else {
+            uploadToLocal(storedName, file, originalName);
         }
 
         ProjectAssetType type = detectType(contentType, extension);
@@ -102,16 +139,91 @@ public class ProjectAssetService {
     public void deleteAsset(Long projectId, Long assetId) {
         ProjectAsset asset = projectAssetRepository.findByIdAndProjectId(assetId, projectId)
                 .orElseThrow(() -> new NotFoundException("Asset not found: id=" + assetId + ", projectId=" + projectId));
-        deleteStoredFileQuietly(asset.getStoredName());
+        deleteStoredAssetQuietly(asset.getStoredName());
         projectAssetRepository.delete(asset);
     }
 
     public void deleteAllByProjectId(Long projectId) {
         List<ProjectAsset> assets = projectAssetRepository.findByProjectIdOrderByCreatedAtAsc(projectId);
         for (ProjectAsset asset : assets) {
-            deleteStoredFileQuietly(asset.getStoredName());
+            deleteStoredAssetQuietly(asset.getStoredName());
         }
         projectAssetRepository.deleteAll(assets);
+    }
+
+    private UploadProvider resolveUploadProvider(
+            String configuredProvider,
+            String supabaseUrl,
+            String supabaseBucket,
+            String serviceRoleKey
+    ) {
+        String normalizedProvider = normalizeBlankToNull(configuredProvider);
+        String providerValue = normalizedProvider == null ? "auto" : normalizedProvider.toLowerCase(Locale.ROOT);
+        boolean supabaseConfigComplete = isSupabaseConfigComplete(supabaseUrl, supabaseBucket, serviceRoleKey);
+
+        return switch (providerValue) {
+            case "auto" -> supabaseConfigComplete ? UploadProvider.SUPABASE : UploadProvider.LOCAL;
+            case "local" -> UploadProvider.LOCAL;
+            case "supabase" -> {
+                if (!supabaseConfigComplete) {
+                    throw new IllegalStateException(
+                            "APP_UPLOAD_PROVIDER is 'supabase' but Supabase Storage config is incomplete. "
+                                    + "Required: APP_UPLOAD_SUPABASE_URL, APP_UPLOAD_SUPABASE_BUCKET, APP_UPLOAD_SUPABASE_SERVICE_ROLE_KEY"
+                    );
+                }
+                yield UploadProvider.SUPABASE;
+            }
+            default -> throw new IllegalStateException("Unsupported app.upload.provider value: " + configuredProvider);
+        };
+    }
+
+    private static boolean isSupabaseConfigComplete(String supabaseUrl, String supabaseBucket, String serviceRoleKey) {
+        return normalizeBlankToNull(supabaseUrl) != null
+                && normalizeBlankToNull(supabaseBucket) != null
+                && normalizeBlankToNull(serviceRoleKey) != null;
+    }
+
+    private static String buildSupabaseObjectBaseUrl(String supabaseUrl, String supabaseBucket) {
+        String normalizedUrl = normalizeBlankToNull(supabaseUrl);
+        String normalizedBucket = normalizeBlankToNull(supabaseBucket);
+        if (normalizedUrl == null || normalizedBucket == null) {
+            throw new IllegalStateException("Supabase Storage URL/Bucket is not configured");
+        }
+        String baseUrlWithoutTrailingSlash = normalizedUrl.replaceAll("/+$", "");
+        return baseUrlWithoutTrailingSlash + "/storage/v1/object/" + encodePathSegment(normalizedBucket);
+    }
+
+    private void uploadToLocal(String storedName, MultipartFile file, String originalName) {
+        Path target = resolveSafePath(storedName);
+        try {
+            Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new StorageException("Failed to store file: " + originalName, e);
+        }
+    }
+
+    private void uploadToSupabase(String storedName, MultipartFile file, String contentType, String originalName) {
+        byte[] fileBytes;
+        try {
+            fileBytes = file.getBytes();
+        } catch (IOException e) {
+            throw new StorageException("Failed to read file bytes: " + originalName, e);
+        }
+
+        String objectUrl = buildSupabaseObjectUrl(storedName);
+        HttpRequest request = supabaseRequestBuilder(objectUrl)
+                .header("Content-Type", contentType == null ? "application/octet-stream" : contentType)
+                .header("x-upsert", "true")
+                .POST(HttpRequest.BodyPublishers.ofByteArray(fileBytes))
+                .build();
+
+        HttpResponse<String> response = sendForText(request, "upload");
+        if (!isSuccessStatus(response.statusCode())) {
+            throw new StorageException(
+                    "Failed to upload file to Supabase Storage: status=" + response.statusCode() + ", body=" + abbreviateBody(response.body()),
+                    null
+            );
+        }
     }
 
     private void ensureUploadDirExists() {
@@ -136,12 +248,39 @@ public class ProjectAssetService {
             String originalName,
             String contentType
     ) {
+        if (uploadProvider == UploadProvider.SUPABASE) {
+            return loadAssetFromSupabase(storedName, inline, originalName, contentType);
+        }
+
         Path path = resolveSafePath(storedName);
         if (!Files.exists(path)) {
             throw new NotFoundException("Asset file not found: storedName=" + storedName);
         }
         Resource resource = new FileSystemResource(path.toFile());
         return new AssetFile(resource, originalName, contentType, inline);
+    }
+
+    private AssetFile loadAssetFromSupabase(String storedName, boolean inline, String originalName, String contentType) {
+        String objectUrl = buildSupabaseObjectUrl(storedName);
+        HttpRequest request = supabaseRequestBuilder(objectUrl)
+                .GET()
+                .build();
+
+        HttpResponse<byte[]> response = sendForBytes(request, "download");
+        if (response.statusCode() == 404) {
+            throw new NotFoundException("Asset file not found: storedName=" + storedName);
+        }
+        if (!isSuccessStatus(response.statusCode())) {
+            throw new StorageException("Failed to download asset from Supabase Storage: status=" + response.statusCode(), null);
+        }
+
+        String resolvedContentType = normalizeBlankToNull(contentType);
+        if (resolvedContentType == null) {
+            resolvedContentType = response.headers().firstValue("Content-Type").orElse(null);
+        }
+
+        Resource resource = new ByteArrayResource(response.body());
+        return new AssetFile(resource, originalName, resolvedContentType, inline);
     }
 
     private static String normalizeStoredName(String storedName) {
@@ -216,12 +355,104 @@ public class ProjectAssetService {
                 || lower.endsWith(".avif");
     }
 
-    private void deleteStoredFileQuietly(String storedName) {
+    private void deleteStoredAssetQuietly(String storedName) {
+        if (uploadProvider == UploadProvider.SUPABASE) {
+            deleteSupabaseObjectQuietly(storedName);
+            return;
+        }
+
         try {
             Files.deleteIfExists(resolveSafePath(storedName));
         } catch (IOException ignored) {
             // Keep DB cleanup even if file deletion fails.
         }
+    }
+
+    private void deleteSupabaseObjectQuietly(String storedName) {
+        if (normalizeBlankToNull(storedName) == null) {
+            return;
+        }
+
+        try {
+            HttpRequest request = supabaseRequestBuilder(buildSupabaseObjectUrl(storedName))
+                    .DELETE()
+                    .build();
+            HttpResponse<String> response = sendForText(request, "delete");
+            if (isSuccessStatus(response.statusCode()) || response.statusCode() == 404) {
+                return;
+            }
+            log.warn("Supabase delete returned non-success status for {}: {}", storedName, response.statusCode());
+        } catch (StorageException e) {
+            log.warn("Supabase delete failed for {}: {}", storedName, e.getMessage());
+        }
+    }
+
+    private String buildSupabaseObjectUrl(String storedName) {
+        String normalizedStoredName = normalizeStoredName(storedName);
+        if (supabaseObjectBaseUrl == null) {
+            throw new StorageException("Supabase object base URL is not initialized", null);
+        }
+        return supabaseObjectBaseUrl + "/" + encodePathSegment(normalizedStoredName);
+    }
+
+    private HttpRequest.Builder supabaseRequestBuilder(String url) {
+        if (supabaseServiceRoleKey == null) {
+            throw new StorageException("Supabase service role key is not configured", null);
+        }
+
+        return HttpRequest.newBuilder(URI.create(url))
+                .timeout(STORAGE_REQUEST_TIMEOUT)
+                .header("Authorization", "Bearer " + supabaseServiceRoleKey)
+                .header("apikey", supabaseServiceRoleKey);
+    }
+
+    private HttpResponse<String> sendForText(HttpRequest request, String action) {
+        try {
+            return httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new StorageException("Supabase request failed during " + action, e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new StorageException("Supabase request interrupted during " + action, e);
+        }
+    }
+
+    private HttpResponse<byte[]> sendForBytes(HttpRequest request, String action) {
+        try {
+            return httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
+        } catch (IOException e) {
+            throw new StorageException("Supabase request failed during " + action, e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new StorageException("Supabase request interrupted during " + action, e);
+        }
+    }
+
+    private static boolean isSuccessStatus(int statusCode) {
+        return statusCode >= 200 && statusCode < 300;
+    }
+
+    private static String encodePathSegment(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20");
+    }
+
+    private static String normalizeBlankToNull(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private static String abbreviateBody(String body) {
+        if (body == null || body.isBlank()) {
+            return "";
+        }
+        String compact = body.replaceAll("\\s+", " ").trim();
+        if (compact.length() <= 220) {
+            return compact;
+        }
+        return compact.substring(0, 220) + "...";
     }
 
     public record AssetFile(Resource resource, String originalName, String contentType, boolean inline) {

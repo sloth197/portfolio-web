@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import I18nText from "@/components/i18n-text";
 
@@ -95,6 +96,19 @@ const INTEREST_TECHS: InterestTech[] = [
     icons: [{ src: "/icons/tech/cplusplus.svg", label: "C++" }],
   },
 ];
+
+export const metadata: Metadata = {
+  title: "About",
+  description: "JWS의 개발 방향, 작업 방식, 주요 기술 스택을 소개합니다.",
+  alternates: {
+    canonical: "/about",
+  },
+  openGraph: {
+    title: "About | JWS Portfolio",
+    description: "JWS의 개발 방향, 작업 방식, 주요 기술 스택을 소개합니다.",
+    url: "/about",
+  },
+};
 
 function getTechIconClass(label: string): string {
   if (label === "Vercel") {

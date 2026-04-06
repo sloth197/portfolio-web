@@ -12,6 +12,16 @@
 - 비밀번호 길이 권장값: `APP_ADMIN_PASSWORD_MIN_LENGTH` (기본 `8`, 미달 시 경고 로그만 출력)
 - 선택 환경변수(CRM 전용 계정): `APP_CRM_USERNAME`, `APP_CRM_PASSWORD`
 
+## 파일 스토리지 설정 (Supabase Storage)
+- 프로젝트 첨부파일(이미지/GIF/문서) 저장소는 `app.upload.provider` 로 선택합니다.
+- 권장값: `APP_UPLOAD_PROVIDER=auto`  
+  Supabase 설정값이 모두 있으면 Supabase Storage를 사용하고, 없으면 local 디스크를 사용합니다.
+- Supabase 강제 사용: `APP_UPLOAD_PROVIDER=supabase`
+- 필수 환경변수(Supabase 사용 시):
+  - `APP_UPLOAD_SUPABASE_URL` (예: `https://<project-ref>.supabase.co`)
+  - `APP_UPLOAD_SUPABASE_BUCKET`
+  - `APP_UPLOAD_SUPABASE_SERVICE_ROLE_KEY`
+
 ## 주요 기능
 - 프로젝트 목록/카테고리 필터/상세 조회
 - 관리자 로그인 후 프로젝트 등록 및 관리

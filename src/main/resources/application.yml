@@ -51,7 +51,12 @@ app:
     kakao-webhook-url: ${APP_AUTH_KAKAO_WEBHOOK_URL:}
     pass-webhook-url: ${APP_AUTH_PASS_WEBHOOK_URL:}
   upload:
+    provider: ${APP_UPLOAD_PROVIDER:auto}
     dir: ${APP_UPLOAD_DIR:uploads}
+    supabase:
+      url: ${APP_UPLOAD_SUPABASE_URL:}
+      bucket: ${APP_UPLOAD_SUPABASE_BUCKET:}
+      service-role-key: ${APP_UPLOAD_SUPABASE_SERVICE_ROLE_KEY:}
   migration:
     rewrite-legacy-asset-links:
       enabled: ${APP_MIGRATION_REWRITE_LEGACY_ASSET_LINKS_ENABLED:true}

@@ -1,3 +1,18 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Contact",
+  description: "GitHub, LinkedIn, 이메일 등 JWS 연락 채널입니다.",
+  alternates: {
+    canonical: "/contact",
+  },
+  openGraph: {
+    title: "Contact | JWS Portfolio",
+    description: "GitHub, LinkedIn, 이메일 등 JWS 연락 채널입니다.",
+    url: "/contact",
+  },
+};
+
 function LinkedInIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" style={{ display: "block" }}>

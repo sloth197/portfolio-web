@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import AboutPage from "@/app/about/page";
 import ContactPage from "@/app/contact/page";
@@ -9,6 +10,19 @@ import { PREVIEW_PROJECTS } from "@/lib/project-preview";
 import { fetchHomeTechNews } from "@/lib/tech-news";
 
 const HOME_PROJECTS_REVALIDATE_SECONDS = 120;
+
+export const metadata: Metadata = {
+  title: "Home",
+  description: "JWS 백엔드/풀스택 프로젝트, 기술 스택, 연락처를 한 페이지에서 확인할 수 있습니다.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "JWS Portfolio",
+    description: "JWS 백엔드/풀스택 프로젝트, 기술 스택, 연락처를 한 페이지에서 확인할 수 있습니다.",
+    url: "/",
+  },
+};
 
 export default async function Home() {
   const newsItems = await fetchHomeTechNews(30);

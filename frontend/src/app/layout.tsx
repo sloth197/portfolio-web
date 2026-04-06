@@ -22,9 +22,47 @@ const plexMono = IBM_Plex_Mono({
   weight: ["500", "600"],
 });
 
+const DEFAULT_SITE_URL = "https://www.xhbt.dev";
+const DEFAULT_SITE_DESCRIPTION = "Java, C#, Spring 기반 프로젝트 포트폴리오";
+
+function resolveMetadataBase(): URL {
+  const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (configuredSiteUrl) {
+    try {
+      return new URL(configuredSiteUrl);
+    } catch {
+      // Fallback to default public domain when env value is invalid.
+    }
+  }
+  return new URL(DEFAULT_SITE_URL);
+}
+
+const metadataBase = resolveMetadataBase();
+const metadataBaseUrl = metadataBase.toString().replace(/\/+$/, "");
+
 export const metadata: Metadata = {
-  title: "JWS's Portfolio",
-  description: "Java and C# portfolio",
+  metadataBase,
+  title: {
+    default: "JWS Portfolio",
+    template: "%s | JWS Portfolio",
+  },
+  description: DEFAULT_SITE_DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "JWS Portfolio",
+    description: DEFAULT_SITE_DESCRIPTION,
+    url: metadataBaseUrl,
+    siteName: "JWS Portfolio",
+    type: "website",
+    locale: "ko_KR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "JWS Portfolio",
+    description: DEFAULT_SITE_DESCRIPTION,
+  },
 };
 
 const themeBootScript = `

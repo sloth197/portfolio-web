@@ -1,9 +1,23 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ProjectsListPanel from "@/components/projects-list-panel";
 import { ApiError, fetchProjects } from "@/lib/api";
 import { PREVIEW_PROJECTS } from "@/lib/project-preview";
 
 const PROJECTS_REVALIDATE_SECONDS = 120;
+
+export const metadata: Metadata = {
+  title: "Projects",
+  description: "소프트웨어/펌웨어 프로젝트 목록과 주요 요약을 확인할 수 있습니다.",
+  alternates: {
+    canonical: "/projects",
+  },
+  openGraph: {
+    title: "Projects | JWS Portfolio",
+    description: "소프트웨어/펌웨어 프로젝트 목록과 주요 요약을 확인할 수 있습니다.",
+    url: "/projects",
+  },
+};
 
 export default async function ProjectsPage() {
   let allProjects: Awaited<ReturnType<typeof fetchProjects>> = [];
