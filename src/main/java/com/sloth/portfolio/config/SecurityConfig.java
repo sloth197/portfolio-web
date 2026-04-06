@@ -3,6 +3,8 @@ package com.sloth.portfolio.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -28,6 +30,7 @@ import java.util.Locale;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, AdminOriginValidationFilter adminOriginValidationFilter) throws Exception {
@@ -105,7 +108,8 @@ public class SecurityConfig {
             throw new IllegalStateException(accountType + " credentials must be configured via environment variables.");
         }
         if (normalizedPassword.length() < minPasswordLength) {
-            throw new IllegalStateException(accountType + " password must be at least " + minPasswordLength + " characters.");
+            log.warn("{} password length ({}) is below configured minimum ({}). Continuing for backward compatibility.",
+                    accountType, normalizedPassword.length(), minPasswordLength);
         }
         String usernameLower = normalizedUsername.toLowerCase(Locale.ROOT);
         String passwordLower = normalizedPassword.toLowerCase(Locale.ROOT);

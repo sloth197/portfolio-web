@@ -9,7 +9,7 @@
 ## 관리자 계정 설정
 - 관리자 로그인 계정은 코드에 하드코딩하지 않고 배포 환경변수로 관리합니다.
 - 필수 환경변수: `APP_ADMIN_USERNAME`, `APP_ADMIN_PASSWORD`
-- 비밀번호 길이 정책: `APP_ADMIN_PASSWORD_MIN_LENGTH` (기본 `8`)
+- 비밀번호 길이 권장값: `APP_ADMIN_PASSWORD_MIN_LENGTH` (기본 `8`, 미달 시 경고 로그만 출력)
 - 선택 환경변수(CRM 전용 계정): `APP_CRM_USERNAME`, `APP_CRM_PASSWORD`
 
 ## 주요 기능
