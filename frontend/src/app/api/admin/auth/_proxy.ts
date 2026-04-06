@@ -40,6 +40,10 @@ function sanitizeUpstreamHeaders(headers: Headers): Headers {
   const safeHeaders = new Headers(headers);
   // Prevent browser HTTP auth prompt from upstream challenge headers.
   safeHeaders.delete("www-authenticate");
+  // NextResponse recalculates body metadata.
+  safeHeaders.delete("content-length");
+  safeHeaders.delete("transfer-encoding");
+  safeHeaders.delete("content-encoding");
   safeHeaders.delete("access-control-allow-origin");
   safeHeaders.delete("access-control-allow-credentials");
   safeHeaders.delete("access-control-allow-methods");
@@ -79,7 +83,8 @@ export async function proxyAdminAuthRequest(
 
   try {
     const upstreamResponse = await fetch(`${API_BASE}${upstreamPath}`, requestInit);
-    return new NextResponse(upstreamResponse.body, {
+    const responseBody = await upstreamResponse.arrayBuffer();
+    return new NextResponse(responseBody.byteLength > 0 ? responseBody : null, {
       status: upstreamResponse.status,
       headers: sanitizeUpstreamHeaders(upstreamResponse.headers),
     });
