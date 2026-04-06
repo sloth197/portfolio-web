@@ -17,7 +17,7 @@ export default function SiteNavLinks() {
         Project
       </Link>
       {adminLoggedIn ? (
-        <Link className="nav-link" href="/Notice">
+        <Link className="nav-link" href="/notice">
           Notice
         </Link>
       ) : null}

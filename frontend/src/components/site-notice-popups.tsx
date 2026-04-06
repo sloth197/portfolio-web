@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getPublicApiBaseUrl } from "@/lib/api-base";
 
 type PopupNotice = {
   id: string;
@@ -23,7 +22,7 @@ type NoticeDto = {
 
 const INTRO_TOTAL_MS = 4000;
 const POPUP_STORAGE_PREFIX = "xhbt-popup-hide-until:";
-const API_BASE = getPublicApiBaseUrl();
+const PUBLIC_NOTICES_API = "/api/public/notices";
 const NOTICE_BRAND_ICON_DARK_URL = "/warning-dark.png";
 // const NOTICE_BRAND_ICON_LIGHT_URL = "/warning-light.png";
 const POPUP_FIXED_TITLE = "NOTICE";
@@ -78,13 +77,8 @@ export default function SiteNoticePopups() {
 
     const timer = window.setTimeout(() => {
       const loadPinnedNotices = async () => {
-        if (!API_BASE) {
-          setVisibleNotices([]);
-          return;
-        }
-
         try {
-          const response = await fetch(`${API_BASE}/api/public/notices`, {
+          const response = await fetch(PUBLIC_NOTICES_API, {
             method: "GET",
             cache: "no-store",
           });

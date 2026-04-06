@@ -10,9 +10,9 @@ import {
   type AdminRole,
   withAdminAuthHeaders,
 } from "@/lib/admin-auth";
-import { getPublicApiBaseUrl } from "@/lib/api-base";
 
-const API_BASE = getPublicApiBaseUrl();
+const PUBLIC_NOTICES_API = "/api/public/notices";
+const ADMIN_NOTICES_API = "/api/admin/notices";
 const DEFAULT_NOTICE_FONT_SIZE = 18;
 const MIN_NOTICE_FONT_SIZE = 12;
 const MAX_NOTICE_FONT_SIZE = 48;
@@ -72,7 +72,6 @@ export default function NoticePage() {
 
   const t = useMemo(
     () => ({
-      apiBaseNotSet: language === "en" ? "NEXT_PUBLIC_API_BASE_URL is not set." : "NEXT_PUBLIC_API_BASE_URL이 설정되어 있지 않습니다.",
       loadNoticesFailed: language === "en" ? "Failed to load notices." : "공지 목록을 불러오지 못했습니다.",
       noticeManagementRequiresAdmin:
         language === "en" ? "Notice management requires an ADMIN account." : "공지 관리는 ADMIN 계정이 필요합니다.",
@@ -121,16 +120,10 @@ export default function NoticePage() {
   const [formNotice, setFormNotice] = useState<string | null>(null);
 
   const loadNotices = useCallback(async () => {
-    if (!API_BASE) {
-      setListError(t.apiBaseNotSet);
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
       setListError(null);
-      const response = await fetch(`${API_BASE}/api/public/notices`, {
+      const response = await fetch(PUBLIC_NOTICES_API, {
         method: "GET",
         cache: "no-store",
       });
@@ -150,7 +143,7 @@ export default function NoticePage() {
     } finally {
       setLoading(false);
     }
-  }, [t.apiBaseNotSet, t.loadNoticesFailed]);
+  }, [t.loadNoticesFailed]);
 
   useEffect(() => {
     void loadNotices();
@@ -169,10 +162,6 @@ export default function NoticePage() {
       setFormError(t.noticeManagementRequiresAdmin);
       return;
     }
-    if (!API_BASE) {
-      setFormError(t.apiBaseNotSet);
-      return;
-    }
 
     if (!adminLoggedIn) {
       setFormError(t.adminSessionMissing);
@@ -184,7 +173,7 @@ export default function NoticePage() {
     setFormNotice(null);
 
     const isEditing = editingId !== null;
-    const endpoint = isEditing ? `${API_BASE}/api/admin/notices/${editingId}` : `${API_BASE}/api/admin/notices`;
+    const endpoint = isEditing ? `${ADMIN_NOTICES_API}/${editingId}` : ADMIN_NOTICES_API;
     const method = isEditing ? "PUT" : "POST";
 
     try {
@@ -243,10 +232,6 @@ export default function NoticePage() {
       setFormError(t.noticeManagementRequiresAdmin);
       return;
     }
-    if (!API_BASE) {
-      setFormError(t.apiBaseNotSet);
-      return;
-    }
 
     if (!adminLoggedIn) {
       setFormError(t.adminSessionMissing);
@@ -262,7 +247,7 @@ export default function NoticePage() {
     setFormNotice(null);
 
     try {
-      const response = await fetch(`${API_BASE}/api/admin/notices/${id}`, {
+      const response = await fetch(`${ADMIN_NOTICES_API}/${id}`, {
         method: "DELETE",
         headers: withAdminAuthHeaders(),
         credentials: "include",

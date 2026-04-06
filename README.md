@@ -4,7 +4,7 @@
 
 ## Live
 - Web: https://xhbt.dev
-- API Health: https://api.xhbt.dev/api/public/health
+- API Health: https://portfolio-api-y5yr.onrender.com/api/public/health
 
 ## 관리자 계정 설정
 - 관리자 로그인 계정은 코드에 하드코딩하지 않고 배포 환경변수로 관리합니다.
