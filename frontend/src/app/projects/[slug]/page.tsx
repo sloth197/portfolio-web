@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 import I18nText from "@/components/i18n-text";
+import MarkdownImageWithFallback from "@/components/markdown-image-with-fallback";
 import ProjectAdminActions from "@/components/project-admin-actions";
 import { ApiError, fetchProjectBySlug, fetchProjects } from "@/lib/api";
 import { resolvePublicAssetUrl } from "@/lib/asset-url";
@@ -187,7 +188,17 @@ export default async function ProjectDetailPage({
           </h2>
           {markdownWithImages ? (
             <div className="project-markdown">
-              <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{markdownWithImages}</ReactMarkdown>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm, remarkBreaks]}
+                components={{
+                  img: ({ node, ...props }) => {
+                    void node;
+                    return <MarkdownImageWithFallback {...props} projectGithubUrl={project.githubUrl} />;
+                  },
+                }}
+              >
+                {markdownWithImages}
+              </ReactMarkdown>
             </div>
           ) : (
             <p className="section-copy" style={{ margin: 0 }}>
