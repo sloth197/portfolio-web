@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { clearAdminAuthHeader, getAdminRole, isAdminLoggedIn, setAdminAuthSession, type AdminRole } from "@/lib/admin-auth";
+import { clearAdminAuthHeader, getAdminRole, isAdminLoggedIn, isLegacyBasicAuthMode, setAdminAuthSession, type AdminRole } from "@/lib/admin-auth";
 import I18nText from "@/components/i18n-text";
 
 type CrmStatus = "checking" | "ok" | "error";
@@ -14,13 +14,16 @@ function normalizeRole(value: unknown): AdminRole {
 
 export default function CrmPage() {
   const router = useRouter();
-  const [status, setStatus] = useState<CrmStatus>("checking");
+  const [status, setStatus] = useState<CrmStatus>(() => (isAdminLoggedIn() && isLegacyBasicAuthMode() ? "ok" : "checking"));
   const [role, setRole] = useState<AdminRole | null>(() => getAdminRole());
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAdminLoggedIn()) {
       router.replace("/admin/login?next=/crm");
+      return;
+    }
+    if (isLegacyBasicAuthMode()) {
       return;
     }
 

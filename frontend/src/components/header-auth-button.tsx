@@ -6,6 +6,7 @@ import { useSiteLanguage } from "@/components/i18n-text";
 import {
   clearAdminAuthHeader,
   getAdminRole,
+  isLegacyBasicAuthMode,
   isAdminLoggedIn,
   setAdminAuthSession,
   subscribeAdminAuth,
@@ -30,6 +31,10 @@ export default function HeaderAuthButton() {
   const adminRole = useSyncExternalStore(subscribeAdminAuth, getAdminRole, getServerRoleSnapshot);
 
   useEffect(() => {
+    if (isLegacyBasicAuthMode()) {
+      return;
+    }
+
     const controller = new AbortController();
 
     async function syncSession() {
@@ -83,13 +88,15 @@ export default function HeaderAuthButton() {
         onClick={async () => {
           const confirmed = window.confirm(language === "en" ? "Do you want to log out?" : "\uB85C\uADF8\uC544\uC6C3 \uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?");
           if (confirmed) {
-            try {
-              await fetch("/api/admin/auth/logout", {
-                method: "POST",
-                credentials: "include",
-              });
-            } catch {
-              // no-op
+            if (!isLegacyBasicAuthMode()) {
+              try {
+                await fetch("/api/admin/auth/logout", {
+                  method: "POST",
+                  credentials: "include",
+                });
+              } catch {
+                // no-op
+              }
             }
             clearAdminAuthHeader();
           }

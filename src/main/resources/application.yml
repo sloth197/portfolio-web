@@ -30,6 +30,7 @@ app:
   admin:
     username: ${APP_ADMIN_USERNAME:}
     password: ${APP_ADMIN_PASSWORD:}
+    password-min-length: ${APP_ADMIN_PASSWORD_MIN_LENGTH:8}
     session-hours: ${APP_ADMIN_SESSION_HOURS:12}
     login-max-attempts: ${APP_ADMIN_LOGIN_MAX_ATTEMPTS:5}
     login-window-seconds: ${APP_ADMIN_LOGIN_WINDOW_SECONDS:300}

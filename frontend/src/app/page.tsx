@@ -13,6 +13,7 @@ const HOME_PROJECTS_REVALIDATE_SECONDS = 120;
 export default async function Home() {
   const newsItems = await fetchHomeTechNews(30);
   let projects: Awaited<ReturnType<typeof fetchProjects>> = [];
+  let projectLoadWarning: string | null = null;
 
   try {
     projects = await fetchProjects(undefined, {
@@ -20,8 +21,19 @@ export default async function Home() {
       revalidateSeconds: HOME_PROJECTS_REVALIDATE_SECONDS,
     });
   } catch (error) {
-    if (error instanceof ApiError && process.env.NODE_ENV !== "production") {
-      projects = PREVIEW_PROJECTS;
+    if (error instanceof ApiError) {
+      if (error.status === 401 || error.status === 403) {
+        projectLoadWarning = "Projects API is requiring authentication (401/403). Check backend auth settings.";
+      } else if (error.status >= 500) {
+        projectLoadWarning = "Projects API is temporarily unavailable. Please check backend deployment status.";
+      }
+
+      if (process.env.NODE_ENV !== "production") {
+        projects = PREVIEW_PROJECTS;
+        if (!projectLoadWarning) {
+          projectLoadWarning = "Development fallback data is shown because live API fetch failed.";
+        }
+      }
     }
   }
 
@@ -70,6 +82,7 @@ export default async function Home() {
 
       <section className="home-merged-project-section" style={{ display: "grid", gap: 20 }}>
         <h2 className="section-title">PROJECT</h2>
+        {projectLoadWarning ? <div className="projects-empty-state">{projectLoadWarning}</div> : null}
         {sortedProjects.length === 0 ? (
           <div className="projects-empty-state">
             <I18nText ko="표시할 프로젝트가 없습니다." en="No projects available yet." />

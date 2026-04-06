@@ -2,7 +2,10 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { setAdminAuthSession, type AdminRole } from "@/lib/admin-auth";
+import { setAdminAuthSession, setAdminBasicAuthHeader, type AdminRole } from "@/lib/admin-auth";
+import { getPublicApiBaseUrl } from "@/lib/api-base";
+
+const API_BASE = getPublicApiBaseUrl();
 
 function sanitizeNextPath(value: string | null): string {
   if (!value) {
@@ -55,9 +58,45 @@ export default function AdminLoginPage() {
       if (!response.ok) {
         const payload = (await response.json().catch(() => null)) as { message?: string } | null;
         if (response.status === 401 || response.status === 403) {
+          const normalizedUsername = username.trim();
+          if (API_BASE && normalizedUsername && password) {
+            const basicToken = window.btoa(`${normalizedUsername}:${password}`);
+
+            try {
+              const pingResponse = await fetch(`${API_BASE}/api/admin/projects/ping`, {
+                method: "GET",
+                headers: {
+                  Authorization: `Basic ${basicToken}`,
+                },
+                cache: "no-store",
+              });
+
+              if (pingResponse.ok) {
+                const pingPayload = (await pingResponse.json().catch(() => null)) as {
+                  role?: string;
+                  canManageProjects?: boolean;
+                } | null;
+                const role = resolveRole(pingPayload?.role);
+                const canManageProjects = pingPayload?.canManageProjects ?? role === "ADMIN";
+
+                setAdminBasicAuthHeader(`Basic ${basicToken}`);
+                setAdminAuthSession(role);
+
+                if (!canManageProjects && nextPath.startsWith("/projects/admin")) {
+                  router.replace("/projects");
+                  return;
+                }
+                router.replace(nextPath);
+                return;
+              }
+            } catch {
+              // no-op, continue with regular login error handling
+            }
+          }
+
           const nextAttempts = failedAttempts + 1;
           setFailedAttempts(nextAttempts);
-          setError(nextAttempts >= 3 ? "너 관리자 아니지?" : "아이디 또는 비밀번호가 틀렸습니다");
+          setError(nextAttempts >= 3 ? "너 관리자 아니지?" : (payload?.message ?? "아이디 또는 비밀번호가 틀렸습니다"));
           return;
         }
         if (response.status === 429) {
@@ -81,6 +120,7 @@ export default function AdminLoginPage() {
       const role = resolveRole(payload?.role);
       const canManageProjects = payload?.canManageProjects ?? role === "ADMIN";
 
+      setAdminBasicAuthHeader(null);
       setAdminAuthSession(role);
 
       if (!canManageProjects && nextPath.startsWith("/projects/admin")) {

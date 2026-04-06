@@ -6,9 +6,11 @@
 - Web: https://xhbt.dev
 - API Health: https://api.xhbt.dev/api/public/health
 
-## 임시관리자 계정
-- ID: readadmin
-- PW: readadmin
+## 관리자 계정 설정
+- 관리자 로그인 계정은 코드에 하드코딩하지 않고 배포 환경변수로 관리합니다.
+- 필수 환경변수: `APP_ADMIN_USERNAME`, `APP_ADMIN_PASSWORD`
+- 비밀번호 길이 정책: `APP_ADMIN_PASSWORD_MIN_LENGTH` (기본 `8`)
+- 선택 환경변수(CRM 전용 계정): `APP_CRM_USERNAME`, `APP_CRM_PASSWORD`
 
 ## 주요 기능
 - 프로젝트 목록/카테고리 필터/상세 조회
@@ -25,3 +27,8 @@
 
 ### 수정사항
 - DB이동 (Render -> Supabase)
+- Loading 및 Background화면 Animation화
+- Notice 팝업 공지 추가
+- 메뉴 탭 UI 개편
+
+

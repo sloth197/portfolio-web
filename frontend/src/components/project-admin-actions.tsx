@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { canAdminManageProjects, clearAdminAuthHeader, isAdminLoggedIn, subscribeAdminAuth } from "@/lib/admin-auth";
+import { canAdminManageProjects, clearAdminAuthHeader, isAdminLoggedIn, subscribeAdminAuth, withAdminAuthHeaders } from "@/lib/admin-auth";
 import { getPublicApiBaseUrl } from "@/lib/api-base";
 import { resolvePublicAssetUrl } from "@/lib/asset-url";
 import { useSiteLanguage } from "@/components/i18n-text";
@@ -169,6 +169,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
       try {
         const response = await fetch(`${API_BASE}/api/admin/projects/${project.id}/assets`, {
           method: "POST",
+          headers: withAdminAuthHeaders(),
           credentials: "include",
           body: formData,
         });
@@ -224,9 +225,9 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
       const autoSlug = slugify(title);
       const response = await fetch(`${API_BASE}/api/admin/projects/${project.id}`, {
         method: "PUT",
-        headers: {
+        headers: withAdminAuthHeaders({
           "Content-Type": "application/json",
-        },
+        }),
         credentials: "include",
         body: JSON.stringify({
           category,
@@ -299,6 +300,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
     try {
       const response = await fetch(`${API_BASE}/api/admin/projects/${project.id}`, {
         method: "DELETE",
+        headers: withAdminAuthHeaders(),
         credentials: "include",
       });
 
@@ -339,6 +341,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
     try {
       const response = await fetch(`${API_BASE}/api/admin/projects/${project.id}/assets/${assetId}`, {
         method: "DELETE",
+        headers: withAdminAuthHeaders(),
         credentials: "include",
       });
 

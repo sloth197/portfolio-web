@@ -8,6 +8,7 @@ import {
   isAdminLoggedIn,
   subscribeAdminAuth,
   type AdminRole,
+  withAdminAuthHeaders,
 } from "@/lib/admin-auth";
 import { getPublicApiBaseUrl } from "@/lib/api-base";
 
@@ -189,9 +190,9 @@ export default function NoticePage() {
     try {
       const response = await fetch(endpoint, {
         method,
-        headers: {
+        headers: withAdminAuthHeaders({
           "Content-Type": "application/json",
-        },
+        }),
         credentials: "include",
         body: JSON.stringify({
           // Keep legacy compatibility with older backend versions requiring title.
@@ -263,6 +264,7 @@ export default function NoticePage() {
     try {
       const response = await fetch(`${API_BASE}/api/admin/notices/${id}`, {
         method: "DELETE",
+        headers: withAdminAuthHeaders(),
         credentials: "include",
       });
 

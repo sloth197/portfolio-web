@@ -60,9 +60,11 @@ public class SecurityConfig {
             @Value("${app.admin.username:}") String username,
             @Value("${app.admin.password:}") String password,
             @Value("${app.crm.username:}") String crmUsername,
-            @Value("${app.crm.password:}") String crmPassword
+            @Value("${app.crm.password:}") String crmPassword,
+            @Value("${app.admin.password-min-length:8}") int passwordMinLength
     ) {
-        validateConfiguredCredential("ADMIN", username, password);
+        int normalizedPasswordMinLength = Math.max(1, passwordMinLength);
+        validateConfiguredCredential("ADMIN", username, password, normalizedPasswordMinLength);
         UserDetails admin = User.builder()
                 .username(username.trim())
                 .password(passwordEncoder().encode(password))
@@ -78,7 +80,7 @@ public class SecurityConfig {
             if (crmUsername.equals(username)) {
                 throw new IllegalStateException("APP_CRM_USERNAME must be different from APP_ADMIN_USERNAME");
             }
-            validateConfiguredCredential("CRM", crmUsername, crmPassword);
+            validateConfiguredCredential("CRM", crmUsername, crmPassword, normalizedPasswordMinLength);
 
             UserDetails crm = User.builder()
                     .username(crmUsername.trim())
@@ -96,14 +98,14 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    private static void validateConfiguredCredential(String accountType, String username, String password) {
+    private static void validateConfiguredCredential(String accountType, String username, String password, int minPasswordLength) {
         String normalizedUsername = username == null ? "" : username.trim();
         String normalizedPassword = password == null ? "" : password.trim();
         if (normalizedUsername.isBlank() || normalizedPassword.isBlank()) {
             throw new IllegalStateException(accountType + " credentials must be configured via environment variables.");
         }
-        if (normalizedPassword.length() < 10) {
-            throw new IllegalStateException(accountType + " password must be at least 10 characters.");
+        if (normalizedPassword.length() < minPasswordLength) {
+            throw new IllegalStateException(accountType + " password must be at least " + minPasswordLength + " characters.");
         }
         String usernameLower = normalizedUsername.toLowerCase(Locale.ROOT);
         String passwordLower = normalizedPassword.toLowerCase(Locale.ROOT);

@@ -25,6 +25,14 @@ function buildProxyHeaders(request: NextRequest): Headers {
   if (cookie) {
     headers.set("cookie", cookie);
   }
+  const origin = request.headers.get("origin");
+  if (origin) {
+    headers.set("origin", origin);
+  }
+  const referer = request.headers.get("referer");
+  if (referer) {
+    headers.set("referer", referer);
+  }
   return headers;
 }
 

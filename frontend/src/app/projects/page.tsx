@@ -7,6 +7,7 @@ const PROJECTS_REVALIDATE_SECONDS = 120;
 
 export default async function ProjectsPage() {
   let allProjects: Awaited<ReturnType<typeof fetchProjects>> = [];
+  let loadWarning: string | null = null;
 
   try {
     allProjects = await fetchProjects(undefined, {
@@ -23,12 +24,19 @@ export default async function ProjectsPage() {
 
       if (error.status === 401 || error.status === 403 || error.status >= 500) {
         allProjects = [];
+        loadWarning =
+          error.status === 401 || error.status === 403
+            ? "Projects API is requiring authentication (401/403). Check backend auth settings."
+            : "Projects API is temporarily unavailable. Please check backend deployment status.";
         handledApiError = true;
       }
     }
 
     if (process.env.NODE_ENV !== "production") {
       allProjects = PREVIEW_PROJECTS;
+      if (!loadWarning) {
+        loadWarning = "Development fallback data is shown because live API fetch failed.";
+      }
     } else if (!handledApiError) {
       throw error;
     }
@@ -43,6 +51,7 @@ export default async function ProjectsPage() {
           Projects
         </h1>
       </div>
+      {loadWarning ? <div className="projects-empty-state">{loadWarning}</div> : null}
 
       <ProjectsListPanel projects={sortedProjects} />
     </div>
