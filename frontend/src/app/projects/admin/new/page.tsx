@@ -3,11 +3,10 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { clearAdminAuthHeader, getAdminRole, isAdminLoggedIn, isLegacyBasicAuthMode, setAdminAuthSession, withAdminAuthHeaders } from "@/lib/admin-auth";
-import { getPublicApiBaseUrl } from "@/lib/api-base";
 import NotionMarkdownEditor from "@/components/notion-markdown-editor";
 import type { ProjectCategory, ProjectDto } from "@/lib/types";
 
-const API_BASE = getPublicApiBaseUrl();
+const ADMIN_PROJECT_API_BASE = "/api/admin/projects";
 const FILE_INPUT_ACCEPT = "image/*,.pdf,.zip,.md,.txt,.doc,.docx,.ppt,.pptx,.xls,.xlsx";
 
 function normalizeCategory(value: string | null): ProjectCategory {
@@ -25,7 +24,7 @@ function slugify(value: string): string {
 }
 
 async function uploadSelectedFiles(projectId: number, files: File[]): Promise<string[]> {
-  if (!API_BASE || files.length === 0) {
+  if (files.length === 0) {
     return [];
   }
 
@@ -36,7 +35,7 @@ async function uploadSelectedFiles(projectId: number, files: File[]): Promise<st
     formData.append("file", file);
 
     try {
-      const response = await fetch(`${API_BASE}/api/admin/projects/${projectId}/assets`, {
+      const response = await fetch(`${ADMIN_PROJECT_API_BASE}/${projectId}/assets`, {
         method: "POST",
         headers: withAdminAuthHeaders(),
         credentials: "include",
@@ -132,11 +131,6 @@ export default function AdminProjectCreatePage() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!API_BASE) {
-      setError("NEXT_PUBLIC_API_BASE_URL is not set.");
-      return;
-    }
-
     if (!isAdminLoggedIn()) {
       setError("Admin login session is missing. Please login again.");
       return;
@@ -152,7 +146,7 @@ export default function AdminProjectCreatePage() {
 
     try {
       const autoSlug = slugify(title);
-      const response = await fetch(`${API_BASE}/api/admin/projects`, {
+      const response = await fetch(ADMIN_PROJECT_API_BASE, {
         method: "POST",
         headers: withAdminAuthHeaders({
           "Content-Type": "application/json",

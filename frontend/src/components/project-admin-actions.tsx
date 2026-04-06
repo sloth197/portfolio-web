@@ -3,13 +3,12 @@
 import { FormEvent, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { canAdminManageProjects, clearAdminAuthHeader, isAdminLoggedIn, subscribeAdminAuth, withAdminAuthHeaders } from "@/lib/admin-auth";
-import { getPublicApiBaseUrl } from "@/lib/api-base";
 import { resolvePublicAssetUrl } from "@/lib/asset-url";
 import { useSiteLanguage } from "@/components/i18n-text";
 import NotionMarkdownEditor from "@/components/notion-markdown-editor";
 import type { ProjectAssetDto, ProjectCategory, ProjectDto } from "@/lib/types";
 
-const API_BASE = getPublicApiBaseUrl();
+const ADMIN_PROJECT_API_BASE = "/api/admin/projects";
 const FILE_INPUT_ACCEPT = "image/*,.pdf,.zip,.md,.txt,.doc,.docx,.ppt,.pptx,.xls,.xlsx";
 
 type Props = {
@@ -55,7 +54,6 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
   const t = language === "ko"
     ? {
         previewNoEdit: "미리보기 모드에서는 수정/삭제를 지원하지 않습니다.",
-        apiBaseMissing: "NEXT_PUBLIC_API_BASE_URL이 설정되어 있지 않습니다.",
         updateFailed: (status: number) => `수정 실패 (${status})`,
         projectUpdated: "프로젝트가 수정되었습니다.",
         projectUpdatedUploaded: (count: number) => `프로젝트가 수정되었습니다. 파일 ${count}개를 업로드했습니다.`,
@@ -89,7 +87,6 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
       }
     : {
         previewNoEdit: "Preview mode does not support edit/delete.",
-        apiBaseMissing: "NEXT_PUBLIC_API_BASE_URL is not set.",
         updateFailed: (status: number) => `Update failed (${status})`,
         projectUpdated: "Project updated.",
         projectUpdatedUploaded: (count: number) => `Project updated. Uploaded ${count} file(s).`,
@@ -167,7 +164,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
       formData.append("file", file);
 
       try {
-        const response = await fetch(`${API_BASE}/api/admin/projects/${project.id}/assets`, {
+        const response = await fetch(`${ADMIN_PROJECT_API_BASE}/${project.id}/assets`, {
           method: "POST",
           headers: withAdminAuthHeaders(),
           credentials: "include",
@@ -208,11 +205,6 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
       setError(t.previewNoEdit);
       return;
     }
-    if (!API_BASE) {
-      setError(t.apiBaseMissing);
-      return;
-    }
-
     if (!requireSession()) {
       return;
     }
@@ -223,7 +215,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
 
     try {
       const autoSlug = slugify(title);
-      const response = await fetch(`${API_BASE}/api/admin/projects/${project.id}`, {
+      const response = await fetch(`${ADMIN_PROJECT_API_BASE}/${project.id}`, {
         method: "PUT",
         headers: withAdminAuthHeaders({
           "Content-Type": "application/json",
@@ -281,10 +273,6 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
       setError(t.previewNoEdit);
       return;
     }
-    if (!API_BASE) {
-      setError(t.apiBaseMissing);
-      return;
-    }
     if (!confirm(t.deleteConfirm)) {
       return;
     }
@@ -298,7 +286,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
     setNotice(null);
 
     try {
-      const response = await fetch(`${API_BASE}/api/admin/projects/${project.id}`, {
+      const response = await fetch(`${ADMIN_PROJECT_API_BASE}/${project.id}`, {
         method: "DELETE",
         headers: withAdminAuthHeaders(),
         credentials: "include",
@@ -325,11 +313,6 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
   }
 
   async function onDeleteAsset(assetId: number) {
-    if (!API_BASE) {
-      setError(t.apiBaseMissing);
-      return;
-    }
-
     if (!requireSession()) {
       return;
     }
@@ -339,7 +322,7 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
     setNotice(null);
 
     try {
-      const response = await fetch(`${API_BASE}/api/admin/projects/${project.id}/assets/${assetId}`, {
+      const response = await fetch(`${ADMIN_PROJECT_API_BASE}/${project.id}/assets/${assetId}`, {
         method: "DELETE",
         headers: withAdminAuthHeaders(),
         credentials: "include",
