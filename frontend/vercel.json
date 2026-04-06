@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/crm/api",
+      "destination": "https://api.xhbt.dev/api"
+    },
+    {
+      "source": "/crm/api/:path*",
+      "destination": "https://api.xhbt.dev/api/:path*"
+    }
+  ]
+}

@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { clearAdminAuthHeader, getAdminRole, isAdminLoggedIn, isLegacyBasicAuthMode, setAdminAuthSession, type AdminRole } from "@/lib/admin-auth";
+import { getCrmApiBaseUrl } from "@/lib/crm-api-base";
 import I18nText from "@/components/i18n-text";
 
 type CrmStatus = "checking" | "ok" | "error";
+const CRM_API_BASE = getCrmApiBaseUrl();
 
 function normalizeRole(value: unknown): AdminRole {
   return value === "CRM" ? "CRM" : "ADMIN";
@@ -14,7 +16,7 @@ function normalizeRole(value: unknown): AdminRole {
 
 export default function CrmPage() {
   const router = useRouter();
-  const [status, setStatus] = useState<CrmStatus>(() => (isAdminLoggedIn() && isLegacyBasicAuthMode() ? "ok" : "checking"));
+  const [status, setStatus] = useState<CrmStatus>("checking");
   const [role, setRole] = useState<AdminRole | null>(() => getAdminRole());
   const [error, setError] = useState<string | null>(null);
 
@@ -23,13 +25,44 @@ export default function CrmPage() {
       router.replace("/admin/login?next=/crm");
       return;
     }
-    if (isLegacyBasicAuthMode()) {
-      return;
-    }
-
     const controller = new AbortController();
 
-    async function checkSession() {
+    async function checkCrmApiReachability() {
+      if (!CRM_API_BASE) {
+        return "CRM API base URL is not configured.";
+      }
+
+      try {
+        const response = await fetch(`${CRM_API_BASE}/v1/users/me`, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+          signal: controller.signal,
+        });
+
+        if (response.ok || response.status === 401 || response.status === 403) {
+          return null;
+        }
+
+        return `CRM API check failed (${response.status})`;
+      } catch {
+        return "CRM API request failed.";
+      }
+    }
+
+    async function checkSessionAndCrmApi() {
+      if (isLegacyBasicAuthMode()) {
+        const crmError = await checkCrmApiReachability();
+        if (crmError) {
+          setStatus("error");
+          setError(crmError);
+          return;
+        }
+        setStatus("ok");
+        setError(null);
+        return;
+      }
+
       try {
         const response = await fetch("/api/admin/auth/session", {
           method: "GET",
@@ -58,14 +91,23 @@ export default function CrmPage() {
         const normalizedRole = normalizeRole(payload.role);
         setAdminAuthSession(normalizedRole);
         setRole(normalizedRole);
+
+        const crmError = await checkCrmApiReachability();
+        if (crmError) {
+          setStatus("error");
+          setError(crmError);
+          return;
+        }
+
         setStatus("ok");
+        setError(null);
       } catch {
         setStatus("error");
         setError("CRM status request failed.");
       }
     }
 
-    void checkSession();
+    void checkSessionAndCrmApi();
 
     return () => controller.abort();
   }, [router]);
