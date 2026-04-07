@@ -32,6 +32,17 @@ function MailIcon() {
   );
 }
 
+function GmailIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false" style={{ display: "block" }}>
+      <path d="M3 7.5 12 14l9-6.5" stroke="#EA4335" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M3 7.5v9A1.5 1.5 0 0 0 4.5 18H8v-6h8v6h3.5A1.5 1.5 0 0 0 21 16.5v-9" stroke="#4285F4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8 18H4.5A1.5 1.5 0 0 1 3 16.5v-9" stroke="#34A853" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M21 7.5v9A1.5 1.5 0 0 1 19.5 18H16" stroke="#FBBC05" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default function ContactPage() {
   const linkedInUrl = "https://www.linkedin.com/in/%EC%9A%B0%EC%84%B1-%EC%A0%95-549379317/?skipRedirect=true";
 
@@ -78,7 +89,7 @@ export default function ContactPage() {
                 href={`mailto:${email}`}
                 style={{ display: "flex", alignItems: "center", gap: 8, color: "inherit", textDecoration: "none", width: "fit-content" }}
               >
-                <MailIcon />
+                {email.endsWith("@gmail.com") ? <GmailIcon /> : <MailIcon />}
                 <span className="section-copy">{email}</span>
               </a>
             ))}
