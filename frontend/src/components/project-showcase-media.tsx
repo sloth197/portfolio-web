@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 
 type ProjectShowcaseMediaProps = {
   alt: string;
+  isHovered: boolean;
   isGif: boolean;
   loading?: "eager" | "lazy";
+  playToken?: number;
   src: string;
 };
 
@@ -57,13 +59,13 @@ function captureGifFirstFrame(gifUrl: string): Promise<string | null> {
 
 export default function ProjectShowcaseMedia({
   alt,
+  isHovered,
   isGif,
   loading = "lazy",
+  playToken = 0,
   src,
 }: ProjectShowcaseMediaProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
   const [posterSrc, setPosterSrc] = useState<string | null>(null);
-  const [playVersion, setPlayVersion] = useState(0);
 
   useEffect(() => {
     if (!isGif) {
@@ -76,7 +78,7 @@ export default function ProjectShowcaseMedia({
       if (!isActive) {
         return;
       }
-      setPosterSrc(frame ?? src);
+      setPosterSrc(frame ?? GIF_PLACEHOLDER);
     });
 
     return () => {
@@ -88,30 +90,11 @@ export default function ProjectShowcaseMedia({
     if (!isGif) {
       return src;
     }
-    if (playVersion === 0) {
-      return src;
-    }
-    return appendQueryParam(src, "gif-play", String(playVersion));
-  }, [isGif, playVersion, src]);
+    const token = playToken > 0 ? playToken : 1;
+    return appendQueryParam(src, "gif-play", String(token));
+  }, [isGif, playToken, src]);
 
-  const currentSrc = isGif
-    ? (isPlaying ? animatedSrc : (posterSrc ?? GIF_PLACEHOLDER))
-    : src;
-
-  const handlePointerEnter = () => {
-    if (!isGif) {
-      return;
-    }
-    setPlayVersion((prev) => prev + 1);
-    setIsPlaying(true);
-  };
-
-  const handlePointerLeave = () => {
-    if (!isGif) {
-      return;
-    }
-    setIsPlaying(false);
-  };
+  const currentSrc = isGif ? (isHovered ? animatedSrc : (posterSrc ?? GIF_PLACEHOLDER)) : src;
 
   return (
     // eslint-disable-next-line @next/next/no-img-element
@@ -120,8 +103,6 @@ export default function ProjectShowcaseMedia({
       src={currentSrc}
       alt={alt}
       loading={loading}
-      onPointerEnter={handlePointerEnter}
-      onPointerLeave={handlePointerLeave}
     />
   );
 }

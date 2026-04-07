@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { pickProjectPreviewMedia } from "@/lib/project-media";
 import type { ProjectDto } from "@/lib/types";
@@ -16,19 +19,30 @@ export default function ProjectShowcaseCard({
   periodText,
   project,
 }: ProjectShowcaseCardProps) {
+  const [isMediaHovered, setIsMediaHovered] = useState(false);
+  const [playToken, setPlayToken] = useState(0);
   const previewMedia = pickProjectPreviewMedia(project);
 
   return (
     <article className="project-showcase-card">
-      <div className={`project-showcase-shot shot-variant-${index % 6}`}>
+      <div
+        className={`project-showcase-shot shot-variant-${index % 6}`}
+        onMouseEnter={() => {
+          setIsMediaHovered(true);
+          setPlayToken((prev) => prev + 1);
+        }}
+        onMouseLeave={() => setIsMediaHovered(false)}
+      >
         {previewMedia ? (
           <>
             <ProjectShowcaseMedia
               key={previewMedia.url}
               src={previewMedia.url}
               alt={previewMedia.alt}
+              isHovered={isMediaHovered}
               isGif={previewMedia.isGif}
               loading="lazy"
+              playToken={playToken}
             />
             <span className="project-showcase-media-overlay" aria-hidden="true" />
           </>
