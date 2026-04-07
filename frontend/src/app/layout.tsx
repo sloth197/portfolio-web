@@ -4,6 +4,7 @@ import { IBM_Plex_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import AdminCrmBanner from "@/components/admin-crm-banner";
 import EntryTransition from "@/components/entry-transition";
 import HeaderAuthButton from "@/components/header-auth-button";
+import HardReloadTracker from "@/components/hard-reload-tracker";
 import LanguageToggle from "@/components/language-toggle";
 import SiteNavLinks from "@/components/site-nav-links";
 import SiteNoticePopups from "@/components/site-notice-popups";
@@ -101,6 +102,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
       <body className={`${jakarta.variable} ${plexMono.variable}`}>
+        <HardReloadTracker />
         <SiteRandomTwinkle />
         <EntryTransition />
         <SiteNoticePopups />

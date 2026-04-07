@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { pickProjectPreviewMedia } from "@/lib/project-media";
 import type { ProjectDto } from "@/lib/types";
+import ProjectShowcaseMedia from "@/components/project-showcase-media";
 
 type ProjectShowcaseCardProps = {
   href: string;
@@ -22,8 +23,13 @@ export default function ProjectShowcaseCard({
       <div className={`project-showcase-shot shot-variant-${index % 6}`}>
         {previewMedia ? (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="project-showcase-media" src={previewMedia.url} alt={previewMedia.alt} loading="lazy" />
+            <ProjectShowcaseMedia
+              key={previewMedia.url}
+              src={previewMedia.url}
+              alt={previewMedia.alt}
+              isGif={previewMedia.isGif}
+              loading="lazy"
+            />
             <span className="project-showcase-media-overlay" aria-hidden="true" />
           </>
         ) : null}

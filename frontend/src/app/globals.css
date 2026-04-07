@@ -2399,6 +2399,7 @@ LIGHT_THEME_DISABLED_END */
   inset: 0;
   z-index: 0;
   background: linear-gradient(180deg, rgba(8, 12, 22, 0.2) 0%, rgba(8, 12, 22, 0.58) 100%);
+  pointer-events: none;
 }
 
 .shot-variant-0 {
@@ -2446,6 +2447,7 @@ LIGHT_THEME_DISABLED_END */
   letter-spacing: 0;
   font-size: 0.76rem;
   font-family: var(--font-geist-mono), Consolas, monospace;
+  pointer-events: none;
 }
 
 .project-showcase-body {

@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   },
 };
 
+const CONTACT_EMAILS = ["contact@xhbt.dev", "kuala290@gmail.com"] as const;
+
 function LinkedInIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" style={{ display: "block" }}>
@@ -21,34 +23,11 @@ function LinkedInIcon() {
   );
 }
 
-function NaverIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false" style={{ display: "block" }}>
-      <rect width="24" height="24" rx="5" fill="#03C75A" />
-      <path fill="#fff" d="M6 5h4.1l4.8 7V5H18v14h-4.1l-4.8-7v7H6V5Z" />
-    </svg>
-  );
-}
-
-function GoogleIcon() {
+function MailIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false" style={{ display: "block" }}>
-      <path
-        d="M21.35 12.2c0-.68-.06-1.19-.2-1.72H12v3.22h5.37c-.11.8-.71 2-2.04 2.8l-.02.11 2.94 2.27.2.02c1.9-1.75 3-4.33 3-7.7Z"
-        fill="#4285F4"
-      />
-      <path
-        d="M12 21.5c2.63 0 4.84-.86 6.45-2.35l-3.07-2.4c-.82.57-1.93.97-3.38.97-2.58 0-4.77-1.75-5.55-4.15l-.11.01-3.06 2.36-.04.1C4.83 19.21 8.15 21.5 12 21.5Z"
-        fill="#34A853"
-      />
-      <path
-        d="M6.45 13.57A5.86 5.86 0 0 1 6.14 12c0-.54.11-1.06.3-1.57l-.01-.11-3.1-2.4-.1.05A9.6 9.6 0 0 0 2.5 12c0 1.47.35 2.85.96 4.03l3-2.46Z"
-        fill="#FBBC05"
-      />
-      <path
-        d="M12 6.27c1.83 0 3.06.78 3.76 1.44l2.75-2.68C16.83 3.46 14.63 2.5 12 2.5 8.15 2.5 4.83 4.79 3.23 7.97l3.2 2.47C7.23 8.02 9.42 6.27 12 6.27Z"
-        fill="#EA4335"
-      />
+      <path d="M3 6.75A1.75 1.75 0 0 1 4.75 5h14.5A1.75 1.75 0 0 1 21 6.75v10.5A1.75 1.75 0 0 1 19.25 19H4.75A1.75 1.75 0 0 1 3 17.25V6.75Z" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M4 7l8 6 8-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -93,14 +72,16 @@ export default function ContactPage() {
         <article className="panel" style={{ padding: 16 }}>
           <div style={{ fontWeight: 800, fontSize: 18 }}>E-mail</div>
           <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "inherit" }}>
-              <NaverIcon />
-              <span className="section-copy">sloth197@naver.com</span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "inherit" }}>
-              <GoogleIcon />
-              <span className="section-copy">kuala290@gmail.com</span>
-            </div>
+            {CONTACT_EMAILS.map((email) => (
+              <a
+                key={email}
+                href={`mailto:${email}`}
+                style={{ display: "flex", alignItems: "center", gap: 8, color: "inherit", textDecoration: "none", width: "fit-content" }}
+              >
+                <MailIcon />
+                <span className="section-copy">{email}</span>
+              </a>
+            ))}
           </div>
         </article>
       </section>

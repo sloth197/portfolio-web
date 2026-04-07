@@ -12,6 +12,10 @@ function hasImageExtension(value: string): boolean {
     || lower.endsWith(".avif");
 }
 
+function hasGifExtension(value: string): boolean {
+  return value.toLowerCase().endsWith(".gif");
+}
+
 function isImageAsset(asset: ProjectAssetDto): boolean {
   if (asset.assetType === "IMAGE") {
     return true;
@@ -23,8 +27,17 @@ function isImageAsset(asset: ProjectAssetDto): boolean {
   return hasImageExtension(asset.originalName) || hasImageExtension(asset.url);
 }
 
+function isGifAsset(asset: ProjectAssetDto): boolean {
+  const contentType = asset.contentType?.toLowerCase() ?? "";
+  if (contentType === "image/gif" || contentType.startsWith("image/gif;")) {
+    return true;
+  }
+  return hasGifExtension(asset.originalName) || hasGifExtension(asset.url);
+}
+
 export type ProjectPreviewMedia = {
   alt: string;
+  isGif: boolean;
   url: string;
 };
 
@@ -38,5 +51,6 @@ export function pickProjectPreviewMedia(project: ProjectDto): ProjectPreviewMedi
   return {
     url: resolvePublicAssetUrl(imageAsset.url),
     alt: imageAsset.originalName?.trim() || `${project.title} preview`,
+    isGif: isGifAsset(imageAsset),
   };
 }

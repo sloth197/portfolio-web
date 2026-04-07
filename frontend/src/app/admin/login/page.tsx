@@ -96,7 +96,7 @@ export default function AdminLoginPage() {
 
           const nextAttempts = failedAttempts + 1;
           setFailedAttempts(nextAttempts);
-          setError(nextAttempts >= 3 ? "너 관리자 아니지?" : (payload?.message ?? "아이디 또는 비밀번호가 틀렸습니다"));
+          setError(nextAttempts >= 3 ? "당신은 관리자가 아닙니다." : (payload?.message ?? "아이디 또는 비밀번호가 틀렸습니다"));
           return;
         }
         if (response.status === 429) {

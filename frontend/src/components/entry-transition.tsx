@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties } from "react";
+import { consumeHardReloadFlag } from "@/lib/hard-reload";
 
 type EntryPhase = "visible" | "fade";
 type Rect = { left: number; top: number; right: number; bottom: number };
@@ -356,8 +357,9 @@ function createGalaxyStars(viewportW: number, viewportH: number, seed: number): 
 }
 
 export default function EntryTransition() {
+  const [enabled] = useState<boolean>(() => consumeHardReloadFlag());
   const [phase, setPhase] = useState<EntryPhase>("visible");
-  const [mounted, setMounted] = useState(true);
+  const [mounted, setMounted] = useState(enabled);
   const [loadingDotIndex, setLoadingDotIndex] = useState(0);
   const [greetings, setGreetings] = useState<GreetingPlacement[]>([]);
   const [galaxyStars, setGalaxyStars] = useState<GalaxyStarsByLayer>(() =>
@@ -365,6 +367,9 @@ export default function EntryTransition() {
   );
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
     const refreshLayout = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
@@ -378,9 +383,12 @@ export default function EntryTransition() {
     return () => {
       window.removeEventListener("resize", refreshLayout);
     };
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const fadeStartDelay = prefersReducedMotion ? 90 : INTRO_TOTAL_MS - INTRO_FADE_MS;
     const unmountDelay = prefersReducedMotion ? 300 : INTRO_TOTAL_MS;
@@ -397,9 +405,12 @@ export default function EntryTransition() {
       window.clearTimeout(fadeTimer);
       window.clearTimeout(unmountTimer);
     };
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
     const interval = window.setInterval(() => {
       setLoadingDotIndex((current) => (current + 1) % LOADING_DOTS.length);
     }, LOADING_DOT_INTERVAL_MS);
@@ -407,9 +418,9 @@ export default function EntryTransition() {
     return () => {
       window.clearInterval(interval);
     };
-  }, []);
+  }, [enabled]);
 
-  if (!mounted) {
+  if (!enabled || !mounted) {
     return null;
   }
 

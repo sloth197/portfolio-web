@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
 import I18nText, { useSiteLanguage } from "@/components/i18n-text";
 import {
   clearAdminAuthHeader,
@@ -65,9 +66,11 @@ function normalizeNoticeFontSize(value: number | null | undefined): number {
 }
 
 export default function NoticePage() {
+  const router = useRouter();
   const language = useSiteLanguage();
   const adminLoggedIn = useSyncExternalStore(subscribeAdminAuth, isAdminLoggedIn, getServerSnapshot);
   const adminRole = useSyncExternalStore(subscribeAdminAuth, getAdminRole, getServerRoleSnapshot);
+  const hasShownDeniedAlertRef = useRef(false);
   const canManageNotices = useMemo(() => adminLoggedIn && adminRole === "ADMIN", [adminLoggedIn, adminRole]);
 
   const t = useMemo(
@@ -146,8 +149,24 @@ export default function NoticePage() {
   }, [t.loadNoticesFailed]);
 
   useEffect(() => {
+    if (adminLoggedIn) {
+      hasShownDeniedAlertRef.current = false;
+      return;
+    }
+    if (hasShownDeniedAlertRef.current) {
+      return;
+    }
+    hasShownDeniedAlertRef.current = true;
+    window.alert(language === "en" ? "You do not have permission." : "권한이 없습니다");
+    router.replace("/");
+  }, [adminLoggedIn, language, router]);
+
+  useEffect(() => {
+    if (!adminLoggedIn) {
+      return;
+    }
     void loadNotices();
-  }, [loadNotices]);
+  }, [adminLoggedIn, loadNotices]);
 
   function resetForm() {
     setEditingId(null);
@@ -272,6 +291,10 @@ export default function NoticePage() {
     } catch {
       setFormError(t.requestFailedWhileDeleting);
     }
+  }
+
+  if (!adminLoggedIn) {
+    return null;
   }
 
   return (
