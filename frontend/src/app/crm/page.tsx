@@ -179,12 +179,15 @@ function formatDateTime(value: string, language: SiteLanguage): string {
   });
 }
 
-function toRelativeTime(value: string, language: SiteLanguage): string {
+function toRelativeTime(value: string, language: SiteLanguage, nowMs: number | null): string {
+  if (nowMs === null) {
+    return "-";
+  }
   const target = new Date(value).getTime();
   if (Number.isNaN(target)) {
     return "-";
   }
-  const diffMs = Date.now() - target;
+  const diffMs = nowMs - target;
   if (diffMs < 0) {
     return language === "ko" ? "방금" : "just now";
   }
@@ -210,6 +213,11 @@ function buildErrorMessage(error: CrmError | null, language: SiteLanguage): stri
     return language === "ko" ? "CRM API 요청에 실패했습니다." : "CRM API request failed.";
   }
   if (error.kind === "crm_api_check_failed") {
+    if (error.status === 503) {
+      return language === "ko"
+        ? "CRM API 서버가 일시 중지 상태에서 기동 중입니다. 잠시 후 다시 시도해 주세요."
+        : "CRM API is waking from hibernation. Please retry shortly.";
+    }
     return language === "ko" ? `CRM API 상태 확인 실패 (${error.status})` : `CRM API check failed (${error.status})`;
   }
   if (error.kind === "crm_status_check_failed") {
@@ -310,6 +318,22 @@ export default function CrmPage() {
   const [visitLogs, setVisitLogs] = useState<VisitLog[]>(VISIT_LOGS);
   const [projectClickStats, setProjectClickStats] = useState<ProjectClickStat[]>(PROJECT_CLICK_STATS);
   const [visitorLeads, setVisitorLeads] = useState<VisitorLead[]>(VISITOR_LEADS);
+  const [nowMs, setNowMs] = useState<number | null>(null);
+
+  useEffect(() => {
+    const updateNowMs = () => {
+      setNowMs(Date.now());
+    };
+    const timeoutId = window.setTimeout(updateNowMs, 0);
+    const timerId = window.setInterval(() => {
+      updateNowMs();
+    }, 60_000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.clearInterval(timerId);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isAdminLoggedIn()) {
@@ -645,7 +669,7 @@ export default function CrmPage() {
                   <td style={{ color: "#adc1e0", fontSize: 15, padding: "10px 0" }}>{lead.sourceHint}</td>
                   <td style={{ color: "#adc1e0", fontSize: 15, padding: "10px 0" }}>{getLeadStatusLabel(lead.status, language)}</td>
                   <td style={{ color: "#adc1e0", fontSize: 15, padding: "10px 0" }}>
-                    {formatDateTime(lead.lastSeenAt, language)} ({toRelativeTime(lead.lastSeenAt, language)})
+                    {formatDateTime(lead.lastSeenAt, language)} ({toRelativeTime(lead.lastSeenAt, language, nowMs)})
                   </td>
                   <td style={{ color: "#adc1e0", fontSize: 15, padding: "10px 0" }}>
                     {isAdmin ? (
