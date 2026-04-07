@@ -407,6 +407,12 @@ export default function CrmPage() {
       if (isLegacyBasicAuthMode()) {
         const crmError = await checkCrmApiReachability();
         if (crmError) {
+          if (crmError.kind === "crm_api_check_failed" && crmError.status === 503) {
+            await syncPortfolioDashboardData();
+            setStatus("ok");
+            setError(crmError);
+            return;
+          }
           setStatus("error");
           setError(crmError);
           return;
@@ -448,6 +454,12 @@ export default function CrmPage() {
 
         const crmError = await checkCrmApiReachability();
         if (crmError) {
+          if (crmError.kind === "crm_api_check_failed" && crmError.status === 503) {
+            await syncPortfolioDashboardData();
+            setStatus("ok");
+            setError(crmError);
+            return;
+          }
           setStatus("error");
           setError(crmError);
           return;
