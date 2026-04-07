@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import {
   clearAdminAuthHeader,
@@ -8,35 +8,26 @@ import {
   isAdminLoggedIn,
   isLegacyBasicAuthMode,
   setAdminAuthSession,
+  subscribeAdminAuth,
   withAdminAuthHeaders,
   type AdminRole,
 } from "@/lib/admin-auth";
 import { getCrmApiBaseUrl } from "@/lib/crm-api-base";
 import I18nText, { type SiteLanguage, useSiteLanguage } from "@/components/i18n-text";
+import {
+  CRM_PROJECT_CLICK_EVENTS_STORAGE_KEY,
+  CRM_PROJECT_STAY_EVENTS_STORAGE_KEY,
+  CRM_VISIT_LOGS_STORAGE_KEY,
+  extractProjectSlug,
+  readCrmStorageEvents,
+  toProjectDisplayName,
+  type CrmProjectClickEvent,
+  type CrmProjectStayEvent,
+  type CrmVisitLogEvent,
+} from "@/lib/hard-reload";
 
 type CrmStatus = "checking" | "ok" | "error";
 type LeadStatus = "new" | "contacted" | "watchlist";
-
-type JobSearchDashboardResponse = {
-  summary?: {
-    totalVisits?: number;
-    uniqueVisitors?: number;
-    totalProjectClicks?: number;
-    avgStaySeconds?: number;
-    topClickedProject?: string;
-    topClickedCount?: number;
-  };
-  visitLogs?: VisitLog[];
-  projectClickStats?: ProjectClickStat[];
-  visitorLeads?: VisitorLead[];
-};
-
-type ApiEnvelope<T> = {
-  success?: boolean;
-  code?: string;
-  message?: string;
-  data?: T;
-};
 
 type VisitLog = {
   id: string;
@@ -78,88 +69,11 @@ type LeadActionNotice =
   | { kind: "memo"; alias: string };
 
 const CRM_API_BASE = getCrmApiBaseUrl();
-//임시
-const VISIT_LOGS: VisitLog[] = [
-  {
-    id: "v1",
-    visitorId: "anon-A12",
-    visitedAt: "2026-04-07T09:12:00+09:00",
-    pagePath: "/projects/admin-dashboard",
-    browser: "Chrome",
-    device: "Desktop",
-    referrer: "google.com / search",
-  },
-  {
-    id: "v2",
-    visitorId: "anon-B07",
-    visitedAt: "2026-04-07T09:25:00+09:00",
-    pagePath: "/projects/smart-factory",
-    browser: "Safari",
-    device: "Mobile",
-    referrer: "linkedin.com",
-  },
-  {
-    id: "v3",
-    visitorId: "anon-C33",
-    visitedAt: "2026-04-07T09:44:00+09:00",
-    pagePath: "/projects/api-gateway",
-    browser: "Edge",
-    device: "Desktop",
-    referrer: "github.com",
-  },
-  {
-    id: "v4",
-    visitorId: "anon-A12",
-    visitedAt: "2026-04-07T10:02:00+09:00",
-    pagePath: "/projects/admin-dashboard",
-    browser: "Chrome",
-    device: "Desktop",
-    referrer: "internal navigation",
-  },
-  {
-    id: "v5",
-    visitorId: "anon-D81",
-    visitedAt: "2026-04-07T10:16:00+09:00",
-    pagePath: "/projects/devops-pipeline",
-    browser: "Firefox",
-    device: "Tablet",
-    referrer: "tistory.com / post",
-  },
-];
+const CRM_LOCAL_DASHBOARD_REFRESH_MS = 30 * 60 * 1000;
 
-const PROJECT_CLICK_STATS: ProjectClickStat[] = [
-  { id: "p1", projectName: "Admin Dashboard", totalClicks: 124, githubClicks: 48, detailClicks: 76, avgStaySeconds: 187 },
-  { id: "p2", projectName: "Smart Factory", totalClicks: 98, githubClicks: 37, detailClicks: 61, avgStaySeconds: 162 },
-  { id: "p3", projectName: "API Gateway", totalClicks: 83, githubClicks: 42, detailClicks: 41, avgStaySeconds: 210 },
-  { id: "p4", projectName: "DevOps Pipeline", totalClicks: 71, githubClicks: 21, detailClicks: 50, avgStaySeconds: 149 },
-];
-
-const VISITOR_LEADS: VisitorLead[] = [
-  {
-    id: "l1",
-    alias: "Lead-A12",
-    interestProject: "Admin Dashboard",
-    sourceHint: "GitHub profile click",
-    status: "new",
-    lastSeenAt: "2026-04-07T10:02:00+09:00",
-  },
-  {
-    id: "l2",
-    alias: "Lead-B07",
-    interestProject: "Smart Factory",
-    sourceHint: "LinkedIn inbound",
-    status: "contacted",
-    lastSeenAt: "2026-04-07T09:25:00+09:00",
-  },
-  {
-    id: "l3",
-    alias: "Lead-D81",
-    interestProject: "DevOps Pipeline",
-    sourceHint: "Blog referral",
-    status: "watchlist",
-    lastSeenAt: "2026-04-07T10:16:00+09:00",
-  },
-];
+function getServerSnapshot(): boolean {
+  return false;
+}
 
 function normalizeRole(value: unknown): AdminRole {
   return value === "CRM" ? "CRM" : "ADMIN";
@@ -253,72 +167,261 @@ function isLeadStatus(value: unknown): value is LeadStatus {
   return value === "new" || value === "contacted" || value === "watchlist";
 }
 
-function normalizeVisitLogs(items: unknown): VisitLog[] {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-  return items
-    .filter((item): item is Record<string, unknown> => typeof item === "object" && item !== null)
-    .map((item) => ({
-      id: String(item.id ?? ""),
-      visitorId: String(item.visitorId ?? ""),
-      visitedAt: String(item.visitedAt ?? ""),
-      pagePath: String(item.pagePath ?? ""),
-      browser: String(item.browser ?? ""),
-      device: String(item.device ?? ""),
-      referrer: String(item.referrer ?? ""),
-    }))
-    .filter((item) => item.id && item.visitorId && item.visitedAt);
+function toTimeMs(value: string): number {
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function normalizeProjectClickStats(items: unknown): ProjectClickStat[] {
-  if (!Array.isArray(items)) {
-    return [];
+function statusFromSignal(clickCount: number, trackedProjects: number): LeadStatus {
+  if (clickCount >= 3) {
+    return "contacted";
   }
-  return items
-    .filter((item): item is Record<string, unknown> => typeof item === "object" && item !== null)
-    .map((item) => ({
-      id: String(item.id ?? ""),
-      projectName: String(item.projectName ?? ""),
-      totalClicks: Number(item.totalClicks ?? 0),
-      githubClicks: Number(item.githubClicks ?? 0),
-      detailClicks: Number(item.detailClicks ?? 0),
-      avgStaySeconds: Number(item.avgStaySeconds ?? 0),
-    }))
-    .filter((item) => item.id && item.projectName);
+  if (clickCount >= 1 || trackedProjects >= 2) {
+    return "watchlist";
+  }
+  return "new";
 }
 
-function normalizeVisitorLeads(items: unknown): VisitorLead[] {
-  if (!Array.isArray(items)) {
-    return [];
+function makeLeadAlias(visitorId: string): string {
+  const token = visitorId.replace(/^anon-/i, "").replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+  return `Lead-${(token.slice(-4) || "USER").padStart(4, "0")}`;
+}
+
+function buildLocalDashboardData(): {
+  visitLogs: VisitLog[];
+  projectClickStats: ProjectClickStat[];
+  visitorLeads: VisitorLead[];
+} {
+  const visitEvents = readCrmStorageEvents<CrmVisitLogEvent>(CRM_VISIT_LOGS_STORAGE_KEY);
+  const clickEvents = readCrmStorageEvents<CrmProjectClickEvent>(CRM_PROJECT_CLICK_EVENTS_STORAGE_KEY);
+  const stayEvents = readCrmStorageEvents<CrmProjectStayEvent>(CRM_PROJECT_STAY_EVENTS_STORAGE_KEY);
+
+  const visitLogs = visitEvents
+    .map((event) => ({
+      id: String(event.id ?? ""),
+      visitorId: String(event.visitorId ?? ""),
+      visitedAt: String(event.visitedAt ?? ""),
+      pagePath: String(event.pagePath ?? ""),
+      browser: String(event.browser ?? "Unknown"),
+      device: String(event.device ?? "Unknown"),
+      referrer: String(event.referrer ?? "direct"),
+    }))
+    .filter((event) => event.id && event.visitorId && event.visitedAt)
+    .sort((a, b) => toTimeMs(b.visitedAt) - toTimeMs(a.visitedAt))
+    .slice(0, 300);
+
+  type ProjectAgg = {
+    slug: string;
+    detailClicks: number;
+    githubClicks: number;
+    staySum: number;
+    stayCount: number;
+  };
+
+  const projectAggMap = new Map<string, ProjectAgg>();
+
+  const ensureProjectAgg = (slug: string): ProjectAgg => {
+    const normalizedSlug = slug.trim().toLowerCase();
+    const existing = projectAggMap.get(normalizedSlug);
+    if (existing) {
+      return existing;
+    }
+    const created: ProjectAgg = {
+      slug: normalizedSlug,
+      detailClicks: 0,
+      githubClicks: 0,
+      staySum: 0,
+      stayCount: 0,
+    };
+    projectAggMap.set(normalizedSlug, created);
+    return created;
+  };
+
+  for (const event of clickEvents) {
+    const slug = String(event.projectSlug ?? "").trim().toLowerCase();
+    if (!slug) {
+      continue;
+    }
+    const agg = ensureProjectAgg(slug);
+    if (event.clickType === "github") {
+      agg.githubClicks += 1;
+    } else {
+      agg.detailClicks += 1;
+    }
   }
-  return items
-    .filter((item): item is Record<string, unknown> => typeof item === "object" && item !== null)
-    .map((item) => {
-      const status = isLeadStatus(item.status) ? item.status : "new";
+
+  for (const event of stayEvents) {
+    const slug = String(event.projectSlug ?? "").trim().toLowerCase();
+    if (!slug) {
+      continue;
+    }
+    const staySeconds = Number(event.staySeconds ?? 0);
+    if (!Number.isFinite(staySeconds) || staySeconds <= 0) {
+      continue;
+    }
+    const agg = ensureProjectAgg(slug);
+    agg.staySum += staySeconds;
+    agg.stayCount += 1;
+  }
+
+  const projectClickStats = [...projectAggMap.values()]
+    .map((agg) => {
+      const avgStaySeconds = agg.stayCount > 0 ? Math.round(agg.staySum / agg.stayCount) : 0;
+      const totalClicks = agg.detailClicks + agg.githubClicks;
       return {
-        id: String(item.id ?? ""),
-        alias: String(item.alias ?? ""),
-        interestProject: String(item.interestProject ?? ""),
-        sourceHint: String(item.sourceHint ?? ""),
-        status,
-        lastSeenAt: String(item.lastSeenAt ?? ""),
+        id: agg.slug,
+        projectName: toProjectDisplayName(agg.slug),
+        totalClicks,
+        githubClicks: agg.githubClicks,
+        detailClicks: agg.detailClicks,
+        avgStaySeconds,
       };
     })
-    .filter((item) => item.id && item.alias);
+    .filter((item) => item.totalClicks > 0 || item.avgStaySeconds > 0)
+    .sort((a, b) => {
+      if (b.totalClicks !== a.totalClicks) {
+        return b.totalClicks - a.totalClicks;
+      }
+      return b.avgStaySeconds - a.avgStaySeconds;
+    })
+    .slice(0, 50);
+
+  type VisitorAgg = {
+    visitorId: string;
+    lastSeenAt: string;
+    sourceHint: string;
+    projectScoreMap: Map<string, number>;
+    clickCount: number;
+  };
+
+  const visitorAggMap = new Map<string, VisitorAgg>();
+
+  const ensureVisitorAgg = (visitorId: string): VisitorAgg => {
+    const normalizedVisitorId = visitorId.trim();
+    const existing = visitorAggMap.get(normalizedVisitorId);
+    if (existing) {
+      return existing;
+    }
+    const created: VisitorAgg = {
+      visitorId: normalizedVisitorId,
+      lastSeenAt: "",
+      sourceHint: "direct",
+      projectScoreMap: new Map<string, number>(),
+      clickCount: 0,
+    };
+    visitorAggMap.set(normalizedVisitorId, created);
+    return created;
+  };
+
+  for (const event of visitEvents) {
+    const visitorId = String(event.visitorId ?? "").trim();
+    if (!visitorId) {
+      continue;
+    }
+    const agg = ensureVisitorAgg(visitorId);
+    const visitedAt = String(event.visitedAt ?? "");
+    if (toTimeMs(visitedAt) >= toTimeMs(agg.lastSeenAt)) {
+      agg.lastSeenAt = visitedAt;
+      const referrer = String(event.referrer ?? "").trim();
+      if (referrer) {
+        agg.sourceHint = referrer;
+      }
+    }
+
+    const slug = extractProjectSlug(String(event.pagePath ?? ""));
+    if (slug) {
+      agg.projectScoreMap.set(slug, (agg.projectScoreMap.get(slug) ?? 0) + 1);
+    }
+  }
+
+  for (const event of clickEvents) {
+    const visitorId = String(event.visitorId ?? "").trim();
+    const slug = String(event.projectSlug ?? "").trim().toLowerCase();
+    if (!visitorId || !slug) {
+      continue;
+    }
+    const agg = ensureVisitorAgg(visitorId);
+    agg.clickCount += 1;
+    const currentScore = agg.projectScoreMap.get(slug) ?? 0;
+    agg.projectScoreMap.set(slug, currentScore + 2);
+
+    const clickedAt = String(event.clickedAt ?? "");
+    if (toTimeMs(clickedAt) > toTimeMs(agg.lastSeenAt)) {
+      agg.lastSeenAt = clickedAt;
+    }
+  }
+
+  const visitorLeads = [...visitorAggMap.values()]
+    .map((agg) => {
+      const rankedProjects = [...agg.projectScoreMap.entries()].sort((a, b) => b[1] - a[1]);
+      const topProjectSlug = rankedProjects[0]?.[0] ?? "";
+      const status = statusFromSignal(agg.clickCount, rankedProjects.length);
+      return {
+        id: agg.visitorId,
+        alias: makeLeadAlias(agg.visitorId),
+        interestProject: topProjectSlug ? toProjectDisplayName(topProjectSlug) : "-",
+        sourceHint: agg.sourceHint || "direct",
+        status: isLeadStatus(status) ? status : "new",
+        lastSeenAt: agg.lastSeenAt || new Date(0).toISOString(),
+      };
+    })
+    .filter((lead) => lead.id && lead.alias)
+    .sort((a, b) => toTimeMs(b.lastSeenAt) - toTimeMs(a.lastSeenAt))
+    .slice(0, 100);
+
+  return {
+    visitLogs,
+    projectClickStats,
+    visitorLeads,
+  };
 }
 
 export default function CrmPage() {
   const router = useRouter();
   const language = useSiteLanguage();
+  const adminLoggedIn = useSyncExternalStore(subscribeAdminAuth, isAdminLoggedIn, getServerSnapshot);
+  const hasShownDeniedAlertRef = useRef(false);
   const [status, setStatus] = useState<CrmStatus>("checking");
   const [role, setRole] = useState<AdminRole | null>(() => getAdminRole());
   const [error, setError] = useState<CrmError | null>(null);
   const [leadActionNotice, setLeadActionNotice] = useState<LeadActionNotice | null>(null);
-  const [visitLogs, setVisitLogs] = useState<VisitLog[]>(VISIT_LOGS);
-  const [projectClickStats, setProjectClickStats] = useState<ProjectClickStat[]>(PROJECT_CLICK_STATS);
-  const [visitorLeads, setVisitorLeads] = useState<VisitorLead[]>(VISITOR_LEADS);
+  const [visitLogs, setVisitLogs] = useState<VisitLog[]>([]);
+  const [projectClickStats, setProjectClickStats] = useState<ProjectClickStat[]>([]);
+  const [visitorLeads, setVisitorLeads] = useState<VisitorLead[]>([]);
   const [nowMs, setNowMs] = useState<number | null>(null);
+
+  useEffect(() => {
+    const syncLocalDashboardData = () => {
+      const next = buildLocalDashboardData();
+      setVisitLogs(next.visitLogs);
+      setProjectClickStats(next.projectClickStats);
+      setVisitorLeads(next.visitorLeads);
+    };
+
+    syncLocalDashboardData();
+
+    const timerId = window.setInterval(syncLocalDashboardData, CRM_LOCAL_DASHBOARD_REFRESH_MS);
+    const onStorage = (event: StorageEvent) => {
+      if (!event.key) {
+        syncLocalDashboardData();
+        return;
+      }
+
+      if (
+        event.key === CRM_VISIT_LOGS_STORAGE_KEY
+        || event.key === CRM_PROJECT_CLICK_EVENTS_STORAGE_KEY
+        || event.key === CRM_PROJECT_STAY_EVENTS_STORAGE_KEY
+      ) {
+        syncLocalDashboardData();
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.clearInterval(timerId);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, []);
 
   useEffect(() => {
     const updateNowMs = () => {
@@ -336,8 +439,20 @@ export default function CrmPage() {
   }, []);
 
   useEffect(() => {
-    if (!isAdminLoggedIn()) {
-      router.replace("/admin/login?next=/crm");
+    if (adminLoggedIn) {
+      hasShownDeniedAlertRef.current = false;
+      return;
+    }
+    if (hasShownDeniedAlertRef.current) {
+      return;
+    }
+    hasShownDeniedAlertRef.current = true;
+    window.alert(language === "en" ? "You do not have permission." : "권한이 없습니다");
+    router.replace("/");
+  }, [adminLoggedIn, language, router]);
+
+  useEffect(() => {
+    if (!adminLoggedIn) {
       return;
     }
     const controller = new AbortController();
@@ -366,49 +481,11 @@ export default function CrmPage() {
       }
     }
 
-    async function syncPortfolioDashboardData() {
-      try {
-        const response = await fetch(`${CRM_API_BASE}/v1/dashboard/portfolio/job-search`, {
-          method: "GET",
-          headers: withAdminAuthHeaders(),
-          credentials: "include",
-          cache: "no-store",
-          signal: controller.signal,
-        });
-        if (!response.ok) {
-          return;
-        }
-
-        const payload = (await response.json().catch(() => null)) as ApiEnvelope<JobSearchDashboardResponse> | null;
-        const data = payload?.data;
-        if (!data || typeof data !== "object") {
-          return;
-        }
-
-        const nextVisitLogs = normalizeVisitLogs(data.visitLogs);
-        const nextProjectClickStats = normalizeProjectClickStats(data.projectClickStats);
-        const nextVisitorLeads = normalizeVisitorLeads(data.visitorLeads);
-
-        if (nextVisitLogs.length > 0) {
-          setVisitLogs(nextVisitLogs);
-        }
-        if (nextProjectClickStats.length > 0) {
-          setProjectClickStats(nextProjectClickStats);
-        }
-        if (nextVisitorLeads.length > 0) {
-          setVisitorLeads(nextVisitorLeads);
-        }
-      } catch {
-        // no-op: keep fallback sample data when backend payload is unavailable
-      }
-    }
-
     async function checkSessionAndCrmApi() {
       if (isLegacyBasicAuthMode()) {
         const crmError = await checkCrmApiReachability();
         if (crmError) {
           if (crmError.kind === "crm_api_check_failed" && crmError.status === 503) {
-            await syncPortfolioDashboardData();
             setStatus("ok");
             setError(crmError);
             return;
@@ -417,7 +494,6 @@ export default function CrmPage() {
           setError(crmError);
           return;
         }
-        await syncPortfolioDashboardData();
         setStatus("ok");
         setError(null);
         return;
@@ -434,7 +510,6 @@ export default function CrmPage() {
         if (!response.ok) {
           if (response.status === 401 || response.status === 403) {
             clearAdminAuthHeader();
-            router.replace("/admin/login?next=/crm");
             return;
           }
           setStatus("error");
@@ -445,7 +520,6 @@ export default function CrmPage() {
         const payload = (await response.json().catch(() => null)) as { authenticated?: boolean; role?: string } | null;
         if (!payload?.authenticated) {
           clearAdminAuthHeader();
-          router.replace("/admin/login?next=/crm");
           return;
         }
         const normalizedRole = normalizeRole(payload.role);
@@ -455,7 +529,6 @@ export default function CrmPage() {
         const crmError = await checkCrmApiReachability();
         if (crmError) {
           if (crmError.kind === "crm_api_check_failed" && crmError.status === 503) {
-            await syncPortfolioDashboardData();
             setStatus("ok");
             setError(crmError);
             return;
@@ -465,7 +538,6 @@ export default function CrmPage() {
           return;
         }
 
-        await syncPortfolioDashboardData();
         setStatus("ok");
         setError(null);
       } catch {
@@ -477,7 +549,7 @@ export default function CrmPage() {
     void checkSessionAndCrmApi();
 
     return () => controller.abort();
-  }, [router]);
+  }, [adminLoggedIn, router]);
 
   const t = useMemo(() => {
     const isKo = language === "ko";
@@ -524,10 +596,10 @@ export default function CrmPage() {
       followupButton: isKo ? "후속 액션" : "Follow-up",
       memoButton: isKo ? "메모" : "Memo",
       readOnlyHint: isKo ? "CRM 계정은 현재 읽기 전용입니다." : "CRM accounts are currently read-only.",
-      tempInfoTitle: isKo ? "임시 구성 안내" : "Temporary Setup",
+      tempInfoTitle: isKo ? "실데이터 안내" : "Live Data Notes",
       tempInfoCopy: isKo
-        ? "현재 데이터는 취준 포트폴리오 CRM용 샘플 데이터입니다. 실시간 트래킹 연동은 다음 단계에서 진행합니다."
-        : "Current data is sample data for job search portfolio CRM. Real-time tracking integration is planned next.",
+        ? "현재 화면 데이터는 브라우저 세션의 실제 방문/클릭/체류 로그를 기반으로 자동 집계됩니다."
+        : "This dashboard is built from real visit/click/stay events captured from your browser sessions.",
     };
   }, [language]);
 
@@ -550,6 +622,10 @@ export default function CrmPage() {
       topProject,
     };
   }, [projectClickStats, visitLogs]);
+
+  if (!adminLoggedIn) {
+    return null;
+  }
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
