@@ -70,6 +70,7 @@ type LeadActionNotice =
 
 const CRM_API_BASE = getCrmApiBaseUrl();
 const CRM_LOCAL_DASHBOARD_REFRESH_MS = 30 * 60 * 1000;
+const CRM_VISIT_LOG_LIMIT = 20;
 
 function getServerSnapshot(): boolean {
   return false;
@@ -208,7 +209,7 @@ function buildLocalDashboardData(): {
     }))
     .filter((event) => event.id && event.visitorId && event.visitedAt)
     .sort((a, b) => toTimeMs(b.visitedAt) - toTimeMs(a.visitedAt))
-    .slice(0, 300);
+    .slice(0, CRM_VISIT_LOG_LIMIT);
 
   type ProjectAgg = {
     slug: string;

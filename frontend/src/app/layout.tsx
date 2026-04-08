@@ -127,7 +127,8 @@ export default function RootLayout({
 
           <footer className="site-footer">
             <div className="site-footer-inner">
-              Copyright 2026 JWS. All rights reserved.
+              Property of The JWS. It is Mine<br />
+              
             </div>
           </footer>
 

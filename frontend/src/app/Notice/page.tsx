@@ -97,14 +97,27 @@ export default function NoticePage() {
       createNotice: language === "en" ? "Create Notice" : "공지 등록",
       editNotice: language === "en" ? "Edit Notice" : "공지 수정",
       content: language === "en" ? "Content" : "내용",
+      detail: language === "en" ? "Details" : "상세 내용",
+      options: language === "en" ? "Options" : "옵션",
+      contentRequired: language === "en" ? "Please fill in details." : "상세 내용을 입력해 주세요.",
       textSize: language === "en" ? "Text size" : "글자 크기",
       pinToTop: language === "en" ? "Pin to top" : "상단 고정",
+      pinSingleHint: language === "en" ? "Only one pinned notice is allowed." : "고정 공지는 1개만 설정할 수 있습니다.",
+      pinReplaceHint:
+        language === "en"
+          ? "The existing pinned notice will be automatically unpinned."
+          : "기존 고정 공지는 자동으로 해제됩니다.",
+      preview: language === "en" ? "Preview" : "미리보기",
+      previewPlaceholder: language === "en" ? "Preview will appear here." : "미리보기가 여기에 표시됩니다.",
+      otherNotices: language === "en" ? "Other notices" : "일반 공지",
+      noOtherNotices: language === "en" ? "There are no regular notices yet." : "일반 공지가 아직 없습니다.",
       saving: language === "en" ? "Saving..." : "저장 중...",
       create: language === "en" ? "Create" : "등록",
       update: language === "en" ? "Update" : "수정",
       cancel: language === "en" ? "Cancel" : "취소",
       register: language === "en" ? "Create" : "등록",
       registerCancel: language === "en" ? "Cancel Create" : "등록 취소",
+      writeAndEdit: language === "en" ? "Write / Edit" : "작성 및 수정",
     }),
     [language],
   );
@@ -114,13 +127,22 @@ export default function NoticePage() {
   const [listError, setListError] = useState<string | null>(null);
 
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [content, setContent] = useState("");
+  const [detail, setDetail] = useState("");
   const [pinned, setPinned] = useState(false);
   const [fontSize, setFontSize] = useState(DEFAULT_NOTICE_FONT_SIZE);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [formNotice, setFormNotice] = useState<string | null>(null);
+
+  const pinnedNotice = useMemo(() => notices.find((item) => item.pinned) ?? null, [notices]);
+  const otherNotices = useMemo(() => {
+    if (!pinnedNotice) {
+      return notices;
+    }
+    return notices.filter((item) => item.id !== pinnedNotice.id);
+  }, [notices, pinnedNotice]);
+  const composedContent = useMemo(() => detail.trim(), [detail]);
 
   const loadNotices = useCallback(async () => {
     try {
@@ -170,7 +192,7 @@ export default function NoticePage() {
 
   function resetForm() {
     setEditingId(null);
-    setContent("");
+    setDetail("");
     setPinned(false);
     setFontSize(DEFAULT_NOTICE_FONT_SIZE);
   }
@@ -194,6 +216,13 @@ export default function NoticePage() {
     const isEditing = editingId !== null;
     const endpoint = isEditing ? `${ADMIN_NOTICES_API}/${editingId}` : ADMIN_NOTICES_API;
     const method = isEditing ? "PUT" : "POST";
+    const contentPayload = detail.trim();
+
+    if (!contentPayload) {
+      setSubmitting(false);
+      setFormError(t.contentRequired);
+      return;
+    }
 
     try {
       const response = await fetch(endpoint, {
@@ -203,9 +232,7 @@ export default function NoticePage() {
         }),
         credentials: "include",
         body: JSON.stringify({
-          // Keep legacy compatibility with older backend versions requiring title.
-          title: "공지",
-          content: content.trim(),
+          content: contentPayload,
           pinned,
           fontSize: normalizeNoticeFontSize(fontSize),
         }),
@@ -227,13 +254,18 @@ export default function NoticePage() {
         ...savedNotice,
         fontSize: normalizeNoticeFontSize(savedNotice.fontSize),
       };
+      setNotices((current) => {
+        const merged = isEditing
+          ? current.map((item) => (item.id === normalizedSavedNotice.id ? normalizedSavedNotice : item))
+          : [normalizedSavedNotice, ...current];
+        const normalized = normalizedSavedNotice.pinned
+          ? merged.map((item) => (item.id === normalizedSavedNotice.id ? item : { ...item, pinned: false }))
+          : merged;
+        return sortNotices(normalized);
+      });
       if (isEditing) {
-        setNotices((current) =>
-          sortNotices(current.map((item) => (item.id === normalizedSavedNotice.id ? normalizedSavedNotice : item))),
-        );
         setFormNotice(t.noticeUpdated);
       } else {
-        setNotices((current) => sortNotices([normalizedSavedNotice, ...current]));
         setFormNotice(t.noticeCreated);
       }
 
@@ -293,6 +325,48 @@ export default function NoticePage() {
     }
   }
 
+  function startEdit(item: NoticeDto): void {
+    setEditingId(item.id);
+    setDetail(item.content);
+    setPinned(item.pinned);
+    setFontSize(normalizeNoticeFontSize(item.fontSize));
+    setFormError(null);
+    setFormNotice(null);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function renderNoticeCard(item: NoticeDto, compact = false) {
+    return (
+      <article
+        key={item.id}
+        className="panel notice-panel"
+        style={{ padding: compact ? 12 : 16, display: "grid", gap: compact ? 6 : 8 }}
+      >
+        <time style={{ fontSize: 12, fontWeight: 700, opacity: 0.78 }} dateTime={item.createdAt}>
+          {formatDate(item.createdAt, language)}
+        </time>
+        {item.pinned ? <span className="badge">{t.pinned}</span> : null}
+        <p
+          className="section-copy"
+          style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: `${normalizeNoticeFontSize(item.fontSize)}px` }}
+        >
+          {item.content}
+        </p>
+        {canManageNotices ? (
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button className="btn-ghost" type="button" onClick={() => startEdit(item)}>
+              {t.edit}
+            </button>
+            <button className="btn-ghost" type="button" onClick={() => void onDelete(item.id)}>
+              {t.delete}
+            </button>
+          </div>
+        ) : null}
+      </article>
+    );
+  }
+
   if (!adminLoggedIn) {
     return null;
   }
@@ -307,7 +381,7 @@ export default function NoticePage() {
         </p>
       </section>
 
-      <section style={{ display: "grid", gap: 12, maxWidth: 860 }}>
+      <section style={{ display: "grid", gap: 12, width: "100%" }}>
         {!loading && !listError && notices.length > 0 && canManageNotices ? (
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <button
@@ -335,7 +409,7 @@ export default function NoticePage() {
 
         {loading ? <p className="helper-text">{t.loadingNotices}</p> : null}
         {listError ? <p className="error-text">{listError}</p> : null}
-        {!loading && !listError && notices.length === 0 ? (
+        {!loading && !listError && !showForm && notices.length === 0 ? (
           <>
             <p className="helper-text">
               <I18nText ko="등록된 공지가 아직 없습니다." en="No notices have been posted yet." />
@@ -358,129 +432,138 @@ export default function NoticePage() {
             ) : null}
           </>
         ) : null}
-        {!loading && !listError
-          ? notices.map((item) => (
-              <article key={item.id} className="panel" style={{ padding: 16, display: "grid", gap: 8 }}>
-                <time style={{ fontSize: 12, fontWeight: 700, opacity: 0.78 }} dateTime={item.createdAt}>
-                  {formatDate(item.createdAt, language)}
-                </time>
-                {item.pinned ? <span className="badge">{t.pinned}</span> : null}
-                <p
-                  className="section-copy"
-                  style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: `${normalizeNoticeFontSize(item.fontSize)}px` }}
-                >
-                  {item.content}
+        {!loading && !listError && !showForm ? (
+          pinnedNotice ? (
+            <div style={{ display: "grid", gap: 18 }}>
+              <div>{renderNoticeCard(pinnedNotice)}</div>
+              <div style={{ display: "grid", gap: 10 }}>
+                <p className="helper-text" style={{ margin: 0, fontWeight: 700 }}>
+                  {t.otherNotices}
                 </p>
-                {canManageNotices ? (
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button
-                      className="btn-ghost"
-                      type="button"
-                      onClick={() => {
-                        setEditingId(item.id);
-                        setContent(item.content);
-                        setPinned(item.pinned);
-                        setFontSize(normalizeNoticeFontSize(item.fontSize));
-                        setFormError(null);
-                        setFormNotice(null);
-                        setShowForm(true);
-                        window.scrollTo({ top: 0, behavior: "smooth" });
-                      }}
-                    >
-                      {t.edit}
-                    </button>
-                    <button className="btn-ghost" type="button" onClick={() => void onDelete(item.id)}>
-                      {t.delete}
-                    </button>
-                  </div>
-                ) : null}
-              </article>
-            ))
-          : null}
+                {otherNotices.length > 0 ? otherNotices.map((item) => renderNoticeCard(item)) : (
+                  <p className="helper-text" style={{ margin: 0 }}>
+                    {t.noOtherNotices}
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : (
+            notices.map((item) => renderNoticeCard(item))
+          )
+        ) : null}
       </section>
 
       {canManageNotices && showForm ? (
-        <section className="panel" style={{ padding: 16, display: "grid", gap: 10, maxWidth: 860 }}>
-          <h2 className="project-detail-subtitle" style={{ margin: 0 }}>
-            {editingId === null ? t.createNotice : t.editNotice}
-          </h2>
-          <form onSubmit={onSubmit} style={{ display: "grid", gap: 10 }}>
-            <label className="field-label" htmlFor="notice-content">
-              {t.content}
-            </label>
-            <textarea
-              id="notice-content"
-              className="field-input"
-              value={content}
-              onChange={(event) => setContent(event.target.value)}
-              rows={6}
-              maxLength={5000}
-              required
-              style={{ resize: "vertical", minHeight: 140 }}
-            />
-            <label className="field-label" htmlFor="notice-font-size">
-              {t.textSize}
-            </label>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-              <input
-                id="notice-font-size"
-                type="range"
-                min={MIN_NOTICE_FONT_SIZE}
-                max={MAX_NOTICE_FONT_SIZE}
-                step={1}
-                value={fontSize}
-                onChange={(event) => setFontSize(normalizeNoticeFontSize(Number(event.target.value)))}
-                style={{ width: "min(340px, 100%)" }}
-              />
-              <input
-                type="number"
-                className="field-input"
-                min={MIN_NOTICE_FONT_SIZE}
-                max={MAX_NOTICE_FONT_SIZE}
-                step={1}
-                value={fontSize}
-                onChange={(event) => setFontSize(normalizeNoticeFontSize(Number(event.target.value)))}
-                style={{ width: 88, padding: "8px 10px" }}
-              />
-              <span className="helper-text" style={{ fontWeight: 700 }}>
-                {fontSize}px
-              </span>
+        <section className="notice-editor-workspace">
+          <div className="notice-editor-workspace-grid">
+            <div className="notice-editor-workspace-main">
+              <h3 className="notice-editor-workspace-main-title">{t.writeAndEdit}</h3>
+              <form onSubmit={onSubmit} className="notice-editor-form">
+                <label className="field-label" htmlFor="notice-detail">
+                  {t.detail}
+                </label>
+                <textarea
+                  id="notice-detail"
+                  className="field-input notice-editor-body"
+                  value={detail}
+                  onChange={(event) => setDetail(event.target.value)}
+                  rows={10}
+                  maxLength={5000}
+                  style={{ resize: "vertical", minHeight: 220 }}
+                />
+
+                <h3 className="project-detail-subtitle" style={{ margin: 0 }}>
+                  {t.options}
+                </h3>
+                <label className="notice-editor-pin-row">
+                  <input
+                    type="checkbox"
+                    checked={pinned}
+                    onChange={(event) => setPinned(event.target.checked)}
+                  />
+                  <span className="field-label" style={{ margin: 0 }}>
+                    {t.pinToTop}
+                  </span>
+                </label>
+                <p className="helper-text" style={{ margin: 0 }}>
+                  {pinned && pinnedNotice && pinnedNotice.id !== editingId ? t.pinReplaceHint : t.pinSingleHint}
+                </p>
+
+                <label className="field-label" htmlFor="notice-font-size">
+                  {t.textSize}
+                </label>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                  <input
+                    id="notice-font-size"
+                    type="range"
+                    min={MIN_NOTICE_FONT_SIZE}
+                    max={MAX_NOTICE_FONT_SIZE}
+                    step={1}
+                    value={fontSize}
+                    onChange={(event) => setFontSize(normalizeNoticeFontSize(Number(event.target.value)))}
+                    style={{ width: "min(340px, 100%)" }}
+                  />
+                  <input
+                    type="number"
+                    className="field-input"
+                    min={MIN_NOTICE_FONT_SIZE}
+                    max={MAX_NOTICE_FONT_SIZE}
+                    step={1}
+                    value={fontSize}
+                    onChange={(event) => setFontSize(normalizeNoticeFontSize(Number(event.target.value)))}
+                    style={{ width: 88, padding: "8px 10px" }}
+                  />
+                  <span className="helper-text" style={{ fontWeight: 700 }}>
+                    {fontSize}px
+                  </span>
+                </div>
+
+                <label className="field-label" htmlFor="notice-preview">
+                  {t.preview}
+                </label>
+                <div id="notice-preview" className="notice-editor-preview-box">
+                  <p
+                    className="field-input"
+                    style={{
+                      margin: 0,
+                      border: "none",
+                      padding: 0,
+                      background: "transparent",
+                      whiteSpace: "pre-wrap",
+                      fontSize: `${normalizeNoticeFontSize(fontSize)}px`,
+                      lineHeight: 1.55,
+                    }}
+                  >
+                    {composedContent || t.previewPlaceholder}
+                  </p>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                  <button className="btn" type="submit" disabled={submitting}>
+                    {submitting ? t.saving : editingId === null ? t.create : t.update}
+                  </button>
+                  <button
+                    className="btn-ghost"
+                    type="button"
+                    onClick={() => {
+                      resetForm();
+                      setFormError(null);
+                      setFormNotice(null);
+                      setShowForm(false);
+                    }}
+                  >
+                    {t.cancel}
+                  </button>
+                  {formNotice ? <span className="success-text">{formNotice}</span> : null}
+                  {formError ? <span className="error-text">{formError}</span> : null}
+                </div>
+              </form>
             </div>
-            <label style={{ display: "inline-flex", alignItems: "center", gap: 8, width: "fit-content", cursor: "pointer" }}>
-              <input
-                type="checkbox"
-                checked={pinned}
-                onChange={(event) => setPinned(event.target.checked)}
-              />
-              <span className="field-label" style={{ margin: 0 }}>
-                {t.pinToTop}
-              </span>
-            </label>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <button className="btn" type="submit" disabled={submitting}>
-                {submitting ? t.saving : editingId === null ? t.create : t.update}
-              </button>
-              <button
-                className="btn-ghost"
-                type="button"
-                onClick={() => {
-                  resetForm();
-                  setFormError(null);
-                  setFormNotice(null);
-                  setShowForm(false);
-                }}
-              >
-                {t.cancel}
-              </button>
-              {formNotice ? <span className="success-text">{formNotice}</span> : null}
-              {formError ? <span className="error-text">{formError}</span> : null}
-            </div>
-          </form>
+          </div>
         </section>
       ) : null}
 
       {!canManageNotices && adminLoggedIn ? (
-        <section className="panel" style={{ padding: 16, maxWidth: 860 }}>
+        <section className="panel" style={{ padding: 16, width: "100%" }}>
           <p className="helper-text">
             <I18nText
               ko="현재 계정은 공지 읽기 전용입니다. 작성/수정/삭제는 ADMIN 계정에서만 가능합니다."

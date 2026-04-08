@@ -16,12 +16,18 @@ public class NoticeCommandService {
     }
 
     public Notice create(Notice notice) {
+        if (notice.isPinned()) {
+            noticeRepository.clearPinnedNotices();
+        }
         return noticeRepository.save(notice);
     }
 
     public Notice update(Long id, Notice newValue) {
         Notice existing = noticeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Notice not found: id=" + id));
+        if (newValue.isPinned()) {
+            noticeRepository.clearPinnedNoticesExcept(id);
+        }
         existing.update(newValue.getContent(), newValue.isPinned(), newValue.getFontSize());
         return existing;
     }
