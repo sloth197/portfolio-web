@@ -872,20 +872,23 @@ a {
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  width: clamp(220px, 26vw, 300px);
-  flex: 0 0 clamp(220px, 26vw, 300px);
+  min-width: 0;
+  width: auto;
+  flex: 1 1 auto;
 }
 
 .header-greeting {
   font-size: 0.84rem;
   color: #8c6bff;
   font-weight: 600;
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
+  max-width: 24ch;
   text-align: right;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.22;
 }
 
 :root[data-theme="dark"] .header-greeting {

@@ -25,6 +25,8 @@ function captureGifFirstFrame(gifUrl: string): Promise<string | null> {
   return new Promise((resolve) => {
     const image = new Image();
     image.decoding = "async";
+    // Cross-origin GIFs must be CORS-enabled to allow canvas export.
+    image.crossOrigin = "anonymous";
 
     image.onload = () => {
       try {

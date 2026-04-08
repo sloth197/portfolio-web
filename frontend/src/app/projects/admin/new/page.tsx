@@ -78,7 +78,7 @@ export default function AdminProjectCreatePage() {
     if (isLegacyBasicAuthMode()) {
       const role = getAdminRole() ?? "ADMIN";
       if (role !== "ADMIN") {
-        router.replace("/projects");
+        router.replace("/");
       }
       return;
     }
@@ -112,7 +112,7 @@ export default function AdminProjectCreatePage() {
           setAdminAuthSession(role);
         }
         if (role !== "ADMIN") {
-          router.replace("/projects");
+          router.replace("/");
         }
       } catch {
         if (!cancelled) {

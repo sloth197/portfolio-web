@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { consumeHardReloadFlag } from "@/lib/hard-reload";
 
 type EntryPhase = "visible" | "fade";
@@ -357,19 +358,46 @@ function createGalaxyStars(viewportW: number, viewportH: number, seed: number): 
 }
 
 export default function EntryTransition() {
-  const [enabled] = useState<boolean>(() => consumeHardReloadFlag());
+  const pathname = usePathname();
+  const [showFromHardReload] = useState<boolean>(() => consumeHardReloadFlag());
   const [phase, setPhase] = useState<EntryPhase>("visible");
-  const [mounted, setMounted] = useState(enabled);
+  const [mounted, setMounted] = useState<boolean>(() => pathname === "/" || showFromHardReload);
+  const [transitionKey, setTransitionKey] = useState<number>(() => (pathname === "/" || showFromHardReload ? 1 : 0));
   const [loadingDotIndex, setLoadingDotIndex] = useState(0);
   const [greetings, setGreetings] = useState<GreetingPlacement[]>([]);
   const [galaxyStars, setGalaxyStars] = useState<GalaxyStarsByLayer>(() =>
     createGalaxyStars(GALAXY_INITIAL_WIDTH, GALAXY_INITIAL_HEIGHT, GALAXY_INITIAL_SEED),
   );
+  const previousPathRef = useRef<string>(pathname);
 
   useEffect(() => {
-    if (!enabled) {
+    const previousPath = previousPathRef.current;
+    if (previousPath === pathname) {
       return;
     }
+    previousPathRef.current = pathname;
+
+    if (pathname !== "/") {
+      return;
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      setPhase("visible");
+      setMounted(true);
+      setLoadingDotIndex(0);
+      setTransitionKey((prev) => prev + 1);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mounted) {
+      return;
+    }
+
     const refreshLayout = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
@@ -383,10 +411,10 @@ export default function EntryTransition() {
     return () => {
       window.removeEventListener("resize", refreshLayout);
     };
-  }, [enabled]);
+  }, [mounted, transitionKey]);
 
   useEffect(() => {
-    if (!enabled) {
+    if (!mounted) {
       return;
     }
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -405,10 +433,10 @@ export default function EntryTransition() {
       window.clearTimeout(fadeTimer);
       window.clearTimeout(unmountTimer);
     };
-  }, [enabled]);
+  }, [mounted, transitionKey]);
 
   useEffect(() => {
-    if (!enabled) {
+    if (!mounted) {
       return;
     }
     const interval = window.setInterval(() => {
@@ -418,14 +446,14 @@ export default function EntryTransition() {
     return () => {
       window.clearInterval(interval);
     };
-  }, [enabled]);
+  }, [mounted, transitionKey]);
 
-  if (!enabled || !mounted) {
+  if (!mounted) {
     return null;
   }
 
   return (
-    <div className={`entry-transition ${phase === "fade" ? "is-fade" : ""}`} aria-hidden="true">
+    <div key={transitionKey} className={`entry-transition ${phase === "fade" ? "is-fade" : ""}`} aria-hidden="true">
       <div className="entry-transition-galaxy" aria-hidden="true">
         {(["ambient", ...GALAXY_BAND_LAYERS] as const).map((layer) => (
           <div key={layer} className={`entry-transition-galaxy-stars entry-transition-galaxy-stars--${layer}`}>

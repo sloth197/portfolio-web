@@ -1,30 +1,15 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
 import { setAdminAuthSession, setAdminBasicAuthHeader, type AdminRole } from "@/lib/admin-auth";
 import { getPublicApiBaseUrl } from "@/lib/api-base";
+import { HARD_RELOAD_SESSION_KEY } from "@/lib/hard-reload";
 
 const API_BASE = getPublicApiBaseUrl();
 
-function sanitizeNextPath(value: string | null): string {
-  if (!value) {
-    return "/projects";
-  }
-  if (!value.startsWith("/") || value.startsWith("//")) {
-    return "/projects";
-  }
-  if (value.startsWith("/admin/login")) {
-    return "/projects";
-  }
-  return value;
-}
-
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [nextPath, setNextPath] = useState("/projects");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [failedAttempts, setFailedAttempts] = useState(0);
@@ -33,10 +18,14 @@ export default function AdminLoginPage() {
     return value === "CRM" ? "CRM" : "ADMIN";
   }
 
-  useEffect(() => {
-    const next = new URLSearchParams(window.location.search).get("next");
-    setNextPath(sanitizeNextPath(next));
-  }, []);
+  function redirectHomeWithEntryTransition(): void {
+    try {
+      window.sessionStorage.setItem(HARD_RELOAD_SESSION_KEY, "1");
+    } catch {
+      // no-op
+    }
+    window.location.assign("/");
+  }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -74,19 +63,12 @@ export default function AdminLoginPage() {
               if (pingResponse.ok) {
                 const pingPayload = (await pingResponse.json().catch(() => null)) as {
                   role?: string;
-                  canManageProjects?: boolean;
                 } | null;
                 const role = resolveRole(pingPayload?.role);
-                const canManageProjects = pingPayload?.canManageProjects ?? role === "ADMIN";
 
                 setAdminBasicAuthHeader(`Basic ${basicToken}`);
                 setAdminAuthSession(role);
-
-                if (!canManageProjects && nextPath.startsWith("/projects/admin")) {
-                  router.replace("/projects");
-                  return;
-                }
-                router.replace(nextPath);
+                redirectHomeWithEntryTransition();
                 return;
               }
             } catch {
@@ -111,23 +93,16 @@ export default function AdminLoginPage() {
       const payload = (await response.json().catch(() => null)) as {
         authenticated?: boolean;
         role?: string;
-        canManageProjects?: boolean;
       } | null;
       if (!payload?.authenticated) {
         setError("Login failed.");
         return;
       }
       const role = resolveRole(payload?.role);
-      const canManageProjects = payload?.canManageProjects ?? role === "ADMIN";
 
       setAdminBasicAuthHeader(null);
       setAdminAuthSession(role);
-
-      if (!canManageProjects && nextPath.startsWith("/projects/admin")) {
-        router.replace("/projects");
-        return;
-      }
-      router.replace(nextPath);
+      redirectHomeWithEntryTransition();
     } catch {
       setError("Login request failed.");
     } finally {
