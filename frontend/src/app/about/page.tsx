@@ -49,9 +49,9 @@ const TOOLS: Tool[] = [
     icons: [{ src: "/icons/tech/aspnet.svg", label: "ASP.NET" }],
   },
   {
-    name: "WPF",
+    name: "Next.JS",
     level: "84%",
-    icons: [{ src: "/icons/tech/wpf.svg", label: "WPF" }],
+    icons: [{ src: "/icons/tech/nextjs.svg", label: "Next.JS" }],
   },
   {
     name: "Docker",
@@ -59,14 +59,14 @@ const TOOLS: Tool[] = [
     icons: [{ src: "/icons/tech/docker.svg", label: "Docker" }],
   },
   {
-    name: "Java",
+    name: "MySQL",
     level: "84%",
-    icons: [{ src: "/icons/tech/java.svg", label: "Java" }],
+    icons: [{ src: "/icons/tech/mysql.svg", label: "MySQL" }],
   },
   {
-    name: "Spring",
+    name: "TypeScript",
     level: "84%",
-    icons: [{ src: "/icons/tech/spring.svg", label: "Spring" }],
+    icons: [{ src: "/icons/tech/typescript.svg", label: "TypeScript" }],
   },
 ];
 
@@ -80,12 +80,12 @@ const INTEREST_TECHS: InterestTech[] = [
     icons: [{ src: "/icons/tech/vercel.svg", label: "Vercel" }],
   },
   {
-    name: "Next.js",
-    icons: [{ src: "/icons/tech/nextjs.svg", label: "Next.js" }],
+    name: "Java",
+    icons: [{ src: "/icons/tech/java.svg", label: "Java" }],
   },
   {
-    name: "TypeScript",
-    icons: [{ src: "/icons/tech/typescript.svg", label: "TypeScript" }],
+    name: "Spring",
+    icons: [{ src: "/icons/tech/spring.svg", label: "Spring" }],
   },
   {
     name: "C",
@@ -135,10 +135,6 @@ export default function AboutPage() {
           </h2>
           <div className="about-neo-about-text">
             <p className="about-neo-about-copy about-neo-about-copy-intro" style={{ whiteSpace: "pre-line" }}>
-              
-              <I18nText ko="리뉴얼! 개편! 리뉴얼! 개편! 리뉴얼! 게편! 리뉴얼! 개편! 리뉴얼! 개편! 리뉴얼! 개편! 리뉴얼! 개편! " 
-                        en="RENEWAL! REORGANIZATION! RENEWAL! REORGANIZATION! RENEWAL! REORGANIZATION!" />
-              {/* 임시 주석 처리, 리뉴얼 후 해제 예정
               <I18nText
                 ko={`백엔드 개발자를 목표로 준비 중입니다.
 Java와 Spring, C# 기반으로 API 설계와 데이터 처리 구조를 학습하며 프로젝트를 진행하고 있습니다.`}
@@ -151,7 +147,6 @@ Building projects using Java, Spring, and C#, focusing on API design and data pr
                 ko="사용가능한 실제 서비스를 구현함에 있어 안정적인 시스템을 구현하는 것을 목표로 하고 있습니다."
                 en="My goal is to build stable systems for practical, real services."
               />
-              */}
             </p>
           </div>
         </section>

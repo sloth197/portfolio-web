@@ -22,8 +22,8 @@ function LinkedInIcon() {
     </svg>
   );
 }
-
-function MailIcon() {
+{/*
+function NaverMailIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false" style={{ display: "block" }}>
       <path d="M3 6.75A1.75 1.75 0 0 1 4.75 5h14.5A1.75 1.75 0 0 1 21 6.75v10.5A1.75 1.75 0 0 1 19.25 19H4.75A1.75 1.75 0 0 1 3 17.25V6.75Z" stroke="currentColor" strokeWidth="1.5" />
@@ -31,6 +31,7 @@ function MailIcon() {
     </svg>
   );
 }
+*/}
 
 function GmailIcon() {
   return (
@@ -89,7 +90,7 @@ export default function ContactPage() {
                 href={`mailto:${email}`}
                 style={{ display: "flex", alignItems: "center", gap: 8, color: "inherit", textDecoration: "none", width: "fit-content" }}
               >
-                {email.endsWith("@gmail.com") ? <GmailIcon /> : <MailIcon />}
+                {email.endsWith("@gmail.com") ? <GmailIcon /> : /*<MailIcon />*/ null}
                 <span className="section-copy">{email}</span>
               </a>
             ))}

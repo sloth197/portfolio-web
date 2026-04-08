@@ -68,11 +68,8 @@ export default async function Home() {
               whiteSpace: "pre-line",
             }}
           >
-            <I18nText ko="웹사이트 리뉴얼 중입니다. 곧 멋진 사이트로 돌아오겠습니다!" en="I am renewing my website. I'll be back with cool website soon!" />
-            {/*  사이트 리뉴얼 중이므로 임시 주석 처리
             <I18nText ko="안녕하세요!" en="Hi!" /> <br />
             <I18nText ko="제 포트폴리오에 오신 것을 환영합니다. " en="Welcome to my Portfolio!" />
-            */}
           </h1>
 
           <div className="home-profile-slot" aria-label="Profile photo placeholder">

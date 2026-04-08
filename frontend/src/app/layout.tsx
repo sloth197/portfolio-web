@@ -24,7 +24,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 const DEFAULT_SITE_URL = "https://www.xhbt.dev";
-const DEFAULT_SITE_DESCRIPTION = "Java, C#, Spring 기반 프로젝트 포트폴리오";
+const DEFAULT_SITE_DESCRIPTION = "Java, Spring 기반 프로젝트 포트폴리오";
 
 function resolveMetadataBase(): URL {
   const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
