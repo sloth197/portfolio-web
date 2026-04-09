@@ -359,16 +359,35 @@ function createGalaxyStars(viewportW: number, viewportH: number, seed: number): 
 
 export default function EntryTransition() {
   const pathname = usePathname();
-  const [showFromHardReload] = useState<boolean>(() => consumeHardReloadFlag());
   const [phase, setPhase] = useState<EntryPhase>("visible");
-  const [mounted, setMounted] = useState<boolean>(() => pathname === "/" || showFromHardReload);
-  const [transitionKey, setTransitionKey] = useState<number>(() => (pathname === "/" || showFromHardReload ? 1 : 0));
+  const [mounted, setMounted] = useState<boolean>(() => pathname === "/");
+  const [transitionKey, setTransitionKey] = useState<number>(() => (pathname === "/" ? 1 : 0));
   const [loadingDotIndex, setLoadingDotIndex] = useState(0);
   const [greetings, setGreetings] = useState<GreetingPlacement[]>([]);
   const [galaxyStars, setGalaxyStars] = useState<GalaxyStarsByLayer>(() =>
     createGalaxyStars(GALAXY_INITIAL_WIDTH, GALAXY_INITIAL_HEIGHT, GALAXY_INITIAL_SEED),
   );
   const previousPathRef = useRef<string>(pathname);
+
+  useEffect(() => {
+    if (pathname === "/") {
+      return;
+    }
+    if (!consumeHardReloadFlag()) {
+      return;
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      setPhase("visible");
+      setMounted(true);
+      setLoadingDotIndex(0);
+      setTransitionKey((prev) => prev + 1);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     const previousPath = previousPathRef.current;
