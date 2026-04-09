@@ -12,11 +12,11 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     @Query("select n from Notice n order by case when n.pinned = true then 1 else 0 end desc, n.createdAt desc")
     List<Notice> findAllSortedForNoticePage();
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying(flushAutomatically = true)
     @Query("update Notice n set n.pinned = false where n.pinned = true")
     int clearPinnedNotices();
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying(flushAutomatically = true)
     @Query("update Notice n set n.pinned = false where n.pinned = true and n.id <> :noticeId")
     int clearPinnedNoticesExcept(@Param("noticeId") Long noticeId);
 }
