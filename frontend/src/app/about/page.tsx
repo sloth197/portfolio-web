@@ -61,7 +61,7 @@ const TOOLS: Tool[] = [
   {
     name: "MySQL",
     level: "84%",
-    icons: [{ src: "/icons/tech/mysql.svg", label: "MySQL" }],
+    icons: [{ src: "/icons/tech/MySQL.svg", label: "MySQL" }],
   },
   {
     name: "TypeScript",
