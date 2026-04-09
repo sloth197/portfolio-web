@@ -12,6 +12,7 @@ import {
   subscribeAdminAuth,
   type AdminRole,
 } from "@/lib/admin-auth";
+import useHydrated from "@/lib/use-hydrated";
 
 function getServerSnapshot(): boolean {
   return false;
@@ -26,6 +27,7 @@ function normalizeRole(value: unknown): AdminRole {
 }
 
 export default function HeaderAuthButton() {
+  const hydrated = useHydrated();
   const language = useSiteLanguage();
   const adminLoggedIn = useSyncExternalStore(subscribeAdminAuth, isAdminLoggedIn, getServerSnapshot);
   const adminRole = useSyncExternalStore(subscribeAdminAuth, getAdminRole, getServerRoleSnapshot);
@@ -67,7 +69,7 @@ export default function HeaderAuthButton() {
     };
   }, []);
 
-  if (!adminLoggedIn) {
+  if (!hydrated || !adminLoggedIn) {
     return (
       <Link className="btn-ghost header-login-link" href="/admin/login">
         Login
