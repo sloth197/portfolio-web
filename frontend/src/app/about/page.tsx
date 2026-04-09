@@ -136,16 +136,24 @@ export default function AboutPage() {
           <div className="about-neo-about-text">
             <p className="about-neo-about-copy about-neo-about-copy-intro" style={{ whiteSpace: "pre-line" }}>
               <I18nText
-                ko={`백엔드 개발자를 목표로 준비 중입니다.
-Java와 Spring, C# 기반으로 API 설계와 데이터 처리 구조를 학습하며 프로젝트를 진행하고 있습니다.`}
+                ko={`백엔드 개발자를 목표로 준비하고 있습니다.
+C#, ASP.NET, Next.JS를 기반으로 프로젝트를 만들고 있습니다.
+기능 구현에만 그치지 않고 API 설계를 고민하며,
+데이터 구조와 처리 흐름을 꾸준히 학습하고 있습니다.`}
                 en={`I am preparing to become a backend developer.
-Building projects using Java, Spring, and C#, focusing on API design and data processing structures.`}
+I build projects using C#, ASP.NET, and Next.JS.
+Beyond feature implementation, I focus on API design,
+and I keep improving data modeling and processing flows.`}
               />
             </p>
             <p className="about-neo-about-copy about-neo-about-copy-goal">
               <I18nText
-                ko="사용가능한 실제 서비스를 구현함에 있어 안정적인 시스템을 구현하는 것을 목표로 하고 있습니다."
-                en="My goal is to build stable systems for practical, real services."
+                ko={`실무에서 바로 사용할 수 있는 서비스를 만드는 과정에서,
+안정적으로 동작하는 시스템을 구현하는 것을 목표로 하며,
+협업과 피드백을 통해 계속 성장하고자 합니다.`}
+                en={`My goal is to build stable systems for practical, real services,
+and to keep growing through collaboration,
+feedback, and continuous improvement.`}
               />
             </p>
           </div>
