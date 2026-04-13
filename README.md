@@ -22,7 +22,7 @@
 - Database: PostgreSQL
 - Deploy/Infra: Vercel (Frontend), Render (Backend), Supabase (DB), Namecheap (DNS)
 
-## * READ ONLY 계정
+## * READ ONLY 계정 *
 * ReadOnly 계정은 수정 및 삭제가 불가능 합니다.
 * 로그인 시 Notice, CRM 메뉴 탭이 활성화 됩니다
 - ID: readadmin
