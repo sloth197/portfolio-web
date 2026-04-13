@@ -1,44 +1,30 @@
 # Portfolio Web (SpringBoot + Next.js)
 
-소프트웨어/펌웨어 프로젝트를 소개하고, 관리자 기능으로 프로젝트를 관리할 수 있는 개인 포트폴리오 웹 서비스입니다.
+개인 프로젝트를 소개하고, 관리자 기능으로 프로젝트, 공지, 인증 기능을 관리할 수 있는 개인 포트폴리오 웹 서비스입니다.
 
 ## Live
 - Web: https://xhbt.dev
 - API Health: https://portfolio-api-y5yr.onrender.com/api/public/health
 
-## 관리자 계정 설정
-- 관리자 로그인 계정은 코드에 하드코딩하지 않고 배포 환경변수로 관리합니다.
-- 필수 환경변수: `APP_ADMIN_USERNAME`, `APP_ADMIN_PASSWORD`
-- 비밀번호 길이 권장값: `APP_ADMIN_PASSWORD_MIN_LENGTH` (기본 `8`, 미달 시 경고 로그만 출력)
-- 선택 환경변수(CRM 전용 계정): `APP_CRM_USERNAME`, `APP_CRM_PASSWORD`
-
-## 파일 스토리지 설정 (Supabase Storage)
-- 프로젝트 첨부파일(이미지/GIF/문서) 저장소는 `app.upload.provider` 로 선택합니다.
-- 권장값: `APP_UPLOAD_PROVIDER=auto`  
-  Supabase 설정값이 모두 있으면 Supabase Storage를 사용하고, 없으면 local 디스크를 사용합니다.
-- Supabase 강제 사용: `APP_UPLOAD_PROVIDER=supabase`
-- 필수 환경변수(Supabase 사용 시):
-  - `APP_UPLOAD_SUPABASE_URL` (예: `https://<project-ref>.supabase.co`)
-  - `APP_UPLOAD_SUPABASE_BUCKET`
-  - `APP_UPLOAD_SUPABASE_SERVICE_ROLE_KEY`
-
 ## 주요 기능
-- 프로젝트 목록/카테고리 필터/상세 조회
+- 프로젝트 목록/카테고리 필터/상세 페이지 조회
+- 관리자 로그인 (Admin, ReadOnly 계정 분리)
 - 관리자 로그인 후 프로젝트 등록 및 관리
-- 헤더 CRM 바로가기 링크 제공
-- 라이트/다크 테마 전환
+  - 프로젝트 CRUD, 첨부파일 업로드
 - 한/영 전환 토글 버튼
+- 홈 IT 뉴스 스트립
+- 공지 등록, 수정, 삭제 기능 및 고정시 팝업 기능
+  - 관리자(Admin, readOnly) 로그인 후 공지 메뉴 탭 활성화
 
 ## Tech Stack
-- Frontend: Next.js, React, TypeScript, Tailwind CSS
+- Frontend: Next.js, React, TypeScript, CSS
 - Backend: Spring Boot (Java)
 - Database: PostgreSQL
 - Deploy/Infra: Vercel (Frontend), Render (Backend), Supabase (DB), Namecheap (DNS)
 
-### 수정사항
-- DB이동 (Render -> Supabase)
-- Loading 및 Background화면 Animation화
-- Notice 팝업 공지 추가
-- 메뉴 탭 UI 개편
-
+## * READ ONLY 계정
+* ReadOnly 계정은 수정 및 삭제가 불가능 합니다.
+* 로그인 시 Notice, CRM 메뉴 탭이 활성화 됩니다
+- ID: readadmin
+- PW: readadmin
 
