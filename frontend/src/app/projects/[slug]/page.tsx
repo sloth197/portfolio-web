@@ -12,6 +12,8 @@ import { resolvePublicAssetUrl } from "@/lib/asset-url";
 import { PREVIEW_PROJECTS, normalizeProjectCategory } from "@/lib/project-preview";
 import type { ProjectCategory, ProjectDto } from "@/lib/types";
 
+export const revalidate = 120;
+
 function buildProjectsPath(selectedCategory?: ProjectCategory): string {
   if (!selectedCategory) {
     return "/projects";
@@ -76,7 +78,10 @@ export async function generateMetadata({
   const encodedSlug = encodeURIComponent(slug);
 
   try {
-    const project = await fetchProjectBySlug(slug);
+    const project = await fetchProjectBySlug(slug, {
+      policy: "cached",
+      revalidateSeconds: 120,
+    });
     const description = trimSeoDescription(project.summary);
     const primaryImageAsset = (project.assets ?? []).find((asset) => {
       const assetUrl = resolvePublicAssetUrl(asset.url);
@@ -139,7 +144,16 @@ export default async function ProjectDetailPage({
   let usesPreviewData = false;
 
   try {
-    [project, allProjects] = await Promise.all([fetchProjectBySlug(slug), fetchProjects()]);
+    [project, allProjects] = await Promise.all([
+      fetchProjectBySlug(slug, {
+        policy: "cached",
+        revalidateSeconds: 120,
+      }),
+      fetchProjects(undefined, {
+        policy: "cached",
+        revalidateSeconds: 120,
+      }),
+    ]);
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) {
       notFound();

@@ -48,10 +48,15 @@ export async function fetchProjects(
   return res.json();
 }
 
-export async function fetchProjectBySlug(slug: string): Promise<ProjectDto> {
-  const res = await fetch(`${BASE}/api/public/projects/${encodeURIComponent(slug)}`, {
-    cache: "no-store",
-  });
+export async function fetchProjectBySlug(
+  slug: string,
+  options?: ProjectFetchOptions,
+): Promise<ProjectDto> {
+  const res = await fetch(
+    `${BASE}/api/public/projects/${encodeURIComponent(slug)}`,
+    resolveProjectFetchInit(options),
+  );
+
   if (!res.ok) throw new ApiError(res.status, `Failed to fetch project(${slug}): ${res.status}`);
   return res.json();
 }
