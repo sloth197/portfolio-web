@@ -5,7 +5,7 @@ const API_BASE = getPublicApiBaseUrl();
 const SUPPORTED_METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]);
 
 type RouteContext = {
-  params: Promise<{ path?: string[] }> | { path?: string[] };
+  params: Promise<{ path?: string[] }>;
 };
 
 const PROXY_UNAVAILABLE_RESPONSE = {
