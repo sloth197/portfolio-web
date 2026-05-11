@@ -2,6 +2,7 @@
 
 import type { ComponentPropsWithoutRef, SyntheticEvent } from "react";
 import { useMemo, useState } from "react";
+import { extractGithubRepo } from "@/lib/github-url";
 
 type MarkdownImageWithFallbackProps = ComponentPropsWithoutRef<"img"> & {
   projectGithubUrl?: string | null;
@@ -19,42 +20,9 @@ const GITHUB_PATH_CANDIDATES = [
   "",
 ];
 
-type GithubRepo = {
-  owner: string;
-  repo: string;
-};
-
 function hasImageExtension(value: string): boolean {
   const lowerValue = value.toLowerCase();
   return IMAGE_EXTENSIONS.some((extension) => lowerValue.endsWith(extension));
-}
-
-function extractGithubRepo(githubUrl?: string | null): GithubRepo | null {
-  if (!githubUrl) {
-    return null;
-  }
-
-  try {
-    const parsed = new URL(githubUrl);
-    if (!parsed.hostname.toLowerCase().includes("github.com")) {
-      return null;
-    }
-
-    const segments = parsed.pathname.split("/").filter((segment) => segment.length > 0);
-    if (segments.length < 2) {
-      return null;
-    }
-
-    const owner = segments[0];
-    const repo = segments[1].replace(/\.git$/i, "");
-    if (!owner || !repo) {
-      return null;
-    }
-
-    return { owner, repo };
-  } catch {
-    return null;
-  }
 }
 
 function extractFileName(value?: string | null): string | null {

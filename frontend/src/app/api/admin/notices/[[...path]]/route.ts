@@ -16,7 +16,7 @@ const PROXY_UNAVAILABLE_RESPONSE = {
 
 function buildProxyHeaders(request: NextRequest): Headers {
   const headers = new Headers();
-  const allowedHeaders = ["content-type", "accept", "cookie", "origin", "referer", "authorization"];
+  const allowedHeaders = ["content-type", "accept", "cookie", "origin", "referer"];
 
   for (const headerName of allowedHeaders) {
     const headerValue = request.headers.get(headerName);

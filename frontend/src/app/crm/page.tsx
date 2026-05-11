@@ -6,7 +6,6 @@ import {
   clearAdminAuthHeader,
   getAdminRole,
   isAdminLoggedIn,
-  isLegacyBasicAuthMode,
   setAdminAuthSession,
   subscribeAdminAuth,
   withAdminAuthHeaders,
@@ -483,23 +482,6 @@ export default function CrmPage() {
     }
 
     async function checkSessionAndCrmApi() {
-      if (isLegacyBasicAuthMode()) {
-        const crmError = await checkCrmApiReachability();
-        if (crmError) {
-          if (crmError.kind === "crm_api_check_failed" && crmError.status === 503) {
-            setStatus("ok");
-            setError(crmError);
-            return;
-          }
-          setStatus("error");
-          setError(crmError);
-          return;
-        }
-        setStatus("ok");
-        setError(null);
-        return;
-      }
-
       try {
         const response = await fetch("/api/admin/auth/session", {
           method: "GET",

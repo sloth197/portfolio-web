@@ -1,11 +1,8 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { setAdminAuthSession, setAdminBasicAuthHeader, type AdminRole } from "@/lib/admin-auth";
-import { getPublicApiBaseUrl } from "@/lib/api-base";
+import { setAdminAuthSession, type AdminRole } from "@/lib/admin-auth";
 import { HARD_RELOAD_SESSION_KEY } from "@/lib/hard-reload";
-
-const API_BASE = getPublicApiBaseUrl();
 
 export default function AdminLoginPage() {
   const [username, setUsername] = useState("");
@@ -47,35 +44,6 @@ export default function AdminLoginPage() {
       if (!response.ok) {
         const payload = (await response.json().catch(() => null)) as { message?: string } | null;
         if (response.status === 401 || response.status === 403) {
-          const normalizedUsername = username.trim();
-          if (API_BASE && normalizedUsername && password) {
-            const basicToken = window.btoa(`${normalizedUsername}:${password}`);
-
-            try {
-              const pingResponse = await fetch(`${API_BASE}/api/admin/projects/ping`, {
-                method: "GET",
-                headers: {
-                  Authorization: `Basic ${basicToken}`,
-                },
-                cache: "no-store",
-              });
-
-              if (pingResponse.ok) {
-                const pingPayload = (await pingResponse.json().catch(() => null)) as {
-                  role?: string;
-                } | null;
-                const role = resolveRole(pingPayload?.role);
-
-                setAdminBasicAuthHeader(`Basic ${basicToken}`);
-                setAdminAuthSession(role);
-                redirectHomeWithEntryTransition();
-                return;
-              }
-            } catch {
-              // no-op, continue with regular login error handling
-            }
-          }
-
           const nextAttempts = failedAttempts + 1;
           setFailedAttempts(nextAttempts);
           setError(nextAttempts >= 3 ? "당신은 관리자가 아닙니다." : (payload?.message ?? "아이디 또는 비밀번호가 틀렸습니다"));
@@ -100,7 +68,6 @@ export default function AdminLoginPage() {
       }
       const role = resolveRole(payload?.role);
 
-      setAdminBasicAuthHeader(null);
       setAdminAuthSession(role);
       redirectHomeWithEntryTransition();
     } catch {

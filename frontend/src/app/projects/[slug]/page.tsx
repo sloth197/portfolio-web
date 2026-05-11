@@ -9,6 +9,7 @@ import MarkdownImageWithFallback from "@/components/markdown-image-with-fallback
 import ProjectAdminActions from "@/components/project-admin-actions";
 import { ApiError, PROJECT_REVALIDATE_SECONDS, fetchProjectBySlug, fetchProjectSummaries } from "@/lib/api";
 import { resolvePublicAssetUrl } from "@/lib/asset-url";
+import { getSafeGithubRepositoryUrl } from "@/lib/github-url";
 import { PREVIEW_PROJECTS } from "@/lib/project-preview";
 import type { ProjectCategory, ProjectDto, ProjectSummaryDto } from "@/lib/types";
 
@@ -198,6 +199,7 @@ export default async function ProjectDetailPage({
     })),
   );
   const fileAssets = resolvedAssets.filter((asset) => !asset.imageAsset);
+  const safeGithubUrl = getSafeGithubRepositoryUrl(project.githubUrl);
 
   return (
     <div id="project-detail-layout" className="project-detail-layout">
@@ -222,9 +224,9 @@ export default async function ProjectDetailPage({
         <h1 className="project-detail-title">{project.title}</h1>
         <p className="section-copy" style={{ margin: 0 }}>{project.summary}</p>
 
-        {project.githubUrl ? (
+        {safeGithubUrl ? (
           <a
-            href={project.githubUrl}
+            href={safeGithubUrl}
             target="_blank"
             rel="noreferrer"
             className="project-github-icon-link"
@@ -262,7 +264,7 @@ export default async function ProjectDetailPage({
                 components={{
                   img: ({ node, ...props }) => {
                     void node;
-                    return <MarkdownImageWithFallback {...props} projectGithubUrl={project.githubUrl} />;
+                    return <MarkdownImageWithFallback {...props} projectGithubUrl={safeGithubUrl} />;
                   },
                 }}
               >

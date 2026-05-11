@@ -6,12 +6,14 @@ import com.sloth.portfolio.service.ProjectQueryService;
 import com.sloth.portfolio.web.dto.ProjectDto;
 import com.sloth.portfolio.web.dto.ProjectSummaryDto;
 import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.List;
 
@@ -98,9 +100,13 @@ public class PublicController {
         } catch (Exception ignored) {
             // Content-Length may be unavailable for some resources.
         }
-        String filename = (assetFile.originalName() == null ? "asset" : assetFile.originalName()).replace("\"", "");
-        String dispositionValue = (assetFile.inline() ? "inline" : "attachment") + "; filename=\"" + filename + "\"";
-        headers.set(HttpHeaders.CONTENT_DISPOSITION, dispositionValue);
+        String filename = assetFile.originalName() == null ? "asset" : assetFile.originalName();
+        ContentDisposition disposition = (assetFile.inline()
+                ? ContentDisposition.inline()
+                : ContentDisposition.attachment())
+                .filename(filename, StandardCharsets.UTF_8)
+                .build();
+        headers.setContentDisposition(disposition);
         headers.set(HttpHeaders.CACHE_CONTROL, "public, max-age=31536000, immutable");
 
         return new ResponseEntity<>(assetFile.resource(), headers, HttpStatus.OK);

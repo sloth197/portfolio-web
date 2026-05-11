@@ -143,15 +143,7 @@ public class AdminAuthController {
         return isAdmin ? "ADMIN" : "CRM";
     }
 
-    private static String resolveClientAddress(HttpServletRequest request) {
-        String forwardedFor = request.getHeader("X-Forwarded-For");
-        if (forwardedFor != null && !forwardedFor.isBlank()) {
-            return forwardedFor.split(",")[0].trim().toLowerCase(Locale.ROOT);
-        }
-        String realIp = request.getHeader("X-Real-IP");
-        if (realIp != null && !realIp.isBlank()) {
-            return realIp.trim().toLowerCase(Locale.ROOT);
-        }
+    static String resolveClientAddress(HttpServletRequest request) {
         String remote = request.getRemoteAddr();
         return remote == null || remote.isBlank() ? "unknown" : remote.trim().toLowerCase(Locale.ROOT);
     }

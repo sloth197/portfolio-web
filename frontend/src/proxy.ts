@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function proxy(request: NextRequest) {
+  if (request.nextUrl.pathname.startsWith("/projects/admin")) {
+    const hasSessionCookie = request.cookies.has("JSESSIONID");
+    if (!hasSessionCookie) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin/login";
+      url.search = `?next=${encodeURIComponent(`${request.nextUrl.pathname}${request.nextUrl.search}`)}`;
+      return NextResponse.redirect(url);
+    }
+  }
+
   if (request.nextUrl.pathname === "/Notice") {
     const url = request.nextUrl.clone();
     url.pathname = "/notice";
@@ -18,5 +28,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/notice", "/Notice"],
+  matcher: ["/notice", "/Notice", "/projects/admin/:path*"],
 };

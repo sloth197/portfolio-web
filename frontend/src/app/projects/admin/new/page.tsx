@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { clearAdminAuthHeader, getAdminRole, isAdminLoggedIn, isLegacyBasicAuthMode, setAdminAuthSession, withAdminAuthHeaders } from "@/lib/admin-auth";
+import { clearAdminAuthHeader, getAdminRole, isAdminLoggedIn, setAdminAuthSession, withAdminAuthHeaders } from "@/lib/admin-auth";
 import NotionMarkdownEditor from "@/components/notion-markdown-editor";
 import type { ProjectCategory, ProjectDto } from "@/lib/types";
 
@@ -75,14 +75,6 @@ export default function AdminProjectCreatePage() {
       router.replace(`/admin/login?next=${encodeURIComponent(next)}`);
       return;
     }
-    if (isLegacyBasicAuthMode()) {
-      const role = getAdminRole() ?? "ADMIN";
-      if (role !== "ADMIN") {
-        router.replace("/");
-      }
-      return;
-    }
-
     let cancelled = false;
     const controller = new AbortController();
 

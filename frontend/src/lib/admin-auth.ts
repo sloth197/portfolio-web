@@ -1,6 +1,5 @@
 export const ADMIN_LOGIN_KEY = "portfolio_admin_logged_in";
 export const ADMIN_ROLE_KEY = "portfolio_admin_role";
-export const ADMIN_BASIC_AUTH_KEY = "portfolio_admin_basic_auth";
 export const ADMIN_AUTH_CHANGE_EVENT = "portfolio-admin-auth-change";
 export type AdminRole = "ADMIN" | "CRM";
 
@@ -36,37 +35,8 @@ export function setAdminAuthSession(role: AdminRole = "ADMIN"): void {
   window.dispatchEvent(new Event(ADMIN_AUTH_CHANGE_EVENT));
 }
 
-export function setAdminBasicAuthHeader(value: string | null): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-  if (!value || !value.trim()) {
-    window.sessionStorage.removeItem(ADMIN_BASIC_AUTH_KEY);
-  } else {
-    window.sessionStorage.setItem(ADMIN_BASIC_AUTH_KEY, value.trim());
-  }
-  window.dispatchEvent(new Event(ADMIN_AUTH_CHANGE_EVENT));
-}
-
-export function getAdminBasicAuthHeader(): string | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-  const stored = window.sessionStorage.getItem(ADMIN_BASIC_AUTH_KEY);
-  return stored && stored.trim() ? stored.trim() : null;
-}
-
-export function isLegacyBasicAuthMode(): boolean {
-  return getAdminBasicAuthHeader() !== null;
-}
-
 export function withAdminAuthHeaders(headers?: HeadersInit): Headers {
-  const merged = new Headers(headers ?? {});
-  const basicAuth = getAdminBasicAuthHeader();
-  if (basicAuth && !merged.has("Authorization")) {
-    merged.set("Authorization", basicAuth);
-  }
-  return merged;
+  return new Headers(headers ?? {});
 }
 
 export function clearAdminAuthHeader(): void {
@@ -75,7 +45,6 @@ export function clearAdminAuthHeader(): void {
   }
   window.sessionStorage.removeItem(ADMIN_LOGIN_KEY);
   window.sessionStorage.removeItem(ADMIN_ROLE_KEY);
-  window.sessionStorage.removeItem(ADMIN_BASIC_AUTH_KEY);
   window.dispatchEvent(new Event(ADMIN_AUTH_CHANGE_EVENT));
 }
 
