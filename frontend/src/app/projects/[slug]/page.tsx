@@ -9,24 +9,17 @@ import MarkdownImageWithFallback from "@/components/markdown-image-with-fallback
 import ProjectAdminActions from "@/components/project-admin-actions";
 import { ApiError, fetchProjectBySlug, fetchProjects } from "@/lib/api";
 import { resolvePublicAssetUrl } from "@/lib/asset-url";
-import { PREVIEW_PROJECTS, normalizeProjectCategory } from "@/lib/project-preview";
+import { PREVIEW_PROJECTS } from "@/lib/project-preview";
 import type { ProjectCategory, ProjectDto } from "@/lib/types";
 
 export const revalidate = 120;
 
-function buildProjectsPath(selectedCategory?: ProjectCategory): string {
-  if (!selectedCategory) {
-    return "/projects";
-  }
-  return `/projects?category=${selectedCategory}`;
+function buildProjectsPath(): string {
+  return "/projects";
 }
 
-function buildProjectDetailPath(slug: string, selectedCategory?: ProjectCategory): string {
-  const params = new URLSearchParams();
-  if (selectedCategory) {
-    params.set("category", selectedCategory);
-  }
-  return params.size > 0 ? `/projects/${slug}?${params.toString()}` : `/projects/${slug}`;
+function buildProjectDetailPath(slug: string): string {
+  return `/projects/${slug}`;
 }
 
 function sortProjectsForSidebar(items: ProjectDto[]): ProjectDto[] {
@@ -67,6 +60,21 @@ function trimSeoDescription(value: string, maxLength = 160): string {
     return compact;
   }
   return `${compact.slice(0, maxLength - 1).trim()}…`;
+}
+
+export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
+  try {
+    const projects = await fetchProjects(undefined, {
+      policy: "cached",
+      revalidateSeconds: 120,
+    });
+
+    return projects.map((project) => ({
+      slug: project.slug,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({
@@ -131,13 +139,10 @@ function buildMarkdownWithImageAssets(
 
 export default async function ProjectDetailPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ category?: string }>;
 }) {
-  const [{ slug }, query] = await Promise.all([params, searchParams]);
-  const selectedCategory = normalizeProjectCategory(query.category);
+  const { slug } = await params;
 
   let project: ProjectDto | null = null;
   let allProjects: ProjectDto[] = [];
@@ -198,7 +203,7 @@ export default async function ProjectDetailPage({
     <div id="project-detail-layout" className="project-detail-layout">
       <section className="surface-card project-detail-head top-banner top-banner-project-detail">
         <div className="project-detail-top-row">
-          <Link className="btn-ghost" href={buildProjectsPath(selectedCategory)} style={{ width: "fit-content" }}>
+          <Link className="btn-ghost" href={buildProjectsPath()} style={{ width: "fit-content" }}>
             Back to projects
           </Link>
           {usesPreviewData ? (
@@ -241,7 +246,7 @@ export default async function ProjectDetailPage({
 
       <ProjectAdminActions
         project={project}
-        returnPath={buildProjectsPath(selectedCategory)}
+        returnPath={buildProjectsPath()}
         disabled={usesPreviewData}
       />
 
@@ -304,7 +309,7 @@ export default async function ProjectDetailPage({
               return (
                 <Link
                   key={item.id}
-                  href={buildProjectDetailPath(item.slug, selectedCategory)}
+                  href={buildProjectDetailPath(item.slug)}
                   className={`project-detail-related-item ${isCurrent ? "is-current" : ""}`}
                 >
                   <span className="badge">
