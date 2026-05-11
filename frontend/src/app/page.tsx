@@ -5,11 +5,9 @@ import ContactPage from "@/app/contact/page";
 import I18nText from "@/components/i18n-text";
 import HomeItNewsStrip from "@/components/home-it-news-strip";
 import ProjectShowcaseCard from "@/components/project-showcase-card";
-import { ApiError, fetchProjects } from "@/lib/api";
+import { ApiError, PROJECT_REVALIDATE_SECONDS, fetchProjectSummaries } from "@/lib/api";
 import { PREVIEW_PROJECTS } from "@/lib/project-preview";
 import { fetchHomeTechNews } from "@/lib/tech-news";
-
-const HOME_PROJECTS_REVALIDATE_SECONDS = 120;
 
 export const metadata: Metadata = {
   title: "Home",
@@ -26,13 +24,13 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   const newsItems = await fetchHomeTechNews(30);
-  let projects: Awaited<ReturnType<typeof fetchProjects>> = [];
+  let projects: Awaited<ReturnType<typeof fetchProjectSummaries>> = [];
   let projectLoadWarning: string | null = null;
 
   try {
-    projects = await fetchProjects(undefined, {
+    projects = await fetchProjectSummaries(undefined, {
       policy: "cached",
-      revalidateSeconds: HOME_PROJECTS_REVALIDATE_SECONDS,
+      revalidateSeconds: PROJECT_REVALIDATE_SECONDS,
     });
   } catch (error) {
     if (error instanceof ApiError) {

@@ -20,4 +20,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     @EntityGraph(attributePaths = "assets")
     List<Project> findAllByOrderByCreatedAtDesc();
+
+    List<ProjectSummaryView> findProjectedByCategoryOrderByCreatedAtDesc(ProjectCategory category);
+
+    List<ProjectSummaryView> findProjectedByOrderByCreatedAtDesc();
 }

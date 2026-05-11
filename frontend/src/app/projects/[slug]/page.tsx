@@ -7,12 +7,12 @@ import remarkGfm from "remark-gfm";
 import I18nText from "@/components/i18n-text";
 import MarkdownImageWithFallback from "@/components/markdown-image-with-fallback";
 import ProjectAdminActions from "@/components/project-admin-actions";
-import { ApiError, fetchProjectBySlug, fetchProjects } from "@/lib/api";
+import { ApiError, PROJECT_REVALIDATE_SECONDS, fetchProjectBySlug, fetchProjectSummaries } from "@/lib/api";
 import { resolvePublicAssetUrl } from "@/lib/asset-url";
 import { PREVIEW_PROJECTS } from "@/lib/project-preview";
-import type { ProjectCategory, ProjectDto } from "@/lib/types";
+import type { ProjectCategory, ProjectDto, ProjectSummaryDto } from "@/lib/types";
 
-export const revalidate = 120;
+export const revalidate = 600;
 
 function buildProjectsPath(): string {
   return "/projects";
@@ -22,7 +22,7 @@ function buildProjectDetailPath(slug: string): string {
   return `/projects/${slug}`;
 }
 
-function sortProjectsForSidebar(items: ProjectDto[]): ProjectDto[] {
+function sortProjectsForSidebar(items: ProjectSummaryDto[]): ProjectSummaryDto[] {
   return [...items].sort((a, b) => {
     const order = (category: ProjectCategory) => (category === "SOFTWARE" ? 0 : 1);
     const byCategory = order(a.category) - order(b.category);
@@ -64,9 +64,9 @@ function trimSeoDescription(value: string, maxLength = 160): string {
 
 export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
   try {
-    const projects = await fetchProjects(undefined, {
+    const projects = await fetchProjectSummaries(undefined, {
       policy: "cached",
-      revalidateSeconds: 120,
+      revalidateSeconds: PROJECT_REVALIDATE_SECONDS,
     });
 
     return projects.map((project) => ({
@@ -88,7 +88,7 @@ export async function generateMetadata({
   try {
     const project = await fetchProjectBySlug(slug, {
       policy: "cached",
-      revalidateSeconds: 120,
+      revalidateSeconds: PROJECT_REVALIDATE_SECONDS,
     });
     const description = trimSeoDescription(project.summary);
     const primaryImageAsset = (project.assets ?? []).find((asset) => {
@@ -145,18 +145,18 @@ export default async function ProjectDetailPage({
   const { slug } = await params;
 
   let project: ProjectDto | null = null;
-  let allProjects: ProjectDto[] = [];
+  let allProjects: ProjectSummaryDto[] = [];
   let usesPreviewData = false;
 
   try {
     [project, allProjects] = await Promise.all([
       fetchProjectBySlug(slug, {
         policy: "cached",
-        revalidateSeconds: 120,
+        revalidateSeconds: PROJECT_REVALIDATE_SECONDS,
       }),
-      fetchProjects(undefined, {
+      fetchProjectSummaries(undefined, {
         policy: "cached",
-        revalidateSeconds: 120,
+        revalidateSeconds: PROJECT_REVALIDATE_SECONDS,
       }),
     ]);
   } catch (error) {

@@ -4,6 +4,7 @@ import com.sloth.portfolio.domain.ProjectCategory;
 import com.sloth.portfolio.service.ProjectAssetService;
 import com.sloth.portfolio.service.ProjectQueryService;
 import com.sloth.portfolio.web.dto.ProjectDto;
+import com.sloth.portfolio.web.dto.ProjectSummaryDto;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,19 @@ public class PublicController {
     public List<ProjectDto> listProjects(@RequestParam(required = false) ProjectCategory category) {
         return projectQueryService.listAll(category).stream()
                 .map(ProjectDto::from)
+                .toList();
+    }
+
+    /**
+     * 프로젝트 목록/사이드바용 경량 조회
+     * - /api/public/projects/summary
+     * - /api/public/projects/summary?category=FIRMWARE
+     * - /api/public/projects/summary?category=SOFTWARE
+     */
+    @GetMapping("/projects/summary")
+    public List<ProjectSummaryDto> listProjectSummaries(@RequestParam(required = false) ProjectCategory category) {
+        return projectQueryService.listSummaries(category).stream()
+                .map(ProjectSummaryDto::from)
                 .toList();
     }
 
@@ -87,6 +101,7 @@ public class PublicController {
         String filename = (assetFile.originalName() == null ? "asset" : assetFile.originalName()).replace("\"", "");
         String dispositionValue = (assetFile.inline() ? "inline" : "attachment") + "; filename=\"" + filename + "\"";
         headers.set(HttpHeaders.CONTENT_DISPOSITION, dispositionValue);
+        headers.set(HttpHeaders.CACHE_CONTROL, "public, max-age=31536000, immutable");
 
         return new ResponseEntity<>(assetFile.resource(), headers, HttpStatus.OK);
     }

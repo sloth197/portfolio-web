@@ -1,9 +1,10 @@
 import "server-only";
 
 import { getPublicApiBaseUrl } from "./api-base";
-import type { ProjectCategory, ProjectDto } from "./types";
+import type { ProjectCategory, ProjectDto, ProjectSummaryDto } from "./types";
 
 const BASE = getPublicApiBaseUrl();
+export const PROJECT_REVALIDATE_SECONDS = 600;
 
 export class ApiError extends Error {
   status: number;
@@ -29,7 +30,7 @@ function resolveProjectFetchInit(
   if (policy === "cached") {
     return {
       cache: "force-cache",
-      next: { revalidate: options?.revalidateSeconds ?? 120 },
+      next: { revalidate: options?.revalidateSeconds ?? PROJECT_REVALIDATE_SECONDS },
     };
   }
 
@@ -45,6 +46,21 @@ export async function fetchProjects(
 
   const res = await fetch(url.toString(), resolveProjectFetchInit(options));
   if (!res.ok) throw new ApiError(res.status, `Failed to fetch projects: ${res.status}`);
+  return res.json();
+}
+
+export async function fetchProjectSummaries(
+  category?: ProjectCategory,
+  options?: ProjectFetchOptions,
+): Promise<ProjectSummaryDto[]> {
+  const url = new URL(`${BASE}/api/public/projects/summary`);
+  if (category) url.searchParams.set("category", category);
+
+  const res = await fetch(url.toString(), resolveProjectFetchInit(options));
+  if (res.status === 404) {
+    return fetchProjects(category, options);
+  }
+  if (!res.ok) throw new ApiError(res.status, `Failed to fetch project summaries: ${res.status}`);
   return res.json();
 }
 

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getPublicApiBaseUrl } from "@/lib/api-base";
-import type { ProjectDto } from "@/lib/types";
+import type { ProjectSummaryDto } from "@/lib/types";
 
 const DEFAULT_SITE_URL = "https://www.xhbt.dev";
 const API_BASE = getPublicApiBaseUrl();
@@ -17,20 +17,20 @@ function resolveSiteUrl(): string {
   return DEFAULT_SITE_URL;
 }
 
-async function fetchProjectsForSitemap(): Promise<ProjectDto[]> {
+async function fetchProjectsForSitemap(): Promise<ProjectSummaryDto[]> {
   if (!API_BASE) {
     return [];
   }
 
   try {
-    const response = await fetch(`${API_BASE}/api/public/projects`, {
+    const response = await fetch(`${API_BASE}/api/public/projects/summary`, {
       cache: "force-cache",
       next: { revalidate: 600 },
     });
     if (!response.ok) {
       return [];
     }
-    return (await response.json()) as ProjectDto[];
+    return (await response.json()) as ProjectSummaryDto[];
   } catch {
     return [];
   }

@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ProjectsListPanel from "@/components/projects-list-panel";
-import { ApiError, fetchProjects } from "@/lib/api";
+import { ApiError, PROJECT_REVALIDATE_SECONDS, fetchProjectSummaries } from "@/lib/api";
 import { PREVIEW_PROJECTS } from "@/lib/project-preview";
-
-const PROJECTS_REVALIDATE_SECONDS = 120;
 
 export const metadata: Metadata = {
   title: "Projects",
@@ -20,13 +18,13 @@ export const metadata: Metadata = {
 };
 
 export default async function ProjectsPage() {
-  let allProjects: Awaited<ReturnType<typeof fetchProjects>> = [];
+  let allProjects: Awaited<ReturnType<typeof fetchProjectSummaries>> = [];
   let loadWarning: string | null = null;
 
   try {
-    allProjects = await fetchProjects(undefined, {
+    allProjects = await fetchProjectSummaries(undefined, {
       policy: "cached",
-      revalidateSeconds: PROJECTS_REVALIDATE_SECONDS,
+      revalidateSeconds: PROJECT_REVALIDATE_SECONDS,
     });
   } catch (error) {
     let handledApiError = false;

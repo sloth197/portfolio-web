@@ -24,3 +24,14 @@ export type ProjectDto = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type ProjectSummaryDto = {
+  id: number;
+  category: ProjectCategory;
+  title: string;
+  slug: string;
+  summary: string;
+  projectPeriod: string | null;
+  createdAt: string;
+  updatedAt: string;
+};

@@ -3,14 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { pickProjectPreviewMedia } from "@/lib/project-media";
-import type { ProjectDto } from "@/lib/types";
+import type { ProjectDto, ProjectSummaryDto } from "@/lib/types";
 import ProjectShowcaseMedia from "@/components/project-showcase-media";
 
 type ProjectShowcaseCardProps = {
   href: string;
   index: number;
   periodText?: string | null;
-  project: ProjectDto;
+  project: ProjectDto | ProjectSummaryDto;
 };
 
 export default function ProjectShowcaseCard({

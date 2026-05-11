@@ -1,4 +1,4 @@
-import type { ProjectAssetDto, ProjectDto } from "./types";
+import type { ProjectAssetDto } from "./types";
 import { resolvePublicAssetUrl } from "./asset-url";
 
 function hasImageExtension(value: string): boolean {
@@ -41,7 +41,7 @@ export type ProjectPreviewMedia = {
   url: string;
 };
 
-export function pickProjectPreviewMedia(project: ProjectDto): ProjectPreviewMedia | null {
+export function pickProjectPreviewMedia(project: { assets?: ProjectAssetDto[]; title: string }): ProjectPreviewMedia | null {
   const assets = project.assets ?? [];
   const imageAsset = assets.find(isImageAsset);
   if (!imageAsset) {

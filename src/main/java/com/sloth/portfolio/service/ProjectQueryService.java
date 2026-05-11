@@ -3,6 +3,7 @@ package com.sloth.portfolio.service;
 import com.sloth.portfolio.domain.Project;
 import com.sloth.portfolio.domain.ProjectCategory;
 import com.sloth.portfolio.repo.ProjectRepository;
+import com.sloth.portfolio.repo.ProjectSummaryView;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,13 @@ public class ProjectQueryService {
             return projectRepository.findAllByOrderByCreatedAtDesc();
         }
         return projectRepository.findByCategoryOrderByCreatedAtDesc(category);
+    }
+
+    public List<ProjectSummaryView> listSummaries(ProjectCategory category) {
+        if (category == null) {
+            return projectRepository.findProjectedByOrderByCreatedAtDesc();
+        }
+        return projectRepository.findProjectedByCategoryOrderByCreatedAtDesc(category);
     }
 
     public Project getBySlug(String slug) {

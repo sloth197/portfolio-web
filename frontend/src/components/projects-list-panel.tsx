@@ -4,10 +4,10 @@ import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import { canAdminManageProjects, subscribeAdminAuth } from "@/lib/admin-auth";
 import ProjectShowcaseCard from "@/components/project-showcase-card";
-import type { ProjectDto } from "@/lib/types";
+import type { ProjectSummaryDto } from "@/lib/types";
 
 type Props = {
-  projects: ProjectDto[];
+  projects: ProjectSummaryDto[];
 };
 
 function buildAdminCreatePath(): string {
