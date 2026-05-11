@@ -8,7 +8,7 @@ const contentSecurityPolicy = [
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  "img-src 'self' data: blob: https://github.com https://raw.githubusercontent.com https://*.githubusercontent.com http://localhost:* http://127.0.0.1:*",
+  "img-src 'self' data: blob: https://portfolio-api-y5yr.onrender.com https://*.onrender.com https://github.com https://raw.githubusercontent.com https://*.githubusercontent.com http://localhost:* http://127.0.0.1:*",
   "font-src 'self' data:",
   `script-src 'self' 'unsafe-inline'${isDevelopment ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
