@@ -11,8 +11,6 @@ type ProjectShowcaseMediaProps = {
   src: string;
 };
 
-const GIF_PLACEHOLDER = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
-
 function appendQueryParam(url: string, key: string, value: string): string {
   const hashIndex = url.indexOf("#");
   const baseUrl = hashIndex >= 0 ? url.slice(0, hashIndex) : url;
@@ -80,7 +78,7 @@ export default function ProjectShowcaseMedia({
       if (!isActive) {
         return;
       }
-      setPosterSrc(frame ?? GIF_PLACEHOLDER);
+      setPosterSrc(frame);
     });
 
     return () => {
@@ -96,7 +94,7 @@ export default function ProjectShowcaseMedia({
     return appendQueryParam(src, "gif-play", String(token));
   }, [isGif, playToken, src]);
 
-  const currentSrc = isGif ? (isHovered ? animatedSrc : (posterSrc ?? GIF_PLACEHOLDER)) : src;
+  const currentSrc = isGif ? (isHovered ? animatedSrc : (posterSrc ?? src)) : src;
 
   return (
     // eslint-disable-next-line @next/next/no-img-element
