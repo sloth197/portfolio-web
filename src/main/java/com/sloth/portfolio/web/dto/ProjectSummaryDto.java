@@ -4,6 +4,7 @@ import com.sloth.portfolio.domain.ProjectCategory;
 import com.sloth.portfolio.repo.ProjectSummaryView;
 
 import java.time.Instant;
+import java.util.List;
 
 public record ProjectSummaryDto(
         Long id,
@@ -12,10 +13,15 @@ public record ProjectSummaryDto(
         String slug,
         String summary,
         String projectPeriod,
+        List<ProjectAssetDto> assets,
         Instant createdAt,
         Instant updatedAt
 ) {
     public static ProjectSummaryDto from(ProjectSummaryView project) {
+        return from(project, List.of());
+    }
+
+    public static ProjectSummaryDto from(ProjectSummaryView project, List<ProjectAssetDto> assets) {
         return new ProjectSummaryDto(
                 project.getId(),
                 project.getCategory(),
@@ -23,6 +29,7 @@ public record ProjectSummaryDto(
                 project.getSlug(),
                 project.getSummary(),
                 project.getProjectPeriod(),
+                assets == null ? List.of() : List.copyOf(assets),
                 project.getCreatedAt(),
                 project.getUpdatedAt()
         );

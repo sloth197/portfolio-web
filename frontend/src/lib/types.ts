@@ -32,6 +32,7 @@ export type ProjectSummaryDto = {
   slug: string;
   summary: string;
   projectPeriod: string | null;
+  assets?: ProjectAssetDto[];
   createdAt: string;
   updatedAt: string;
 };

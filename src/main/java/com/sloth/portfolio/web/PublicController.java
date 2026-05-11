@@ -1,8 +1,11 @@
 package com.sloth.portfolio.web;
 
+import com.sloth.portfolio.domain.ProjectAsset;
 import com.sloth.portfolio.domain.ProjectCategory;
+import com.sloth.portfolio.repo.ProjectSummaryView;
 import com.sloth.portfolio.service.ProjectAssetService;
 import com.sloth.portfolio.service.ProjectQueryService;
+import com.sloth.portfolio.web.dto.ProjectAssetDto;
 import com.sloth.portfolio.web.dto.ProjectDto;
 import com.sloth.portfolio.web.dto.ProjectSummaryDto;
 import org.springframework.core.io.Resource;
@@ -14,8 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/public")
@@ -55,8 +59,21 @@ public class PublicController {
      */
     @GetMapping("/projects/summary")
     public List<ProjectSummaryDto> listProjectSummaries(@RequestParam(required = false) ProjectCategory category) {
-        return projectQueryService.listSummaries(category).stream()
-                .map(ProjectSummaryDto::from)
+        List<ProjectSummaryView> summaries = projectQueryService.listSummaries(category);
+        Map<Long, ProjectAsset> previewAssets = projectQueryService.listPreviewImageAssets(
+                summaries.stream()
+                        .map(ProjectSummaryView::getId)
+                        .toList()
+        );
+
+        return summaries.stream()
+                .map(project -> {
+                    ProjectAsset previewAsset = previewAssets.get(project.getId());
+                    List<ProjectAssetDto> assets = previewAsset == null
+                            ? List.of()
+                            : List.of(ProjectAssetDto.from(previewAsset));
+                    return ProjectSummaryDto.from(project, assets);
+                })
                 .toList();
     }
 
