@@ -21,16 +21,6 @@ function getServerSnapshot(): boolean {
   return false;
 }
 
-function slugify(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
 export default function ProjectAdminActions({ project, returnPath, disabled = false }: Props) {
   const router = useRouter();
   const canManageProjects = useSyncExternalStore(subscribeAdminAuth, canAdminManageProjects, getServerSnapshot);
@@ -214,7 +204,6 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
     setNotice(null);
 
     try {
-      const autoSlug = slugify(title);
       const response = await fetch(`${ADMIN_PROJECT_API_BASE}/${project.id}`, {
         method: "PUT",
         headers: withAdminAuthHeaders({
@@ -224,8 +213,6 @@ export default function ProjectAdminActions({ project, returnPath, disabled = fa
         body: JSON.stringify({
           category,
           title: title.trim(),
-          // Keep backward compatibility with older backend versions that still require slug.
-          slug: project.slug || autoSlug || `project-${project.id}`,
           summary: summary.trim(),
           projectPeriod: projectPeriod.trim() || null,
           contentMarkdown: contentMarkdown.trim(),
