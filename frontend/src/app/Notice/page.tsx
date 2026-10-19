@@ -7,6 +7,7 @@ import {
   clearAdminAuthHeader,
   getAdminRole,
   isAdminLoggedIn,
+  setAdminAuthSession,
   subscribeAdminAuth,
   type AdminRole,
   withAdminAuthHeaders,
@@ -70,6 +71,7 @@ export default function NoticePage() {
   const language = useSiteLanguage();
   const adminLoggedIn = useSyncExternalStore(subscribeAdminAuth, isAdminLoggedIn, getServerSnapshot);
   const adminRole = useSyncExternalStore(subscribeAdminAuth, getAdminRole, getServerRoleSnapshot);
+  const [authChecking, setAuthChecking] = useState(true);
   const hasShownDeniedAlertRef = useRef(false);
   const canManageNotices = useMemo(() => adminLoggedIn && adminRole === "ADMIN", [adminLoggedIn, adminRole]);
 
@@ -144,6 +146,46 @@ export default function NoticePage() {
   }, [notices, pinnedNotice]);
   const composedContent = useMemo(() => detail.trim(), [detail]);
 
+  useEffect(() => {
+    let active = true;
+
+    async function syncSession() {
+      try {
+        const response = await fetch("/api/admin/auth/session", {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+        const payload = (await response.json().catch(() => null)) as { authenticated?: boolean; role?: string } | null;
+        if (!response.ok) {
+          if (!isAdminLoggedIn()) {
+            clearAdminAuthHeader();
+          }
+          return;
+        }
+        if (payload?.authenticated) {
+          setAdminAuthSession(payload.role === "CRM" ? "CRM" : "ADMIN");
+        } else {
+          clearAdminAuthHeader();
+        }
+      } catch {
+        // Keep an existing client session during a temporary upstream cold start.
+        if (!isAdminLoggedIn()) {
+          clearAdminAuthHeader();
+        }
+      } finally {
+        if (active) {
+          setAuthChecking(false);
+        }
+      }
+    }
+
+    void syncSession();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const loadNotices = useCallback(async () => {
     try {
       setLoading(true);
@@ -171,6 +213,9 @@ export default function NoticePage() {
   }, [t.loadNoticesFailed]);
 
   useEffect(() => {
+    if (authChecking) {
+      return;
+    }
     if (adminLoggedIn) {
       hasShownDeniedAlertRef.current = false;
       return;
@@ -181,7 +226,7 @@ export default function NoticePage() {
     hasShownDeniedAlertRef.current = true;
     window.alert(language === "en" ? "You do not have permission." : "권한이 없습니다");
     router.replace("/");
-  }, [adminLoggedIn, language, router]);
+  }, [adminLoggedIn, authChecking, language, router]);
 
   useEffect(() => {
     if (!adminLoggedIn) {
@@ -365,6 +410,10 @@ export default function NoticePage() {
         ) : null}
       </article>
     );
+  }
+
+  if (authChecking) {
+    return <p className="helper-text">Loading admin session...</p>;
   }
 
   if (!adminLoggedIn) {

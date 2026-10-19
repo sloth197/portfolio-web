@@ -6,8 +6,12 @@ export type SiteLanguage = "ko" | "en";
 
 const STORAGE_KEY = "portfolio-language";
 const LANGUAGE_CHANGE_EVENT = "portfolio-language-change";
+let languageHydrated = false;
 
 function readSiteLanguage(): SiteLanguage {
+  if (!languageHydrated) {
+    return "en";
+  }
   if (typeof window === "undefined" || typeof document === "undefined") {
     return "en";
   }
@@ -24,6 +28,8 @@ function subscribeSiteLanguage(onStoreChange: () => void): () => void {
   if (typeof window === "undefined") {
     return () => {};
   }
+
+  languageHydrated = true;
 
   const onStorage = (event: StorageEvent) => {
     if (!event.key || event.key === STORAGE_KEY) {
