@@ -13,12 +13,14 @@ export default function AdminCrmBanner() {
   const hydrated = useHydrated();
   const adminLoggedIn = useSyncExternalStore(subscribeAdminAuth, isAdminLoggedIn, getServerSnapshot);
 
-  if (!hydrated || !adminLoggedIn) {
+  if (!hydrated) {
     return null;
   }
 
+  const href = adminLoggedIn ? "/crm" : "/admin/login?next=%2Fcrm";
+
   return (
-    <Link className="nav-link crm-nav-link" href="/crm">
+    <Link className="nav-link crm-nav-link" href={href}>
       CRM
     </Link>
   );
