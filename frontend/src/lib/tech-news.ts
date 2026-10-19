@@ -8,6 +8,15 @@ export type HomeNewsItem = {
 
 const YOZM_FEED_URL = "https://yozm.wishket.com/magazine/feed/";
 const ITEM_REGEX = /<item>([\s\S]*?)<\/item>/g;
+const FALLBACK_NEWS: HomeNewsItem[] = [
+  {
+    id: "yozm-latest",
+    title: "Read the latest stories on 요즘IT",
+    url: "https://yozm.wishket.com/magazine/list/new/",
+    publishedAt: "",
+    summary: "The latest technology articles are available on 요즘IT.",
+  },
+];
 
 function decodeXml(value: string): string {
   return value
@@ -41,7 +50,7 @@ export async function fetchHomeTechNews(limit = 10): Promise<HomeNewsItem[]> {
       cache: "force-cache",
     });
     if (!response.ok) {
-      return [];
+      return FALLBACK_NEWS;
     }
 
     const xml = await response.text();
@@ -72,8 +81,8 @@ export async function fetchHomeTechNews(limit = 10): Promise<HomeNewsItem[]> {
       }
     }
 
-    return items;
+    return items.length > 0 ? items : FALLBACK_NEWS;
   } catch {
-    return [];
+    return FALLBACK_NEWS;
   }
 }
