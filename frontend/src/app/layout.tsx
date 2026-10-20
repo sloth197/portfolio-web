@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IBM_Plex_Mono, Plus_Jakarta_Sans } from "next/font/google";
-import AdminCrmBanner from "@/components/admin-crm-banner";
 import EntryTransition from "@/components/entry-transition";
-import HeaderAuthButton from "@/components/header-auth-button";
 import HardReloadTracker from "@/components/hard-reload-tracker";
-import LanguageToggle from "@/components/language-toggle";
-import SiteNavLinks from "@/components/site-nav-links";
 import SiteNoticePopups from "@/components/site-notice-popups";
-import SiteRandomTwinkle from "@/components/site-random-twinkle";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -103,23 +98,18 @@ export default function RootLayout({
       </head>
       <body className={`${jakarta.variable} ${plexMono.variable}`}>
         <HardReloadTracker />
-        <SiteRandomTwinkle />
         <EntryTransition />
         <SiteNoticePopups />
         <div className="site-shell">
-          <header className="site-header">
-            <div className="site-header-inner">
-              <Link className="brand-mark" href="/#home">
-                JWS
-              </Link>
-              <nav className="site-nav">
-                <SiteNavLinks />
-                <AdminCrmBanner />
+          <header className="site-header editorial-header">
+            <div className="site-header-inner editorial-header-inner">
+              <Link className="editorial-brand" href="/#home">xhbt.dev</Link>
+              <nav className="editorial-nav" aria-label="Primary navigation">
+                <Link href="/#home">Home</Link>
+                <Link href="/projects">Projects</Link>
+                <Link href="/#about">About</Link>
+                <Link href="/contact" className="editorial-contact-link">Let&apos;s Talk <span aria-hidden="true">→</span></Link>
               </nav>
-              <div className="site-header-actions">
-                <HeaderAuthButton />
-                <LanguageToggle />
-              </div>
             </div>
           </header>
 

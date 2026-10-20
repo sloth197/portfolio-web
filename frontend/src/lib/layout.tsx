@@ -11,32 +11,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko">
       <body>
-        <header style={{ borderBottom: "1px solid #222" }}>
-          <div
-            style={{
-              maxWidth: 1080,
-              margin: "0 auto",
-              padding: "16px 20px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 16,
-              flexWrap: "wrap",
-            }}
-          >
-            <Link href="/" style={{ fontWeight: 800, letterSpacing: 0.3 }}>
-              Portfolio
-            </Link>
-
-            <nav style={{ display: "flex", gap: 16 }}>
+        <header className="editorial-header">
+          <div className="editorial-header-inner">
+            <Link href="/" className="editorial-brand">xhbt.dev</Link>
+            <nav className="editorial-nav" aria-label="Primary navigation">
               <Link href="/">Home</Link>
               <Link href="/projects">Projects</Link>
-              <Link href="/contact">Contact</Link>
+              <Link href="/about">About</Link>
+              <Link href="/contact" className="editorial-contact-link">Let&apos;s Talk <span aria-hidden="true">→</span></Link>
             </nav>
           </div>
         </header>
 
-        <main style={{ maxWidth: 1080, margin: "0 auto", padding: "28px 20px" }}>
+        <main className="editorial-main">
           {children}
         </main>
 
