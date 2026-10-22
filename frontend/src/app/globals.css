@@ -181,12 +181,13 @@ body { background: linear-gradient(145deg, #080a12 0%, #0c0f1d 52%, #090b14 100%
   --project-detail-inner-card-opacity: 0.0;
 }
 
+/* backgrounf 테마 임시 주석 처리
 @theme inline {
   --color-background: var(--bg);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
+} */
 
 *,
 *::before,
@@ -2836,6 +2837,30 @@ LIGHT_THEME_DISABLED_END */
   padding: 20px 22px;
 }
 
+.project-description-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.project-description-toolbar button {
+  border: 1px solid #2d3852;
+  border-radius: 999px;
+  background: transparent;
+  color: #9aa6bd;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 5px 9px;
+}
+
+.project-description-toolbar button.is-active {
+  background: #9b7cff;
+  border-color: #9b7cff;
+  color: #0b1018;
+}
+
 .project-markdown hr {
   border: 0;
   border-top: 1px solid #5a34be;
@@ -3273,6 +3298,27 @@ LIGHT_THEME_DISABLED_END */
 :root[data-theme="dark"] .site-popup-foot-btn + .site-popup-foot-btn {
   border-left-color: #2f3a46;
 }
+
+/* Refined dark editorial home */
+.editorial-hero { position: relative; min-height: 430px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 1fr); align-items: center; overflow: hidden; border-bottom: 1px solid #27303d; }
+.editorial-hero-copy { position: relative; z-index: 2; padding: 64px 0 58px; }
+.editorial-eyebrow { margin: 0 0 16px; color: #58d9e8; font: 600 .72rem/1.4 var(--font-geist-mono), monospace; letter-spacing: .2em; }
+.editorial-eyebrow span { color: #74809a; margin: 0 8px; }
+.editorial-hero h1 { margin: 0; max-width: 650px; font-size: clamp(3.25rem, 6vw, 6rem); line-height: .99; letter-spacing: -.065em; font-weight: 600; }
+.editorial-hero h1 em { color: #9575ff; font-style: normal; }
+.editorial-rule { display: flex; align-items: center; gap: 22px; margin-top: 24px; color: #7f8999; font: 600 .68rem/1 var(--font-geist-mono), monospace; letter-spacing: .18em; }
+.editorial-rule span { width: 54px; height: 1px; background: #8b96a8; }
+.editorial-stack { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 28px; color: #7f8999; font: 600 .65rem/1 var(--font-geist-mono), monospace; letter-spacing: .15em; }
+.editorial-stack span { margin-right: 10px; }
+.editorial-stack b { display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 40px; border: 1px solid #303a4a; border-radius: 9px; color: #dce4f0; font: 600 .7rem var(--font-geist-mono), monospace; letter-spacing: 0; }
+.editorial-visual { position: absolute; inset: 0 0 0 42%; background: radial-gradient(ellipse at 62% 52%, #1d2b3c 0%, #111821 32%, transparent 68%); }
+.editorial-visual::before { content: ""; position: absolute; right: -8%; bottom: 17%; width: 75%; height: 1px; background: linear-gradient(90deg, transparent, #9bb5d9aa, transparent); transform: rotate(-5deg); box-shadow: 0 28px 0 #9bb5d933, 0 56px 0 #9bb5d91c; }
+.editorial-monolith { position: absolute; right: 16%; top: 21%; width: 22%; height: 46%; background: linear-gradient(110deg, #111722 0%, #202a3a 78%, #a9f6ff 79%, #5e6cff 82%, #111722 84%); clip-path: polygon(16% 10%, 100% 0, 100% 100%, 0 90%); box-shadow: 0 0 40px #63dff955; }
+.editorial-reflection { position: absolute; right: 15%; top: 67%; width: 24%; height: 22%; background: linear-gradient(165deg, #8af1ff66, transparent 55%); clip-path: polygon(0 0, 100% 12%, 70% 100%, 20% 72%); filter: blur(3px); }
+.editorial-section-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.editorial-section-head a { color: #a78bfa; font: 600 .68rem var(--font-geist-mono), monospace; letter-spacing: .14em; }
+.editorial-section-head .section-title { margin: 0; }
+@media (max-width: 760px) { .editorial-hero { min-height: 540px; grid-template-columns: 1fr; align-items: end; } .editorial-hero-copy { padding: 54px 0 46px; } .editorial-visual { inset: 0 0 38% 0; opacity: .8; } .editorial-hero h1 { font-size: clamp(3rem, 13vw, 4.5rem); } .editorial-rule { font-size: .58rem; gap: 10px; } }
 
 body.site-popup-lock-active .site-shell :is(a, button, input, select, textarea, summary, [role="button"]) {
   pointer-events: none;

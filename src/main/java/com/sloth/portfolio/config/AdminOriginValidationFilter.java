@@ -40,7 +40,7 @@ public class AdminOriginValidationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
+    protected boolean shouldNotFilter(@SuppressWarnings("null") HttpServletRequest request) {
         String path = request.getRequestURI();
         if (path == null || !path.startsWith("/api/admin/")) {
             return true;

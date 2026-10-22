@@ -77,49 +77,49 @@ export default function NoticePage() {
 
   const t = useMemo(
     () => ({
-      loadNoticesFailed: language === "en" ? "Failed to load notices." : "공지 목록을 불러오지 못했습니다.",
-      noticeManagementRequiresAdmin:
-        language === "en" ? "Notice management requires an ADMIN account." : "공지 관리는 ADMIN 계정이 필요합니다.",
-      adminSessionMissing:
-        language === "en" ? "Admin login session is missing. Please login again." : "관리자 로그인 세션이 없습니다. 다시 로그인해 주세요.",
-      adminSessionExpired:
-        language === "en" ? "Admin session expired. Please login again." : "관리자 세션이 만료되었습니다. 다시 로그인해 주세요.",
-      requestFailedWhileSaving: language === "en" ? "Request failed while saving notice." : "공지 저장 요청에 실패했습니다.",
-      requestFailedWhileDeleting: language === "en" ? "Request failed while deleting notice." : "공지 삭제 요청에 실패했습니다.",
-      noticeUpdated: language === "en" ? "Notice updated." : "공지가 수정되었습니다.",
-      noticeCreated: language === "en" ? "Notice created." : "공지가 등록되었습니다.",
-      noticeDeleted: language === "en" ? "Notice deleted." : "공지가 삭제되었습니다.",
-      deleteConfirm: language === "en" ? "Do you want to delete this notice?" : "삭제하시겠습니까?",
-      requestFailedPrefix: language === "en" ? "Request failed" : "요청 실패",
-      deleteFailedPrefix: language === "en" ? "Delete failed" : "삭제 실패",
-      loadingNotices: language === "en" ? "Loading notices..." : "공지를 불러오는 중...",
-      pinned: language === "en" ? "Pinned" : "상단 고정",
-      edit: language === "en" ? "Edit" : "수정",
-      delete: language === "en" ? "Delete" : "삭제",
-      createNotice: language === "en" ? "Create Notice" : "공지 등록",
-      editNotice: language === "en" ? "Edit Notice" : "공지 수정",
-      content: language === "en" ? "Content" : "내용",
-      detail: language === "en" ? "Details" : "상세 내용",
-      options: language === "en" ? "Options" : "옵션",
-      contentRequired: language === "en" ? "Please fill in details." : "상세 내용을 입력해 주세요.",
-      textSize: language === "en" ? "Text size" : "글자 크기",
-      pinToTop: language === "en" ? "Pin to top" : "상단 고정",
-      pinSingleHint: language === "en" ? "Only one pinned notice is allowed." : "고정 공지는 1개만 설정할 수 있습니다.",
-      pinReplaceHint:
-        language === "en"
-          ? "The existing pinned notice will be automatically unpinned."
-          : "기존 고정 공지는 자동으로 해제됩니다.",
-      preview: language === "en" ? "Preview" : "미리보기",
-      previewPlaceholder: language === "en" ? "Preview will appear here." : "미리보기가 여기에 표시됩니다.",
-      otherNotices: language === "en" ? "Other notices" : "일반 공지",
-      noOtherNotices: language === "en" ? "There are no regular notices yet." : "일반 공지가 아직 없습니다.",
-      saving: language === "en" ? "Saving..." : "저장 중...",
-      create: language === "en" ? "Create" : "등록",
-      update: language === "en" ? "Update" : "수정",
-      cancel: language === "en" ? "Cancel" : "취소",
-      register: language === "en" ? "Create" : "등록",
-      registerCancel: language === "en" ? "Cancel Create" : "등록 취소",
-      writeAndEdit: language === "en" ? "Write / Edit" : "작성 및 수정",
+              loadNoticesFailed: language === "en" ? "Failed to load notices." : "공지 목록을 불러오지 못했습니다.",
+              noticeManagementRequiresAdmin:
+                language === "en" ? "Notice management requires an ADMIN account." : "공지 관리는 ADMIN 계정이 필요합니다.",
+              adminSessionMissing:
+                language === "en" ? "Admin login session is missing. Please login again." : "관리자 로그인 세션이 없습니다. 다시 로그인해 주세요.",
+              adminSessionExpired:
+                language === "en" ? "Admin session expired. Please login again." : "관리자 세션이 만료되었습니다. 다시 로그인해 주세요.",
+              requestFailedWhileSaving: language === "en" ? "Request failed while saving notice." : "공지 저장 요청에 실패했습니다.",
+              requestFailedWhileDeleting: language === "en" ? "Request failed while deleting notice." : "공지 삭제 요청에 실패했습니다.",
+              noticeUpdated: language === "en" ? "Notice updated." : "공지가 수정되었습니다.",
+              noticeCreated: language === "en" ? "Notice created." : "공지가 등록되었습니다.",
+              noticeDeleted: language === "en" ? "Notice deleted." : "공지가 삭제되었습니다.",
+              deleteConfirm: language === "en" ? "Do you want to delete this notice?" : "삭제하시겠습니까?",
+              requestFailedPrefix: language === "en" ? "Request failed" : "요청 실패",
+              deleteFailedPrefix: language === "en" ? "Delete failed" : "삭제 실패",
+              loadingNotices: language === "en" ? "Loading notices..." : "공지를 불러오는 중...",
+              pinned: language === "en" ? "Pinned" : "상단 고정",
+              edit: language === "en" ? "Edit" : "수정",
+              delete: language === "en" ? "Delete" : "삭제",
+              createNotice: language === "en" ? "Create Notice" : "공지 등록",
+              editNotice: language === "en" ? "Edit Notice" : "공지 수정",
+              content: language === "en" ? "Content" : "내용",
+              detail: language === "en" ? "Details" : "상세 내용",
+              options: language === "en" ? "Options" : "옵션",
+              contentRequired: language === "en" ? "Please fill in details." : "상세 내용을 입력해 주세요.",
+              textSize: language === "en" ? "Text size" : "글자 크기",
+              pinToTop: language === "en" ? "Pin to top" : "상단 고정",
+              pinSingleHint: language === "en" ? "Only one pinned notice is allowed." : "고정 공지는 1개만 설정할 수 있습니다.",
+              pinReplaceHint:
+                language === "en"
+                  ? "The existing pinned notice will be automatically unpinned."
+                  : "기존 고정 공지는 자동으로 해제됩니다.",
+              preview: language === "en" ? "Preview" : "미리보기",
+              previewPlaceholder: language === "en" ? "Preview will appear here." : "미리보기가 여기에 표시됩니다.",
+              otherNotices: language === "en" ? "Other notices" : "일반 공지",
+              noOtherNotices: language === "en" ? "There are no regular notices yet." : "일반 공지가 아직 없습니다.",
+              saving: language === "en" ? "Saving..." : "저장 중...",
+              create: language === "en" ? "Create" : "등록",
+              update: language === "en" ? "Update" : "수정",
+              cancel: language === "en" ? "Cancel" : "취소",
+              register: language === "en" ? "Create" : "등록",
+              registerCancel: language === "en" ? "Cancel Create" : "등록 취소",
+              writeAndEdit: language === "en" ? "Write / Edit" : "작성 및 수정",
     }),
     [language],
   );
@@ -425,9 +425,6 @@ export default function NoticePage() {
       <section className="surface-card top-banner" style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 10 }}>
         <span className="badge">Notice</span>
         <h1 className="section-title">Notice</h1>
-        <p className="section-copy">
-          <I18nText ko="사이트 공지와 업데이트 내역을 확인하는 공간입니다." en="This is where site announcements and update notes are posted." />
-        </p>
       </section>
 
       <section style={{ display: "grid", gap: 12, width: "100%" }}>

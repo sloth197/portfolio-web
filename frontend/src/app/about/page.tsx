@@ -95,6 +95,10 @@ const INTEREST_TECHS: InterestTech[] = [
     name: "C++",
     icons: [{ src: "/icons/tech/cplusplus.svg", label: "C++" }],
   },
+  {
+    name: "Flutter",
+    icons: [{ src: "/icons/tech/flutter.svg", label: "Flutter"}],
+  }
 ];
 
 export const metadata: Metadata = {

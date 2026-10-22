@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import remarkBreaks from "remark-breaks";
-import remarkGfm from "remark-gfm";
 import I18nText from "@/components/i18n-text";
-import MarkdownImageWithFallback from "@/components/markdown-image-with-fallback";
 import ProjectAdminActions from "@/components/project-admin-actions";
+import ProjectDescription from "@/components/project-description";
 import { ApiError, PROJECT_REVALIDATE_SECONDS, fetchProjectBySlug, fetchProjectSummaries } from "@/lib/api";
 import { resolvePublicAssetUrl } from "@/lib/asset-url";
 import { getSafeGithubRepositoryUrl } from "@/lib/github-url";
@@ -258,19 +255,7 @@ export default async function ProjectDetailPage({
             <I18nText ko="상세" en="Details" />
           </h2>
           {markdownWithImages ? (
-            <div className="project-markdown">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm, remarkBreaks]}
-                components={{
-                  img: ({ node, ...props }) => {
-                    void node;
-                    return <MarkdownImageWithFallback {...props} projectGithubUrl={safeGithubUrl} />;
-                  },
-                }}
-              >
-                {markdownWithImages}
-              </ReactMarkdown>
-            </div>
+            <ProjectDescription markdown={markdownWithImages} githubUrl={safeGithubUrl} />
           ) : (
             <p className="section-copy" style={{ margin: 0 }}>
               <I18nText ko="아직 상세 내용이 없습니다." en="No detailed notes available yet." />

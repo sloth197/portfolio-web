@@ -68,3 +68,6 @@ uploads/
 .github/java-upgrade/
 
 .vercel
+
+# Local toolchain cache
+.tools/
