@@ -43,7 +43,7 @@ export async function fetchHomeTechNews(limit = 3): Promise<HomeNewsItem[]> {
       const response = await fetch(`${HACKER_NEWS_API}/item/${id}.json`, { next: { revalidate: 900 }, cache: "force-cache" });
       return response.ok ? await response.json() as HackerNewsItem : null;
     }));
-    const news = items.filter((item): item is HackerNewsItem => Boolean(item?.title) && !isDocumentLink(item) && isDevelopmentStory(item)).sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).map((item) => ({
+    const news = items.filter((item): item is HackerNewsItem => item !== null && Boolean(item.title) && !isDocumentLink(item) && isDevelopmentStory(item)).sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).map((item) => ({
       id: String(item.id), title: item.title!, url: item.url ?? `${HACKER_NEWS_HOME}item?id=${item.id}`,
       publishedAt: item.time ? new Date(item.time * 1000).toISOString() : "",
       summary: item.text ? stripHtml(item.text) : "Developer news and technical discussion from Hacker News.",
