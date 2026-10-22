@@ -66,8 +66,12 @@ export default function HeaderAuthButton() {
 
   if (!hydrated || !adminLoggedIn) {
     return (
-      <Link className="btn-ghost header-login-link" href="/admin/login">
-        Login
+      <Link className="header-login-link" href="/admin/login">
+        <svg className="header-login-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="8" r="3.5" />
+          <path d="M4.5 20c.8-3.3 3.2-5 7.5-5s6.7 1.7 7.5 5" />
+        </svg>
+        <span>Login</span>
       </Link>
     );
   }
@@ -81,7 +85,7 @@ export default function HeaderAuthButton() {
       </span>
       <button
         type="button"
-        className="btn-ghost header-login-link"
+        className="header-login-link"
         onClick={async () => {
           const confirmed = window.confirm(language === "en" ? "Do you want to log out?" : "\uB85C\uADF8\uC544\uC6C3 \uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?");
           if (confirmed) {

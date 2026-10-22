@@ -1,20 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { IBM_Plex_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import HardReloadTracker from "@/components/hard-reload-tracker";
+import HeaderAuthButton from "@/components/header-auth-button";
 import SiteNoticePopups from "@/components/site-notice-popups";
 import "./globals.css";
 
-const jakarta = Plus_Jakarta_Sans({
+const geist = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
 });
 
-const plexMono = IBM_Plex_Mono({
+const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-  weight: ["500", "600"],
 });
 
 const DEFAULT_SITE_URL = "https://www.xhbt.dev";
@@ -95,7 +94,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
-      <body className={`${jakarta.variable} ${plexMono.variable}`}>
+      <body className={`${geist.variable} ${geistMono.variable}`}>
         <HardReloadTracker />
         <SiteNoticePopups />
         <div className="site-shell">
@@ -105,11 +104,13 @@ export default function RootLayout({
                 xhbt<span className="editorial-brand-dot" aria-hidden="true">.</span>dev
               </Link>
               <nav className="editorial-nav" aria-label="Primary navigation">
-                <Link href="/#home">Home</Link>
-                <Link href="/projects">Projects</Link>
                 <Link href="/#about">About</Link>
-                <Link href="/contact" className="editorial-contact-link">Let&apos;s Talk <span aria-hidden="true">→</span></Link>
+                <Link href="/projects">Projects</Link>
               </nav>
+              <div className="site-header-actions">
+                <Link href="/contact" className="editorial-contact-link">Contact <span aria-hidden="true">→</span></Link>
+                <HeaderAuthButton />
+              </div>
             </div>
           </header>
 
