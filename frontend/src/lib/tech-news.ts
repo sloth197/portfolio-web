@@ -6,82 +6,35 @@ export type HomeNewsItem = {
   summary: string;
 };
 
-const YOZM_FEED_URL = "https://yozm.wishket.com/magazine/feed/";
-const ITEM_REGEX = /<item>([\s\S]*?)<\/item>/g;
+const HACKER_NEWS_API = "https://hacker-news.firebaseio.com/v0";
+const HACKER_NEWS_HOME = "https://news.ycombinator.com/";
 const FALLBACK_NEWS: HomeNewsItem[] = [
-  {
-    id: "yozm-latest",
-    title: "Read the latest stories on 요즘IT",
-    url: "https://yozm.wishket.com/magazine/list/new/",
-    publishedAt: "",
-    summary: "The latest technology articles are available on 요즘IT.",
-  },
+  { id: "hn-1", title: "Explore developer news on Hacker News", url: HACKER_NEWS_HOME, publishedAt: "", summary: "Developer news, tools, and technical discussions from the community." },
+  { id: "hn-2", title: "Discover new developer tools", url: HACKER_NEWS_HOME, publishedAt: "", summary: "Find interesting projects, libraries, and engineering ideas." },
+  { id: "hn-3", title: "Read the latest engineering stories", url: HACKER_NEWS_HOME, publishedAt: "", summary: "A broad selection of current technology and software topics." },
 ];
 
-function decodeXml(value: string): string {
-  return value
-    .replaceAll("&lt;", "<")
-    .replaceAll("&gt;", ">")
-    .replaceAll("&quot;", '"')
-    .replaceAll("&#39;", "'")
-    .replaceAll("&amp;", "&");
-}
+type HackerNewsItem = { id: number; title?: string; url?: string; text?: string; time?: number };
 
 function stripHtml(value: string): string {
-  return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  return value.replace(/<[^>]*>/g, " ").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/\s+/g, " ").trim();
 }
 
-function readTag(xml: string, tag: string): string | null {
-  const pattern = new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`, "i");
-  const matched = xml.match(pattern);
-  if (!matched?.[1]) {
-    return null;
-  }
-
-  const raw = matched[1].trim();
-  const withoutCdata = raw.startsWith("<![CDATA[") && raw.endsWith("]]>") ? raw.slice(9, -3) : raw;
-  return decodeXml(withoutCdata.trim());
-}
-
-export async function fetchHomeTechNews(limit = 10): Promise<HomeNewsItem[]> {
+export async function fetchHomeTechNews(limit = 3): Promise<HomeNewsItem[]> {
   try {
-    const response = await fetch(YOZM_FEED_URL, {
-      next: { revalidate: 900 },
-      cache: "force-cache",
-    });
-    if (!response.ok) {
-      return FALLBACK_NEWS;
-    }
-
-    const xml = await response.text();
-    const items: HomeNewsItem[] = [];
-
-    for (const matched of xml.matchAll(ITEM_REGEX)) {
-      const block = matched[1];
-      const title = readTag(block, "title");
-      const url = readTag(block, "link");
-      const guid = readTag(block, "guid");
-      const pubDate = readTag(block, "pubDate");
-      const description = readTag(block, "description");
-
-      if (!title || !url) {
-        continue;
-      }
-
-      items.push({
-        id: guid ?? url,
-        title,
-        url,
-        publishedAt: pubDate ?? "",
-        summary: description ? stripHtml(description) : "",
-      });
-
-      if (items.length >= limit) {
-        break;
-      }
-    }
-
-    return items.length > 0 ? items : FALLBACK_NEWS;
+    const idsResponse = await fetch(`${HACKER_NEWS_API}/topstories.json`, { next: { revalidate: 900 }, cache: "force-cache" });
+    if (!idsResponse.ok) return FALLBACK_NEWS;
+    const ids = (await idsResponse.json() as number[]).slice(0, limit);
+    const items = await Promise.all(ids.map(async (id) => {
+      const response = await fetch(`${HACKER_NEWS_API}/item/${id}.json`, { next: { revalidate: 900 }, cache: "force-cache" });
+      return response.ok ? await response.json() as HackerNewsItem : null;
+    }));
+    const news = items.filter((item): item is HackerNewsItem => Boolean(item?.title)).map((item) => ({
+      id: String(item.id), title: item.title!, url: item.url ?? `${HACKER_NEWS_HOME}item?id=${item.id}`,
+      publishedAt: item.time ? new Date(item.time * 1000).toISOString() : "",
+      summary: item.text ? stripHtml(item.text) : "Developer news and technical discussion from Hacker News.",
+    }));
+    return news.length > 0 ? news : FALLBACK_NEWS;
   } catch {
     return FALLBACK_NEWS;
   }
