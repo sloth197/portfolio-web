@@ -24,17 +24,17 @@ export async function fetchHomeTechNews(limit = 3): Promise<HomeNewsItem[]> {
   try {
     const idsResponse = await fetch(`${HACKER_NEWS_API}/topstories.json`, { next: { revalidate: 900 }, cache: "force-cache" });
     if (!idsResponse.ok) return FALLBACK_NEWS;
-    const ids = (await idsResponse.json() as number[]).slice(0, limit);
+    const ids = (await idsResponse.json() as number[]).slice(0, 20);
     const items = await Promise.all(ids.map(async (id) => {
       const response = await fetch(`${HACKER_NEWS_API}/item/${id}.json`, { next: { revalidate: 900 }, cache: "force-cache" });
       return response.ok ? await response.json() as HackerNewsItem : null;
     }));
-    const news = items.filter((item): item is HackerNewsItem => Boolean(item?.title)).map((item) => ({
+    const news = items.filter((item): item is HackerNewsItem => Boolean(item?.title) && !/\.pdf(?:$|[?#])/i.test(item.url ?? "") && !/\bpdf\b/i.test(item.title ?? "")).map((item) => ({
       id: String(item.id), title: item.title!, url: item.url ?? `${HACKER_NEWS_HOME}item?id=${item.id}`,
       publishedAt: item.time ? new Date(item.time * 1000).toISOString() : "",
       summary: item.text ? stripHtml(item.text) : "Developer news and technical discussion from Hacker News.",
     }));
-    return news.length > 0 ? news : FALLBACK_NEWS;
+    return news.length > 0 ? news.slice(0, limit) : FALLBACK_NEWS;
   } catch {
     return FALLBACK_NEWS;
   }
