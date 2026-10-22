@@ -2831,6 +2831,7 @@ LIGHT_THEME_DISABLED_END */
 }
 
 .project-detail-media-stage {
+  position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
@@ -3708,24 +3709,6 @@ LIGHT_THEME_DISABLED_END */
 LIGHT_THEME_DISABLED_END */
 
 
-
-.project-detail-layout .project-detail-head,
-.project-detail-layout .project-detail-content,
-.project-detail-layout .project-detail-sidebar,
-.project-detail-layout .project-detail-related-item,
-.project-detail-layout .project-detail-related-item.is-current,
-.project-detail-layout .project-asset-card,
-.project-detail-layout .project-asset-thumb,
-.project-detail-layout .project-markdown,
-.project-detail-layout .project-markdown pre,
-.project-detail-layout .project-markdown img {
-  border-color: #5a34be;
-}
-
-.project-detail-layout .project-detail-related-item:hover {
-  border: 0;
-  border-color: transparent;
-}
 
 .project-detail-layout .project-detail-related-item,
 .project-detail-layout .project-detail-related-item.is-current {

@@ -12,9 +12,17 @@ export default function RelatedProjectsCarousel({ projects, currentSlug }: Props
   const visible = projects.slice(offset, offset + 4);
 
   return (
-    <div className="related-projects-carousel">
+    <div
+      className="related-projects-carousel"
+      onKeyDown={(event) => {
+        if (event.key === "ArrowLeft") setOffset((value) => Math.max(0, value - 1));
+        if (event.key === "ArrowRight") setOffset((value) => Math.min(maxOffset, value + 1));
+      }}
+      tabIndex={0}
+      aria-label={`Other projects, showing ${offset + 1} to ${Math.min(offset + 4, projects.length)} of ${projects.length}`}
+    >
       <button type="button" className="related-projects-arrow" onClick={() => setOffset(Math.max(0, offset - 1))} disabled={offset === 0} aria-label="Previous projects">←</button>
-      <div className="project-detail-related-list">
+      <div className="project-detail-related-list" aria-live="polite">
         {visible.map((item) => (
           <Link key={item.id} href={`/projects/${item.slug}`} className={`project-detail-related-item ${item.slug === currentSlug ? "is-current" : ""}`}>
             <span className="badge">{item.category === "SOFTWARE" ? "C#" : "Java"}</span>

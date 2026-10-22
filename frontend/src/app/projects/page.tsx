@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ProjectsPage() {
   let allProjects: Awaited<ReturnType<typeof fetchProjectSummaries>> = [];
   let loadWarning: string | null = null;

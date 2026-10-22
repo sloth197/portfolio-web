@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import I18nText from "@/components/i18n-text";
@@ -12,6 +13,7 @@ import { PREVIEW_PROJECTS } from "@/lib/project-preview";
 import type { ProjectCategory, ProjectDto, ProjectSummaryDto } from "@/lib/types";
 
 export const revalidate = 600;
+export const dynamic = "force-dynamic";
 
 function buildProjectsPath(): string {
   return "/projects";
@@ -215,7 +217,13 @@ export default async function ProjectDetailPage({
 
       {primaryImage ? (
         <div className="project-detail-media-stage">
-          <img src={primaryImage.assetUrl} alt={`${project.title} preview`} />
+          <Image
+            src={primaryImage.assetUrl}
+            alt={`${project.title} preview`}
+            fill
+            sizes="(max-width: 900px) 100vw, 1296px"
+            priority
+          />
         </div>
       ) : null}
 
