@@ -2,7 +2,6 @@
 
 import { FormEvent, useState } from "react";
 import { setAdminAuthSession, type AdminRole } from "@/lib/admin-auth";
-import { HARD_RELOAD_SESSION_KEY } from "@/lib/hard-reload";
 
 export default function AdminLoginPage() {
   const [username, setUsername] = useState("");
@@ -16,11 +15,6 @@ export default function AdminLoginPage() {
   }
 
   function redirectHomeWithEntryTransition(): void {
-    try {
-      window.sessionStorage.setItem(HARD_RELOAD_SESSION_KEY, "1");
-    } catch {
-      // no-op
-    }
     window.location.assign("/");
   }
 

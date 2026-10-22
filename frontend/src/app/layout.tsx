@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IBM_Plex_Mono, Plus_Jakarta_Sans } from "next/font/google";
-import EntryTransition from "@/components/entry-transition";
 import HardReloadTracker from "@/components/hard-reload-tracker";
 import SiteNoticePopups from "@/components/site-notice-popups";
 import "./globals.css";
@@ -98,12 +97,13 @@ export default function RootLayout({
       </head>
       <body className={`${jakarta.variable} ${plexMono.variable}`}>
         <HardReloadTracker />
-        <EntryTransition />
         <SiteNoticePopups />
         <div className="site-shell">
           <header className="site-header editorial-header">
             <div className="site-header-inner editorial-header-inner">
-              <Link className="editorial-brand" href="/#home">xhbt.dev</Link>
+              <Link className="editorial-brand" href="/#home" aria-label="xhbt.dev">
+                xhbt<span className="editorial-brand-dot" aria-hidden="true">.</span>dev
+              </Link>
               <nav className="editorial-nav" aria-label="Primary navigation">
                 <Link href="/#home">Home</Link>
                 <Link href="/projects">Projects</Link>
