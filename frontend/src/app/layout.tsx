@@ -108,7 +108,7 @@ export default function RootLayout({
                 <Link href="/projects">Projects</Link>
               </nav>
               <div className="site-header-actions">
-                <Link href="/contact" className="editorial-contact-link">Contact <span aria-hidden="true">→</span></Link>
+                <Link href="/#contact" className="editorial-contact-link">Contact <span aria-hidden="true">→</span></Link>
                 <HeaderAuthButton />
               </div>
             </div>
