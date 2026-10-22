@@ -61,7 +61,7 @@ export default function ProjectShowcaseCard({
         ) : null}
 
         <Link href={href} className="btn project-showcase-link">
-          view
+          View project <span aria-hidden="true">→</span>
         </Link>
       </div>
     </article>

@@ -36,7 +36,7 @@ export default function ProjectsListPanel({ projects }: Props) {
   const canManageProjects = useSyncExternalStore(subscribeAdminAuth, canAdminManageProjects, getServerSnapshot);
 
   return (
-    <section className="projects-gallery">
+    <section className="projects-gallery projects-list-redesign">
       <div className="projects-gallery-head">
         <div style={{ display: "grid", gap: 6 }}>
           <h2 className="projects-gallery-title">All projects</h2>

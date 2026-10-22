@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import I18nText from "@/components/i18n-text";
 import ProjectAdminActions from "@/components/project-admin-actions";
 import ProjectDescription from "@/components/project-description";
+import RelatedProjectsCarousel from "@/components/related-projects-carousel";
 import { ApiError, PROJECT_REVALIDATE_SECONDS, fetchProjectBySlug, fetchProjectSummaries } from "@/lib/api";
 import { resolvePublicAssetUrl } from "@/lib/asset-url";
 import { getSafeGithubRepositoryUrl } from "@/lib/github-url";
@@ -14,10 +15,6 @@ export const revalidate = 600;
 
 function buildProjectsPath(): string {
   return "/projects";
-}
-
-function buildProjectDetailPath(slug: string): string {
-  return `/projects/${slug}`;
 }
 
 function sortProjectsForSidebar(items: ProjectSummaryDto[]): ProjectSummaryDto[] {
@@ -46,10 +43,6 @@ function isImageAsset(contentType: string | null, url: string): boolean {
     || lowered.endsWith(".gif")
     || lowered.endsWith(".webp")
     || lowered.endsWith(".svg");
-}
-
-function escapeMarkdownAltText(value: string): string {
-  return value.replace(/]/g, "\\]");
 }
 
 function trimSeoDescription(value: string, maxLength = 160): string {
@@ -119,22 +112,6 @@ export async function generateMetadata({
   }
 }
 
-function buildMarkdownWithImageAssets(
-  contentMarkdown: string,
-  imageAssets: Array<{ originalName: string; url: string }>,
-): string {
-  const baseMarkdown = contentMarkdown.trim();
-  if (imageAssets.length === 0) {
-    return baseMarkdown;
-  }
-
-  const imageMarkdown = imageAssets
-    .map((asset) => `![${escapeMarkdownAltText(asset.originalName)}](${asset.url})`)
-    .join("\n\n");
-
-  return [baseMarkdown, imageMarkdown].filter((value) => value.length > 0).join("\n\n");
-}
-
 export default async function ProjectDetailPage({
   params,
 }: {
@@ -188,35 +165,22 @@ export default async function ProjectDetailPage({
       imageAsset: asset.assetType === "IMAGE" || isImageAsset(asset.contentType, assetUrl),
     };
   });
-  const markdownWithImages = buildMarkdownWithImageAssets(
-    project.contentMarkdown,
-    resolvedAssets.filter((asset) => asset.imageAsset).map((asset) => ({
-      originalName: asset.originalName,
-      url: asset.assetUrl,
-    })),
-  );
   const fileAssets = resolvedAssets.filter((asset) => !asset.imageAsset);
+  const imageAssets = resolvedAssets.filter((asset) => asset.imageAsset);
+  const primaryImage = imageAssets[0] ?? null;
   const safeGithubUrl = getSafeGithubRepositoryUrl(project.githubUrl);
 
   return (
     <div id="project-detail-layout" className="project-detail-layout">
-      <section className="surface-card project-detail-head top-banner top-banner-project-detail">
+      <section className="project-detail-hero">
         <div className="project-detail-top-row">
-          <Link className="btn-ghost" href={buildProjectsPath()} style={{ width: "fit-content" }}>
-            Back to projects
+          <Link className="project-detail-back-link" href={buildProjectsPath()}>
+            <span aria-hidden="true">←</span> Back to projects
           </Link>
-          {usesPreviewData ? (
-            <span className="badge">
-              <I18nText ko="미리보기 데이터" en="Preview Data" />
-            </span>
-          ) : null}
-        </div>
-
-        <div className="project-badge-row">
-          <span className="badge">
-            {getLanguageLabelByCategory(project.category)}
-          </span>
-          {project.projectPeriod ? <span className="project-period-badge">{project.projectPeriod}</span> : null}
+          <div className="project-badge-row">
+            <span className="badge">{getLanguageLabelByCategory(project.category)}</span>
+            {project.projectPeriod ? <span className="project-period-badge">{project.projectPeriod}</span> : null}
+          </div>
         </div>
         <h1 className="project-detail-title">{project.title}</h1>
         <p className="section-copy" style={{ margin: 0 }}>{project.summary}</p>
@@ -249,13 +213,19 @@ export default async function ProjectDetailPage({
         disabled={usesPreviewData}
       />
 
+      {primaryImage ? (
+        <div className="project-detail-media-stage">
+          <img src={primaryImage.assetUrl} alt={`${project.title} preview`} />
+        </div>
+      ) : null}
+
       <section className="project-detail-main">
-        <article className="panel project-detail-content">
+        <article className="project-detail-content">
           <h2 className="project-detail-subtitle">
-            <I18nText ko="상세" en="Details" />
+            <I18nText ko="설명" en="Description" />
           </h2>
-          {markdownWithImages ? (
-            <ProjectDescription markdown={markdownWithImages} githubUrl={safeGithubUrl} />
+          {project.contentMarkdown ? (
+            <ProjectDescription markdown={project.contentMarkdown} githubUrl={safeGithubUrl} />
           ) : (
             <p className="section-copy" style={{ margin: 0 }}>
               <I18nText ko="아직 상세 내용이 없습니다." en="No detailed notes available yet." />
@@ -285,35 +255,13 @@ export default async function ProjectDetailPage({
           ) : null}
         </article>
 
-        <aside className="panel project-detail-sidebar">
+        <section className="project-detail-related-section">
           <h2 className="project-detail-subtitle">
             <I18nText ko="다른 프로젝트" en="Other Projects" />
           </h2>
 
-          <div className="project-detail-related-list">
-            {sortedProjects.map((item) => {
-              const isCurrent = item.slug === project.slug;
-              return (
-                <Link
-                  key={item.id}
-                  href={buildProjectDetailPath(item.slug)}
-                  className={`project-detail-related-item ${isCurrent ? "is-current" : ""}`}
-                >
-                  <span className="badge">
-                    {getLanguageLabelByCategory(item.category)}
-                  </span>
-                  <div className="project-detail-related-title">{item.title}</div>
-                  {item.projectPeriod ? (
-                    <span className="project-tag-pill" style={{ width: "fit-content" }}>{item.projectPeriod}</span>
-                  ) : null}
-                  <p className="section-copy" style={{ margin: 0, fontSize: 13 }}>
-                    {item.summary}
-                  </p>
-                </Link>
-              );
-            })}
-          </div>
-        </aside>
+          <RelatedProjectsCarousel projects={sortedProjects} currentSlug={project.slug} />
+        </section>
       </section>
     </div>
   );
