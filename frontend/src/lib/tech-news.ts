@@ -20,6 +20,12 @@ function stripHtml(value: string): string {
   return value.replace(/<[^>]*>/g, " ").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/\s+/g, " ").trim();
 }
 
+function isDocumentLink(item: HackerNewsItem): boolean {
+  const title = item.title ?? "";
+  const url = item.url ?? "";
+  return /(?:\.pdf(?:$|[?#])|\[\s*pdf\s*\]|\bpdf\b)/i.test(`${title} ${url}`);
+}
+
 export async function fetchHomeTechNews(limit = 3): Promise<HomeNewsItem[]> {
   try {
     const idsResponse = await fetch(`${HACKER_NEWS_API}/topstories.json`, { next: { revalidate: 900 }, cache: "force-cache" });
@@ -29,7 +35,7 @@ export async function fetchHomeTechNews(limit = 3): Promise<HomeNewsItem[]> {
       const response = await fetch(`${HACKER_NEWS_API}/item/${id}.json`, { next: { revalidate: 900 }, cache: "force-cache" });
       return response.ok ? await response.json() as HackerNewsItem : null;
     }));
-    const news = items.filter((item): item is HackerNewsItem => Boolean(item?.title) && !/\.pdf(?:$|[?#])/i.test(item.url ?? "") && !/\bpdf\b/i.test(item.title ?? "")).map((item) => ({
+    const news = items.filter((item): item is HackerNewsItem => Boolean(item?.title) && !isDocumentLink(item)).map((item) => ({
       id: String(item.id), title: item.title!, url: item.url ?? `${HACKER_NEWS_HOME}item?id=${item.id}`,
       publishedAt: item.time ? new Date(item.time * 1000).toISOString() : "",
       summary: item.text ? stripHtml(item.text) : "Developer news and technical discussion from Hacker News.",
