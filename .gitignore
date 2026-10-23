@@ -56,6 +56,8 @@ auth-cookies.txt
 # Frontend build/runtime
 frontend/.next/
 frontend/node_modules/
+frontend/node_modules.broken/
+render.dump
 
 # Backend build/runtime
 target/

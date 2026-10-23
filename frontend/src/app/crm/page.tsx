@@ -400,7 +400,11 @@ export default function CrmPage() {
 
     syncLocalDashboardData();
 
-    const timerId = window.setInterval(syncLocalDashboardData, CRM_LOCAL_DASHBOARD_REFRESH_MS);
+    const timerId = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        syncLocalDashboardData();
+      }
+    }, CRM_LOCAL_DASHBOARD_REFRESH_MS);
     const onStorage = (event: StorageEvent) => {
       if (!event.key) {
         syncLocalDashboardData();
@@ -429,7 +433,9 @@ export default function CrmPage() {
     };
     const timeoutId = window.setTimeout(updateNowMs, 0);
     const timerId = window.setInterval(() => {
-      updateNowMs();
+      if (document.visibilityState === "visible") {
+        updateNowMs();
+      }
     }, 60_000);
 
     return () => {

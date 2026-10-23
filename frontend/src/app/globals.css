@@ -4289,6 +4289,24 @@ body { background: #0b0f17 !important; }
   filter: drop-shadow(0 0 3px rgb(139 92 246 / .7)) drop-shadow(0 0 9px rgb(139 92 246 / .35));
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+html[data-document-hidden] *,
+html[data-document-hidden] *::before,
+html[data-document-hidden] *::after {
+  animation-play-state: paused !important;
+  transition: none !important;
+}
+
 .login-page-form-panel > form {
   position: relative;
   z-index: 1;

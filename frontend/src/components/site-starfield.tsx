@@ -357,6 +357,20 @@ export default function SiteStarfield() {
     };
   }, [rebuild]);
 
+  useEffect(() => {
+    const updateVisibility = () => {
+      document.documentElement.toggleAttribute("data-document-hidden", document.hidden);
+    };
+
+    updateVisibility();
+    document.addEventListener("visibilitychange", updateVisibility);
+
+    return () => {
+      document.removeEventListener("visibilitychange", updateVisibility);
+      document.documentElement.removeAttribute("data-document-hidden");
+    };
+  }, []);
+
   return (
     <div className="site-starfield" aria-hidden="true" style={styles ? { height: `${styles.height}px` } : undefined}>
       <span className="site-starfield-layer site-starfield-layer--small-a site-starfield-layer--desktop" style={styles?.desktopSmallA} />
