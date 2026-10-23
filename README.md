@@ -1,30 +1,58 @@
-# Portfolio Web (SpringBoot + Next.js)
+# xhbt.dev
 
-개인 프로젝트를 소개하고, 관리자 기능으로 프로젝트, 공지, 인증 기능을 관리할 수 있는 개인 포트폴리오 웹 서비스입니다.
+### Developer Portfolio · Full-stack Web Experience
 
-## Live
-- Web: https://xhbt.dev
-- API Health: https://portfolio-api-y5yr.onrender.com/api/public/health
+A dark neon portfolio experience for showcasing projects, ideas, and the process behind building them.
 
-## 주요 기능
-- 프로젝트 목록/카테고리 필터/상세 페이지 조회
-- 관리자 로그인 (Admin, ReadOnly 계정 분리)
-- 관리자 로그인 후 프로젝트 등록 및 관리
-  - 프로젝트 CRUD, 첨부파일 업로드
-- 한/영 전환 토글 버튼
-- 홈 IT 뉴스 스트립
-- 공지 등록, 수정, 삭제 기능 및 고정시 팝업 기능
-  - 관리자(Admin, readOnly) 로그인 후 공지 메뉴 탭 활성화
+[Visit Website](https://xhbt.dev)
+
+![xhbt.dev login design](./docs/login-design-preview.png)
+
+## About
+
+xhbt.dev는 개발 프로젝트와 작업물을 소개하기 위한 개인 개발자 포트폴리오입니다.
+
+어두운 네이비 배경에 보라색과 시안색 네온 포인트를 사용해 차분하면서도 기술적인 분위기를 표현했습니다.
+
+## Design Direction
+
+- Dark navy visual system
+- Violet and cyan neon accents
+- Editorial typography
+- Spacious two-column layouts
+- Minimal cards with soft glow
+- Responsive desktop and mobile experience
+
+## Highlights
+
+### Home
+
+개발자 소개, 기술 스택, 프로젝트, Contact 영역을 하나의 흐름으로 연결했습니다.
+
+### Projects
+
+프로젝트별 대표 이미지와 설명을 카드 형태로 보여주며, 각 프로젝트의 상세 페이지로 이동할 수 있습니다.
+
+### Notice
+
+중요한 공지사항을 고정하고 필요한 경우 팝업으로 안내할 수 있습니다.
+
+### Login
+
+포트폴리오의 다크 네온 분위기를 유지한 별도의 로그인 화면을 구성했습니다.
+
+![Login page design](./docs/login-design-preview.png)
 
 ## Tech Stack
-- Frontend: Next.js, React, TypeScript, CSS
-- Backend: Spring Boot (Java)
-- Database: PostgreSQL
-- Deploy/Infra: Vercel (Frontend), Render (Backend), Supabase (DB), Namecheap (DNS)
 
-## * READ ONLY 계정 *
-* ReadOnly 계정은 수정 및 삭제가 불가능 합니다.
-* 로그인 시 Notice, CRM 메뉴 탭이 활성화 됩니다
-- ID: readadmin
-- PW: readadmin
+`Next.js` `React` `TypeScript` `Spring Boot`  
+`Java` `PostgreSQL` `Supabase` `Vercel` `Render`
+
+## Live
+
+[https://xhbt.dev](https://xhbt.dev)
+
+---
+
+Built with curiosity, code, and continuous improvement.
 
