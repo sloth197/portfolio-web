@@ -40,11 +40,11 @@ export default function AdminLoginPage() {
         if (response.status === 401 || response.status === 403) {
           const nextAttempts = failedAttempts + 1;
           setFailedAttempts(nextAttempts);
-          setError(nextAttempts >= 3 ? "당신은 관리자가 아닙니다." : (payload?.message ?? "아이디 또는 비밀번호가 틀렸습니다"));
+          setError(nextAttempts >= 3 ? "You are not authorized to access this area." : (payload?.message ?? "Invalid ID or password."));
           return;
         }
         if (response.status === 429) {
-          setError(payload?.message ?? "로그인 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.");
+          setError(payload?.message ?? "Too many login attempts. Please try again later.");
           return;
         }
         setError("Login failed.");
@@ -72,16 +72,20 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div style={{ display: "grid", gap: 16 }}>
-      <section className="surface-card top-banner top-banner-login" style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 8 }}>
-        <span className="badge">Login</span>
-        <h1 className="section-title">Login </h1>
-        <p className="section-copy" style={{ fontSize: 14 }}>
-          관리자 계정으로 로그인할 수 있습니다.
-        </p>
+    <div className="login-page-editorial">
+      <section className="login-page-intro">
+        <div className="login-page-accent" aria-hidden="true" />
+        <div>
+          <h1><span className="login-title-initial">L</span>ogin</h1>
+          <p>Sign in to continue building.</p>
+          <span className="login-page-kicker">XHBT.DEV / ADMIN PORTAL</span>
+        </div>
       </section>
 
-      <section className="panel" style={{ padding: 16, width: "min(560px, 100%)", margin: "0 auto" }}>
+      <section className="panel login-page-form-panel">
+        <svg className="login-border-dot" viewBox="0 0 100 100" aria-hidden="true" preserveAspectRatio="none">
+          <rect x="0.5" y="0.5" width="99" height="99" rx="7.5" pathLength="400" />
+        </svg>
         <form onSubmit={onSubmit} style={{ display: "grid", gap: 10 }}>
           <label className="field-label" htmlFor="admin-username">
             ID
@@ -106,8 +110,8 @@ export default function AdminLoginPage() {
             required
           />
 
-          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-            <button className="btn" type="submit" disabled={submitting}>
+          <div className="login-page-submit-row">
+            <button className="btn login-page-submit" type="submit" disabled={submitting}>
               {submitting ? "Checking..." : "Login"}
             </button>
             {error ? <span className="error-text">{error}</span> : null}

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import HardReloadTracker from "@/components/hard-reload-tracker";
 import HeaderAuthButton from "@/components/header-auth-button";
+import SiteNavLinks from "@/components/site-nav-links";
 import SiteNoticePopups from "@/components/site-notice-popups";
 import "./globals.css";
 
@@ -104,11 +105,9 @@ export default function RootLayout({
                 xhbt<span className="editorial-brand-dot" aria-hidden="true">.</span>dev
               </Link>
               <nav className="editorial-nav" aria-label="Primary navigation">
-                <Link href="/#about">About</Link>
-                <Link href="/projects">Projects</Link>
+                <SiteNavLinks />
               </nav>
               <div className="site-header-actions">
-                <Link href="/#contact" className="editorial-contact-link">Contact <span aria-hidden="true">→</span></Link>
                 <HeaderAuthButton />
               </div>
             </div>

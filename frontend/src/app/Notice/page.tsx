@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { FormEvent, type CSSProperties, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import I18nText, { useSiteLanguage } from "@/components/i18n-text";
 import {
@@ -385,25 +385,24 @@ export default function NoticePage() {
     return (
       <article
         key={item.id}
-        className="panel notice-panel"
-        style={{ padding: compact ? 12 : 16, display: "grid", gap: compact ? 6 : 8 }}
+        className={`panel notice-panel${compact ? " notice-panel-compact" : ""}`}
       >
-        <time style={{ fontSize: 12, fontWeight: 700, opacity: 0.78 }} dateTime={item.createdAt}>
+        <time className="notice-panel-date" dateTime={item.createdAt}>
           {formatDate(item.createdAt, language)}
         </time>
-        {item.pinned ? <span className="badge">{t.pinned}</span> : null}
+        {item.pinned ? <span className="notice-pin-badge">{t.pinned}</span> : null}
         <p
-          className="section-copy"
-          style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: `${normalizeNoticeFontSize(item.fontSize)}px` }}
+          className="notice-panel-content"
+          style={{ fontSize: `${normalizeNoticeFontSize(item.fontSize)}px` }}
         >
           {item.content}
         </p>
         {canManageNotices ? (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button className="btn-ghost" type="button" onClick={() => startEdit(item)}>
+          <div className="notice-panel-actions">
+            <button className="btn-ghost notice-action-edit" type="button" onClick={() => startEdit(item)}>
               {t.edit}
             </button>
-            <button className="btn-ghost" type="button" onClick={() => void onDelete(item.id)}>
+            <button className="btn-ghost notice-action-delete" type="button" onClick={() => void onDelete(item.id)}>
               {t.delete}
             </button>
           </div>
@@ -421,33 +420,34 @@ export default function NoticePage() {
   }
 
   return (
-    <div style={{ display: "grid", gap: 16 }}>
-      <section className="surface-card top-banner" style={{ padding: "22px clamp(18px, 4vw, 30px)", display: "grid", gap: 10 }}>
-        <span className="badge">Notice</span>
-        <h1 className="section-title">Notice</h1>
-      </section>
+    <div className="notice-page">
+      <header className="notice-page-heading">
+        <div className="notice-page-heading-accent" aria-hidden="true" />
+        <div>
+          <h1>Notice</h1>
+          <p>Updates, announcements, and more.</p>
+        </div>
+        {!loading && !listError && canManageNotices && !showForm ? (
+          <button
+            className="notice-create-heading-button"
+            type="button"
+            onClick={() => {
+              resetForm();
+              setFormError(null);
+              setFormNotice(null);
+              setShowForm(true);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          >
+            <span aria-hidden="true">+</span>
+            Create
+          </button>
+        ) : null}
+      </header>
 
-      <section style={{ display: "grid", gap: 12, width: "100%" }}>
-        {!loading && !listError && notices.length > 0 && canManageNotices ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <button
-              className="btn"
-              type="button"
-              onClick={() => {
-                if (showForm) {
-                  resetForm();
-                  setShowForm(false);
-                  return;
-                }
-                resetForm();
-                setFormError(null);
-                setFormNotice(null);
-                setShowForm(true);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-            >
-              {showForm ? t.registerCancel : t.register}
-            </button>
+      <section className="notice-page-content">
+        {formNotice || formError ? (
+          <div className="notice-page-feedback">
             {formNotice ? <span className="success-text">{formNotice}</span> : null}
             {formError ? <span className="error-text">{formError}</span> : null}
           </div>
@@ -480,17 +480,19 @@ export default function NoticePage() {
         ) : null}
         {!loading && !listError && !showForm ? (
           pinnedNotice ? (
-            <div style={{ display: "grid", gap: 18 }}>
-              <div>{renderNoticeCard(pinnedNotice)}</div>
-              <div style={{ display: "grid", gap: 10 }}>
-                <p className="helper-text" style={{ margin: 0, fontWeight: 700 }}>
+            <div className="notice-layout-split notice-page-list-layout">
+              <div className="notice-featured-column">{renderNoticeCard(pinnedNotice)}</div>
+              <div className="notice-page-other-column">
+                <p className="notice-page-subheading">
                   {t.otherNotices}
                 </p>
-                {otherNotices.length > 0 ? otherNotices.map((item) => renderNoticeCard(item)) : (
+                <div className="notice-page-other-list">
+                  {otherNotices.length > 0 ? otherNotices.map((item) => renderNoticeCard(item)) : (
                   <p className="helper-text" style={{ margin: 0 }}>
                     {t.noOtherNotices}
                   </p>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           ) : (
@@ -541,13 +543,17 @@ export default function NoticePage() {
                 <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                   <input
                     id="notice-font-size"
+                    className="notice-font-size-range"
                     type="range"
                     min={MIN_NOTICE_FONT_SIZE}
                     max={MAX_NOTICE_FONT_SIZE}
-                    step={1}
+                    step={0.1}
                     value={fontSize}
-                    onChange={(event) => setFontSize(normalizeNoticeFontSize(Number(event.target.value)))}
-                    style={{ width: "min(340px, 100%)" }}
+                    onChange={(event) => setFontSize(Number(event.target.value))}
+                    style={{
+                      width: "min(340px, 100%)",
+                      "--range-progress": `${((fontSize - MIN_NOTICE_FONT_SIZE) / (MAX_NOTICE_FONT_SIZE - MIN_NOTICE_FONT_SIZE)) * 100}%`,
+                    } as CSSProperties}
                   />
                   <input
                     type="number"
@@ -564,10 +570,10 @@ export default function NoticePage() {
                   </span>
                 </div>
 
-                <label className="field-label" htmlFor="notice-preview">
+                <label className="field-label notice-editor-inline-preview-label" htmlFor="notice-preview">
                   {t.preview}
                 </label>
-                <div id="notice-preview" className="notice-editor-preview-box">
+                <div id="notice-preview" className="notice-editor-preview-box notice-editor-inline-preview">
                   <p
                     className="field-input"
                     style={{
@@ -604,6 +610,15 @@ export default function NoticePage() {
                 </div>
               </form>
             </div>
+            <aside className="notice-editor-live-preview">
+              <h3 className="notice-editor-workspace-main-title">{t.preview}</h3>
+              <div className="notice-live-preview-card">
+                {pinned ? <span className="notice-pin-badge">{t.pinned}</span> : null}
+                <p className="notice-live-preview-content" style={{ fontSize: `${normalizeNoticeFontSize(fontSize)}px` }}>
+                  {composedContent || t.previewPlaceholder}
+                </p>
+              </div>
+            </aside>
           </div>
         </section>
       ) : null}

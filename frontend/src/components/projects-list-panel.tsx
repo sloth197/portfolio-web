@@ -39,11 +39,11 @@ export default function ProjectsListPanel({ projects }: Props) {
     <section className="projects-gallery projects-list-redesign">
       <div className="projects-gallery-head">
         <div style={{ display: "grid", gap: 6 }}>
-          <h2 className="projects-gallery-title">All projects</h2>
           <p className="projects-gallery-copy">{`${projects.length} projects available`}</p>
         </div>
         {canManageProjects ? (
           <Link className="btn-ghost projects-admin-button" href={buildAdminCreatePath()}>
+            <span aria-hidden="true">+</span>
             Add Project
           </Link>
         ) : null}

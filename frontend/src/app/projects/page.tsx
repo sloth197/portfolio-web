@@ -61,7 +61,7 @@ export default async function ProjectsPage() {
   return (
     <div className="projects-layout-preview">
       <div style={{ display: "grid", justifyItems: "center" }}>
-        <h1 className="section-title" style={{ textAlign: "center", margin: 0 }}>
+        <h1 className="section-title projects-page-title">
           Projects
         </h1>
       </div>

@@ -16,11 +16,14 @@ export default function SiteNavLinks() {
 
   return (
     <>
-      <Link className="nav-link" href="/projects">
-        Project
+      <Link href="/#about">
+        About
+      </Link>
+      <Link href="/projects">
+        Projects
       </Link>
       {showNoticeLink ? (
-        <Link className="nav-link" href="/notice">
+        <Link href="/notice">
           Notice
         </Link>
       ) : null}

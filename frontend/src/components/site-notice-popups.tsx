@@ -23,8 +23,6 @@ type NoticeDto = {
 const INTRO_TOTAL_MS = 4000;
 const POPUP_STORAGE_PREFIX = "xhbt-popup-hide-until:";
 const PUBLIC_NOTICES_API = "/api/public/notices";
-const NOTICE_BRAND_ICON_DARK_URL = "/warning-dark.png";
-// const NOTICE_BRAND_ICON_LIGHT_URL = "/warning-light.png";
 const POPUP_FIXED_TITLE = "NOTICE";
 const DEFAULT_NOTICE_FONT_SIZE = 18;
 const MIN_NOTICE_FONT_SIZE = 12;
@@ -68,7 +66,6 @@ function todayEndTimestamp(): number {
 export default function SiteNoticePopups() {
   const pathname = usePathname();
   const [visibleNotices, setVisibleNotices] = useState<PopupNotice[]>([]);
-  const [showBrandIcon, setShowBrandIcon] = useState(true);
 
   useEffect(() => {
     if (pathname !== "/") {
@@ -145,8 +142,6 @@ export default function SiteNoticePopups() {
     return null;
   }
 
-  const noticeBrandIconSrc = NOTICE_BRAND_ICON_DARK_URL;
-
   return (
     <div className="site-popup-layer" aria-live="polite">
       <div className="site-popup-stack">
@@ -164,19 +159,10 @@ export default function SiteNoticePopups() {
             </header>
 
             <div className="site-popup-body">
-              <span className="site-popup-brand-wrap site-popup-brand-wrap-main" aria-hidden="true">
-                {showBrandIcon ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={noticeBrandIconSrc}
-                    alt=""
-                    aria-hidden="true"
-                    className="site-popup-brand-icon site-popup-brand-icon-main"
-                    onError={() => setShowBrandIcon(false)}
-                  />
-                ) : null}
+              <div className="site-popup-brand-wrap site-popup-brand-wrap-main">
+                <span className="site-popup-eyebrow">SITE UPDATE</span>
                 <span className="site-popup-brand site-popup-brand-main">{POPUP_FIXED_TITLE}</span>
-              </span>
+              </div>
               <div className="site-popup-body-divider" aria-hidden="true" />
               <div className="site-popup-copy" style={{ fontSize: `${notice.fontSize}px` }}>
                 {String(notice.message ?? "").split(/\r?\n/).map((line, index) => (

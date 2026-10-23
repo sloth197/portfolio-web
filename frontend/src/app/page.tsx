@@ -7,7 +7,7 @@ import { fetchHomeTechNews } from "@/lib/tech-news";
 
 export const metadata: Metadata = { title: "Home", description: "xhbt.dev developer portfolio" };
 const frontendSkills = ["React", "Next.js", "TypeScript"];
-const backendSkills = ["C#", "ASP.NET", "Docker", "MySQL"];
+const backendSkills = ["C#", "ASP.NET", "Docker", "MySQL", "Java"];
 
 function TechIcon({ name }: { name: string }) {
   if (name === "React") return <svg viewBox="0 0 24 24" className="tech-icon" aria-hidden="true"><circle cx="12" cy="12" r="2.2" fill="currentColor" /><ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="currentColor" strokeWidth="1.5" /><ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="currentColor" strokeWidth="1.5" transform="rotate(60 12 12)" /><ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="currentColor" strokeWidth="1.5" transform="rotate(120 12 12)" /></svg>;
@@ -16,6 +16,7 @@ function TechIcon({ name }: { name: string }) {
   if (name === "C#") return <svg viewBox="0 0 24 24" className="tech-icon tech-icon-csharp" aria-hidden="true"><path fill="currentColor" d="M12 2 21 7v10l-9 5-9-5V7l9-5Zm-4.8 8.2v1.4h1.7v1.6H7.2v1.4h1.7v1.7h1.4v-1.7h2v1.7h1.4v-1.7h1.2v-1.4h-1.2v-1.6h1.2v-1.4h-1.2V8.5h-1.4v1.7h-2V8.5H8.9v1.7H7.2Zm3.1 1.4h2v1.6h-2v-1.6Z" /></svg>;
   if (name === "ASP.NET") return <svg viewBox="0 0 28 24" className="tech-icon tech-icon-dotnet" aria-hidden="true"><path fill="currentColor" d="M2 15.5c4.2-6.2 8.2-6.2 12.2 0 3.1 4.8 6.3 4.8 11.8-.3-3.6 7.4-8.8 8.1-12.7 2.5C10 13.9 7.2 13.2 2 15.5Z" /><path fill="currentColor" opacity=".65" d="M2 11.8c4.4-3.4 8.6-3.1 12.1.8 3.2 3.5 6.3 3.3 11.9-1.7-3.4 6.6-8.4 7.5-12.6 3.5C9.8 10.9 6.3 10 2 11.8Z" /></svg>;
   if (name === "Docker") return <svg viewBox="0 0 24 24" className="tech-icon tech-icon-docker" aria-hidden="true"><path fill="currentColor" d="M3 13h3v3H3v-3Zm4 0h3v3H7v-3Zm4 0h3v3h-3v-3Zm-4-4h3v3H7V9Zm4 0h3v3h-3V9Zm4 4h3v3h-3v-3Zm3.8 1.2c-.7-.5-1.5-.7-2.3-.6-.2-1-.6-1.9-1.3-2.6l-.7.7c.5.5.8 1.2.9 1.9H4.2c.1 2.8 2 4.4 4.8 4.4h5.7c2.6 0 4.3-1.1 5.1-3.1.3-.7.5-1.5.5-2.3-.5.1-1 .3-1.5.6Z" /></svg>;
+  if (name === "Java") return <svg viewBox="0 0 24 24" className="tech-icon tech-icon-java" aria-hidden="true"><path fill="currentColor" d="M13.2 3.1c1.7 1.3.8 2.4-.2 3.2-.9.7-1.7 1.3-.8 2.3-2.5-1.4-1.2-2.8.2-3.7.8-.5 1.2-1 .8-1.8Zm-3.3 5.2c-1.1 1.7-.8 2.8.8 3.6 1.8.9 2.2 1.4 1.1 2.2-1.3 1-4.6.2-4.6-1.8 0-1.3 1.3-2.5 2.7-4Zm5.2 4.2c1.7.4 2.8 1.2 2.8 2.1 0 1.5-2.5 2.7-5.7 2.7s-5.7-1.2-5.7-2.7c0-.7.7-1.3 1.8-1.8-.3.4-.4.7-.4 1 0 .8 1.7 1.5 4.1 1.5s4.1-.7 4.1-1.5c0-.4-.4-.8-1-1.3Zm-7.1 5.1c.8.7 2.7 1.1 4.9 1.1s4.1-.4 4.9-1.1c-.2 1.1-2.3 2-4.9 2s-4.7-.9-4.9-2Z" /></svg>;
   return <svg viewBox="0 0 24 24" className="tech-icon tech-icon-mysql" aria-hidden="true"><path fill="currentColor" d="M4 7c0-2 3.6-3.5 8-3.5S20 5 20 7v10c0 2-3.6 3.5-8 3.5S4 19 4 17V7Zm2 0c0 .8 2.2 1.8 6 1.8s6-1 6-1.8-2.2-1.8-6-1.8-6 1-6 1.8Zm0 5c1.4 1 3.6 1.5 6 1.5s4.6-.5 6-1.5v2c-1.4 1-3.6 1.5-6 1.5s-4.6-.5-6-1.5v-2Zm0 5c1.4 1 3.6 1.5 6 1.5s4.6-.5 6-1.5v2c-1.4 1-3.6 1.5-6 1.5s-4.6-.5-6-1.5v-2Z" /></svg>;
 }
 
