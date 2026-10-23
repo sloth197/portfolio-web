@@ -1,6 +1,20 @@
 import type { NextConfig } from "next";
 
 const isDevelopment = process.env.NODE_ENV !== "production";
+const configuredApiOrigin = (() => {
+  const raw = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+  if (!raw) return "https://portfolio-api-y5yr.onrender.com";
+
+  try {
+    return new URL(raw).origin;
+  } catch {
+    return "https://portfolio-api-y5yr.onrender.com";
+  }
+})();
+
+const developmentOrigins = isDevelopment
+  ? " http://localhost:* http://127.0.0.1:* ws: wss:"
+  : "";
 
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -8,11 +22,11 @@ const contentSecurityPolicy = [
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  "img-src 'self' data: blob: https://portfolio-api-y5yr.onrender.com https://*.onrender.com https://github.com https://raw.githubusercontent.com https://*.githubusercontent.com http://localhost:* http://127.0.0.1:*",
+  `img-src 'self' data: blob: ${configuredApiOrigin} https://github.com https://raw.githubusercontent.com https://*.githubusercontent.com${developmentOrigins}`,
   "font-src 'self' data:",
   `script-src 'self' 'unsafe-inline'${isDevelopment ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "connect-src 'self' https://portfolio-api-y5yr.onrender.com https://*.onrender.com http://localhost:* http://127.0.0.1:* ws: wss:",
+  `connect-src 'self' ${configuredApiOrigin}${developmentOrigins}`,
   "worker-src 'self' blob:",
 ].join("; ");
 
@@ -32,6 +46,18 @@ const securityHeaders = [
   {
     key: "X-Frame-Options",
     value: "DENY",
+  },
+  {
+    key: "Cross-Origin-Opener-Policy",
+    value: "same-origin",
+  },
+  {
+    key: "Cross-Origin-Embedder-Policy",
+    value: "credentialless",
+  },
+  {
+    key: "Cross-Origin-Resource-Policy",
+    value: "cross-origin",
   },
   {
     key: "Permissions-Policy",
