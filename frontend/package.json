@@ -9,7 +9,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "next": "^16.2.5",
+    "next": "^16.4.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
