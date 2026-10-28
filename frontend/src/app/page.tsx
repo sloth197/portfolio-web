@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import ProjectShowcaseCard from "@/components/project-showcase-card";
 import { ApiError, PROJECT_REVALIDATE_SECONDS, fetchProjectSummaries } from "@/lib/api";
 import { PREVIEW_PROJECTS } from "@/lib/project-preview";
@@ -7,17 +8,25 @@ import { fetchHomeTechNews } from "@/lib/tech-news";
 
 export const metadata: Metadata = { title: "Home", description: "xhbt.dev developer portfolio" };
 const frontendSkills = ["React", "Next.js", "TypeScript"];
-const backendSkills = ["C#", "ASP.NET", "Docker", "MySQL", "Java"];
+const backendSkills = ["C#", "WPF", "Docker", "PostgreSQL", "Java"];
+const workItems = [
+  { title: "Understand the Problem", description: "I start by clarifying the problem and the value the product should deliver." },
+  { title: "Design the Structure", description: "I shape a clear, maintainable structure before turning ideas into code." },
+  { title: "Build and Iterate", description: "I build, test, and improve the product through real feedback." },
+];
 
 function TechIcon({ name }: { name: string }) {
   if (name === "React") return <svg viewBox="0 0 24 24" className="tech-icon" aria-hidden="true"><circle cx="12" cy="12" r="2.2" fill="currentColor" /><ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="currentColor" strokeWidth="1.5" /><ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="currentColor" strokeWidth="1.5" transform="rotate(60 12 12)" /><ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="currentColor" strokeWidth="1.5" transform="rotate(120 12 12)" /></svg>;
-  if (name === "Next.js") return <span className="tech-icon tech-icon-next" aria-hidden="true">N</span>;
-  if (name === "TypeScript") return <span className="tech-icon tech-icon-ts" aria-hidden="true">TS</span>;
-  if (name === "C#") return <svg viewBox="0 0 24 24" className="tech-icon tech-icon-csharp" aria-hidden="true"><path fill="currentColor" d="M12 2 21 7v10l-9 5-9-5V7l9-5Zm-4.8 8.2v1.4h1.7v1.6H7.2v1.4h1.7v1.7h1.4v-1.7h2v1.7h1.4v-1.7h1.2v-1.4h-1.2v-1.6h1.2v-1.4h-1.2V8.5h-1.4v1.7h-2V8.5H8.9v1.7H7.2Zm3.1 1.4h2v1.6h-2v-1.6Z" /></svg>;
-  if (name === "ASP.NET") return <svg viewBox="0 0 28 24" className="tech-icon tech-icon-dotnet" aria-hidden="true"><path fill="currentColor" d="M2 15.5c4.2-6.2 8.2-6.2 12.2 0 3.1 4.8 6.3 4.8 11.8-.3-3.6 7.4-8.8 8.1-12.7 2.5C10 13.9 7.2 13.2 2 15.5Z" /><path fill="currentColor" opacity=".65" d="M2 11.8c4.4-3.4 8.6-3.1 12.1.8 3.2 3.5 6.3 3.3 11.9-1.7-3.4 6.6-8.4 7.5-12.6 3.5C9.8 10.9 6.3 10 2 11.8Z" /></svg>;
-  if (name === "Docker") return <svg viewBox="0 0 24 24" className="tech-icon tech-icon-docker" aria-hidden="true"><path fill="currentColor" d="M3 13h3v3H3v-3Zm4 0h3v3H7v-3Zm4 0h3v3h-3v-3Zm-4-4h3v3H7V9Zm4 0h3v3h-3V9Zm4 4h3v3h-3v-3Zm3.8 1.2c-.7-.5-1.5-.7-2.3-.6-.2-1-.6-1.9-1.3-2.6l-.7.7c.5.5.8 1.2.9 1.9H4.2c.1 2.8 2 4.4 4.8 4.4h5.7c2.6 0 4.3-1.1 5.1-3.1.3-.7.5-1.5.5-2.3-.5.1-1 .3-1.5.6Z" /></svg>;
-  if (name === "Java") return <svg viewBox="0 0 24 24" className="tech-icon tech-icon-java" aria-hidden="true"><path fill="currentColor" d="M13.2 3.1c1.7 1.3.8 2.4-.2 3.2-.9.7-1.7 1.3-.8 2.3-2.5-1.4-1.2-2.8.2-3.7.8-.5 1.2-1 .8-1.8Zm-3.3 5.2c-1.1 1.7-.8 2.8.8 3.6 1.8.9 2.2 1.4 1.1 2.2-1.3 1-4.6.2-4.6-1.8 0-1.3 1.3-2.5 2.7-4Zm5.2 4.2c1.7.4 2.8 1.2 2.8 2.1 0 1.5-2.5 2.7-5.7 2.7s-5.7-1.2-5.7-2.7c0-.7.7-1.3 1.8-1.8-.3.4-.4.7-.4 1 0 .8 1.7 1.5 4.1 1.5s4.1-.7 4.1-1.5c0-.4-.4-.8-1-1.3Zm-7.1 5.1c.8.7 2.7 1.1 4.9 1.1s4.1-.4 4.9-1.1c-.2 1.1-2.3 2-4.9 2s-4.7-.9-4.9-2Z" /></svg>;
-  return <svg viewBox="0 0 24 24" className="tech-icon tech-icon-mysql" aria-hidden="true"><path fill="currentColor" d="M4 7c0-2 3.6-3.5 8-3.5S20 5 20 7v10c0 2-3.6 3.5-8 3.5S4 19 4 17V7Zm2 0c0 .8 2.2 1.8 6 1.8s6-1 6-1.8-2.2-1.8-6-1.8-6 1-6 1.8Zm0 5c1.4 1 3.6 1.5 6 1.5s4.6-.5 6-1.5v2c-1.4 1-3.6 1.5-6 1.5s-4.6-.5-6-1.5v-2Zm0 5c1.4 1 3.6 1.5 6 1.5s4.6-.5 6-1.5v2c-1.4 1-3.6 1.5-6 1.5s-4.6-.5-6-1.5v-2Z" /></svg>;
+  const iconByName: Record<string, string> = {
+    "Next.js": "/icons/tech/nextjs.svg",
+    TypeScript: "/icons/tech/typescript.svg",
+    "C#": "/icons/tech/c-sharp.png",
+    WPF: "/icons/tech/wpf.svg",
+    Docker: "/icons/tech/docker.svg",
+    Java: "/icons/tech/java.svg",
+    PostgreSQL: "/icons/tech/postgresql.svg",
+  };
+  return iconByName[name] ? <Image src={iconByName[name]} className="tech-icon tech-icon-image" alt="" width={24} height={24} aria-hidden="true" /> : null;
 }
 
 function GithubIcon() {
@@ -35,13 +44,20 @@ function MailIcon() {
 export default async function Home() {
   let projects: Awaited<ReturnType<typeof fetchProjectSummaries>> = [];
   let projectLoadWarning: string | null = null;
-  const newsItems = await fetchHomeTechNews(3);
-  try { projects = await fetchProjectSummaries(undefined, { policy: "cached", revalidateSeconds: PROJECT_REVALIDATE_SECONDS }); } catch (error) { if (error instanceof ApiError) projectLoadWarning = "Projects API is temporarily unavailable."; if (process.env.NODE_ENV !== "production") projects = PREVIEW_PROJECTS; }
+  const [newsItems, projectResult] = await Promise.all([
+    fetchHomeTechNews(3),
+    fetchProjectSummaries(undefined, { policy: "cached", revalidateSeconds: PROJECT_REVALIDATE_SECONDS })
+      .then((value) => ({ projects: value, error: null }))
+      .catch((error: unknown) => ({ projects: [], error })),
+  ]);
+  projects = projectResult.projects;
+  if (projectResult.error instanceof ApiError) projectLoadWarning = "Projects API is temporarily unavailable.";
+  if (process.env.NODE_ENV !== "production" && projectResult.error) projects = PREVIEW_PROJECTS;
   const sortedProjects = [...projects].sort((a, b) => a.title.localeCompare(b.title));
   return <div className="editorial-page">
-    <section id="home" className="editorial-hero"><div className="editorial-hero-copy"><p className="editorial-kicker">DEVELOPER / CREATIVE BUILDER</p><h1><span>Building</span><span>digital things</span><span>that <em>work.</em></span></h1><p className="editorial-hero-description">Web applications, internal tools, and digital experiences<br />that solve real problems.</p></div><div className="monolith-visual" aria-hidden="true" /></section>
-    <section id="about" className="editorial-intro"><p>안녕하세요. 백엔드 개발자로 성장하고 있는 주니어 개발자입니다.</p><p>C#, ASP.NET, Next.js를 활용해 다양한 프로젝트를 개발하며, 단순한 기능 구현을 넘어 실제 서비스와 데이터 흐름을 이해하는 데 집중하고 있습니다.</p><p>데이터 모델링과 처리 흐름을 꾸준히 개선하고, 협업과 피드백을 통해 더 나은 개발자로 성장해 나가는 것이 목표입니다.</p></section>
-    <section className="editorial-section"><div className="editorial-section-title"><h2>HOW I WORK</h2><i /></div><div className="work-carousel"><div className="work-grid">{["Structure-Driven Development", "Work Together", "Keep Improving", "Stability First"].map((title, index) => <article className="work-card" key={title}><div><h3>{title}</h3><p>{["명확한 구조와 유지보수하기 쉬운 코드를 작성합니다.", "함께 논의하고 피드백을 주고받으며 더 나은 결과를 만듭니다.", "새로운 기술을 배우고 실험하며 꾸준히 성장합니다.", "빠른 처리 속도보다 안정적인 동작과 예측 가능한 결과를 우선합니다."][index]}</p></div></article>)}{["Structure-Driven Development", "Work Together", "Keep Improving", "Stability First"].map((title, index) => <article className="work-card" aria-hidden="true" key={`duplicate-${title}`}><div><h3>{title}</h3><p>{["명확한 구조와 유지보수하기 쉬운 코드를 작성합니다.", "함께 논의하고 피드백을 주고받으며 더 나은 결과를 만듭니다.", "새로운 기술을 배우고 실험하며 꾸준히 성장합니다.", "빠른 처리 속도보다 안정적인 동작과 예측 가능한 결과를 우선합니다."][index]}</p></div></article>)}</div></div></section>
+    <section id="home" className="editorial-hero"><div className="editorial-hero-copy"><p className="editorial-kicker">DEVELOPER / CREATIVE BUILDER</p><h1><span>Concept to</span><span><em>working product.</em></span></h1><p className="editorial-hero-description">Turning ideas into reliable digital products<br />across web and desktop.</p></div><div className="monolith-visual" aria-hidden="true" /></section>
+    <section id="about" className="editorial-intro"><p className="editorial-intro-highlight"><span>The goal is simple:</span><br /><strong>software that is easy to use, maintain, and improve over time.</strong></p><p>Clear structure, thoughtful interfaces, and reliable application logic are at the center of my work.</p><p>I focus on understanding how systems and data flow together, then improving each project through testing and feedback.</p></section>
+    <section className="editorial-section"><div className="editorial-section-title"><h2>HOW I WORK</h2><i /></div><div className="work-carousel"><div className="work-grid">{workItems.map(({ title, description }) => <article className="work-card" key={title}><div><h3>{title}</h3><p>{description}</p></div></article>)}{workItems.map(({ title, description }) => <article className="work-card" aria-hidden="true" key={`duplicate-${title}`}><div><h3>{title}</h3><p>{description}</p></div></article>)}</div></div></section>
     <section className="editorial-section"><div className="editorial-section-title"><h2>TECH STACK</h2><i /></div><div className="skills-pill-groups"><div className="skills-pill-group"><h3>FRONTEND</h3><div>{frontendSkills.map((name) => <span key={name}><TechIcon name={name} />{name}</span>)}</div></div><div className="skills-pill-group"><h3>BACKEND</h3><div>{backendSkills.map((name) => <span key={name}><TechIcon name={name} />{name}</span>)}</div></div></div></section>
     <section id="projects" className="editorial-section editorial-projects"><div className="editorial-section-title"><h2>PROJECTS</h2><Link href="/projects">VIEW ALL →</Link></div>{projectLoadWarning ? <div className="projects-empty-state">{projectLoadWarning}</div> : null}<div className="projects-showcase-grid">{sortedProjects.map((project, index) => <ProjectShowcaseCard key={project.id} href={`/projects/${project.slug}`} index={index} periodText={project.projectPeriod} project={project} />)}</div></section>
     <section id="contact" className="editorial-section contact-strip"><div className="editorial-section-title"><h2>CONTACT</h2><span>좋은 아이디어가 있다면 언제든지 연락주세요.</span></div><div className="contact-links"><a href="https://github.com/sloth197" target="_blank" rel="noreferrer"><GithubIcon /><span>GitHub</span><b>→</b></a><a href="https://www.linkedin.com/in/%EC%9A%B0%EC%84%B1-%EC%A0%95-549379317/?skipRedirect=true" target="_blank" rel="noreferrer"><LinkedinIcon /><span>LinkedIn</span><b>→</b></a><a href="mailto:sloth197@naver.com"><MailIcon /><span>E-mail</span><b>→</b></a></div></section>

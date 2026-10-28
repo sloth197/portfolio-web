@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
+import NextImage from "next/image";
 
 type ProjectShowcaseMediaProps = {
   alt: string;
@@ -57,7 +58,7 @@ function captureGifFirstFrame(gifUrl: string): Promise<string | null> {
   });
 }
 
-export default function ProjectShowcaseMedia({
+function ProjectShowcaseMedia({
   alt,
   isHovered,
   isGif,
@@ -96,13 +97,13 @@ export default function ProjectShowcaseMedia({
 
   const currentSrc = isGif ? (isHovered ? animatedSrc : (posterSrc ?? src)) : src;
 
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      className="project-showcase-media"
-      src={currentSrc}
-      alt={alt}
-      loading={loading}
-    />
-  );
+  if (!isGif) {
+    return <NextImage className="project-showcase-media" src={currentSrc} alt={alt} fill sizes="(max-width: 640px) 112px, 220px" />;
+  }
+
+  // GIFs need a normal image element so the animated source can be restarted on hover.
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img className="project-showcase-media" src={currentSrc} alt={alt} loading={loading} />;
 }
+
+export default memo(ProjectShowcaseMedia);

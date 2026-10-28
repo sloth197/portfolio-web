@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import Link from "next/link";
 import { pickProjectPreviewMedia } from "@/lib/project-media";
 import type { ProjectDto, ProjectSummaryDto } from "@/lib/types";
@@ -13,7 +13,7 @@ type ProjectShowcaseCardProps = {
   project: ProjectDto | ProjectSummaryDto;
 };
 
-export default function ProjectShowcaseCard({
+function ProjectShowcaseCard({
   href,
   index,
   periodText,
@@ -67,3 +67,5 @@ export default function ProjectShowcaseCard({
     </article>
   );
 }
+
+export default memo(ProjectShowcaseCard);

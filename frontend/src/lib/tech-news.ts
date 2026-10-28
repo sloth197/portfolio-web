@@ -48,7 +48,9 @@ export async function fetchHomeTechNews(limit = 3): Promise<HomeNewsItem[]> {
   try {
     const idsResponse = await fetch(`${HACKER_NEWS_API}/beststories.json`, { next: { revalidate: 900 }, cache: "force-cache" });
     if (!idsResponse.ok) return FALLBACK_NEWS;
-    const ids = (await idsResponse.json() as number[]).slice(0, 50);
+    // Thirty candidates are enough to find the three developer-focused stories
+    // while avoiding fifty parallel item requests on every revalidation.
+    const ids = (await idsResponse.json() as number[]).slice(0, 30);
     const items = await Promise.all(ids.map(async (id) => {
       const response = await fetch(`${HACKER_NEWS_API}/item/${id}.json`, { next: { revalidate: 900 }, cache: "force-cache" });
       return response.ok ? await response.json() as HackerNewsItem : null;
