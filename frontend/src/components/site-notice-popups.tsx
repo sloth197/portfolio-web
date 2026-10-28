@@ -145,35 +145,42 @@ export default function SiteNoticePopups() {
       <div className="site-popup-stack">
         {visibleNotices.map((notice) => (
           <section key={notice.id} className="site-popup" role="dialog" aria-label={POPUP_FIXED_TITLE}>
-            <header className="site-popup-head">
-              <button
-                type="button"
-                className="site-popup-icon-close"
-                onClick={() => closeNotice(notice.id)}
-                aria-label={`${POPUP_FIXED_TITLE} 닫기`}
-              >
-                ×
-              </button>
-            </header>
-
-            <div className="site-popup-body">
-              <div className="site-popup-brand-wrap site-popup-brand-wrap-main">
-                <span className="site-popup-eyebrow">SITE UPDATE</span>
-                <span className="site-popup-brand site-popup-brand-main">{POPUP_FIXED_TITLE}</span>
-              </div>
-              <div className="site-popup-body-divider" aria-hidden="true" />
-              <div className="site-popup-copy" style={{ fontSize: `${notice.fontSize}px` }}>
-                {String(notice.message ?? "").split(/\r?\n/).map((line, index) => (
-                  <p key={`${notice.id}-${index}`}>{line}</p>
-                ))}
-              </div>
+            <div className="site-popup-visual" aria-hidden="true">
+              <span className="site-popup-visual-orbit site-popup-visual-orbit-one" />
+              <span className="site-popup-visual-orbit site-popup-visual-orbit-two" />
             </div>
 
-            <footer className="site-popup-foot">
-              <button type="button" className="site-popup-foot-btn" onClick={() => hideFor24Hours(notice.id)}>
-                24시간동안 보지 않기
-              </button>
-            </footer>
+            <div className="site-popup-content">
+              <header className="site-popup-head">
+                <button
+                  type="button"
+                  className="site-popup-icon-close"
+                  onClick={() => closeNotice(notice.id)}
+                  aria-label={`${POPUP_FIXED_TITLE} 닫기`}
+                >
+                  ×
+                </button>
+              </header>
+
+              <div className="site-popup-body">
+                <div className="site-popup-brand-wrap site-popup-brand-wrap-main">
+                  <span className="site-popup-eyebrow">SITE UPDATE</span>
+                  <span className="site-popup-brand site-popup-brand-main">{POPUP_FIXED_TITLE}</span>
+                </div>
+                <div className="site-popup-body-divider" aria-hidden="true" />
+                <div className="site-popup-copy" style={{ fontSize: `${notice.fontSize}px` }}>
+                  {String(notice.message ?? "").split(/\r?\n/).map((line, index) => (
+                    <p key={`${notice.id}-${index}`}>{line}</p>
+                  ))}
+                </div>
+              </div>
+
+              <footer className="site-popup-foot">
+                <button type="button" className="site-popup-foot-btn" onClick={() => hideFor24Hours(notice.id)}>
+                  24시간동안 보지 않기
+                </button>
+              </footer>
+            </div>
           </section>
         ))}
       </div>
