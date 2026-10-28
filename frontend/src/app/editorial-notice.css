@@ -1,0 +1,8 @@
+/* Notice page ownership. Shared form primitives remain in globals.css. */
+.notice-page { display: grid; gap: 34px; }
+.notice-page-content { width: 100%; }
+
+@media (max-width: 900px) {
+  .notice-page-list-layout { grid-template-columns: 1fr; gap: 24px; }
+  .notice-page-other-column { border-left: 0; border-top: 1px solid #3d4268; padding: 24px 0 0; }
+}

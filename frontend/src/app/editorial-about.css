@@ -1,0 +1,7 @@
+/* About page ownership. Shared tokens remain in globals.css. */
+.about-neo-shell,
+.about-profile-section { width: 100%; }
+
+@media (max-width: 720px) {
+  .about-neo-shell { padding-inline: 0; }
+}

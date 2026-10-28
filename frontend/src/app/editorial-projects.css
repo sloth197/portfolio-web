@@ -1,0 +1,61 @@
+/* Homepage Projects layout. Keep this page-specific layer isolated from legacy cards. */
+.editorial-projects .projects-showcase-grid {
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+}
+
+.editorial-projects .project-showcase-card {
+  display: grid !important;
+  grid-template-columns: 220px minmax(0, 1fr) !important;
+  min-height: 138px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: linear-gradient(105deg, rgba(17, 24, 42, .88), rgba(13, 19, 32, .7)) !important;
+  box-shadow: none !important;
+}
+
+.editorial-projects .project-showcase-card:hover {
+  border-color: rgba(139, 92, 246, .62) !important;
+  transform: translateY(-2px);
+}
+
+.editorial-projects .project-showcase-shot {
+  min-height: 138px !important;
+  padding: 12px;
+}
+
+.editorial-projects .project-showcase-body {
+  position: relative;
+  align-content: center;
+  gap: 6px;
+  padding: 18px 78px 18px 18px !important;
+}
+
+.editorial-projects .project-showcase-title { font-size: 1.08rem; }
+.editorial-projects .project-showcase-summary { min-height: 0; font-size: .82rem; line-height: 1.45; }
+
+.editorial-projects .project-showcase-link {
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgba(139, 92, 246, .45) !important;
+  border-radius: 50% !important;
+  background: rgba(22, 20, 54, .55) !important;
+  font-size: 0 !important;
+  transform: translateY(-50%);
+}
+
+.editorial-projects .project-showcase-link span { font-size: 1rem !important; }
+
+@media (max-width: 640px) {
+  .editorial-projects .project-showcase-card { grid-template-columns: 112px minmax(0, 1fr) !important; min-height: 112px !important; }
+  .editorial-projects .project-showcase-shot { min-height: 112px !important; }
+  .editorial-projects .project-showcase-body { padding: 13px 58px 13px 13px !important; }
+  .editorial-projects .project-showcase-link { right: 10px; width: 34px; height: 34px; }
+}

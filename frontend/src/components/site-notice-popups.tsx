@@ -57,10 +57,8 @@ function isHiddenForToday(id: string): boolean {
   return Date.now() < until;
 }
 
-function todayEndTimestamp(): number {
-  const end = new Date();
-  end.setHours(23, 59, 59, 999);
-  return end.getTime();
+function hideFor24HoursTimestamp(): number {
+  return Date.now() + 24 * 60 * 60 * 1000;
 }
 
 export default function SiteNoticePopups() {
@@ -129,8 +127,8 @@ export default function SiteNoticePopups() {
     setVisibleNotices((current) => current.filter((notice) => notice.id !== id));
   };
 
-  const hideForToday = (id: string) => {
-    window.localStorage.setItem(popupStorageKey(id), String(todayEndTimestamp()));
+  const hideFor24Hours = (id: string) => {
+    window.localStorage.setItem(popupStorageKey(id), String(hideFor24HoursTimestamp()));
     closeNotice(id);
   };
 
@@ -172,11 +170,8 @@ export default function SiteNoticePopups() {
             </div>
 
             <footer className="site-popup-foot">
-              <button type="button" className="site-popup-foot-btn" onClick={() => hideForToday(notice.id)}>
-                오늘 하루 안보기
-              </button>
-              <button type="button" className="site-popup-foot-btn" onClick={() => closeNotice(notice.id)}>
-                닫기
+              <button type="button" className="site-popup-foot-btn" onClick={() => hideFor24Hours(notice.id)}>
+                24시간동안 보지 않기
               </button>
             </footer>
           </section>

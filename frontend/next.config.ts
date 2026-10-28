@@ -72,6 +72,9 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "*.onrender.com" },
       { protocol: "http", hostname: "localhost" },
       { protocol: "http", hostname: "127.0.0.1" },
+      { protocol: "https", hostname: "raw.githubusercontent.com" },
+      { protocol: "https", hostname: "github.com" },
+      { protocol: "https", hostname: "*.githubusercontent.com" },
     ],
   },
   async headers() {

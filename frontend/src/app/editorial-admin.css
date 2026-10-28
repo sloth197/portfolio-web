@@ -1,0 +1,7 @@
+/* Admin page ownership. Shared controls remain in globals.css. */
+.login-page-editorial { width: 100%; }
+.admin-asset-list { display: grid; gap: 10px; }
+
+@media (max-width: 720px) {
+  .login-page-editorial { grid-template-columns: 1fr; }
+}
