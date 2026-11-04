@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import HardReloadTracker from "@/components/hard-reload-tracker";
 import HeaderAuthButton from "@/components/header-auth-button";
 import SiteNavLinks from "@/components/site-nav-links";
@@ -96,6 +97,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
       <body className={`${geist.variable} ${geistMono.variable}`}>
+        <Analytics />
         <HardReloadTracker />
         <SiteNoticePopups />
         <div className="site-shell">
